@@ -6,36 +6,54 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Simulate login for prototype
     console.log('Logging in with', email, password);
     alert('Logged in successfully!');
     window.location.href = '/dashboard';
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '400px', margin: '0 auto' }}>
-      <h2>Parent Login</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <input 
-          type="email" 
-          placeholder="Email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          required 
-          style={{ padding: '10px' }}
-        />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          required 
-          style={{ padding: '10px' }}
-        />
-        <button type="submit" style={{ padding: '10px', backgroundColor: '#007bff', color: '#fff', border: 'none' }}>
-          Login
-        </button>
-      </form>
+    <div className="animate-fade-in" style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      minHeight: '60vh' 
+    }}>
+      <div className="glass-card" style={{ width: '100%', maxWidth: '400px' }}>
+        <h2 style={{ marginBottom: '8px', textAlign: 'center', fontWeight: '700' }}>Welcome Back</h2>
+        <p style={{ marginBottom: '24px', textAlign: 'center', color: 'var(--text-light)' }}>
+          Log in to your parent dashboard
+        </p>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>Email Address</label>
+            <input 
+              className="input-glass"
+              type="email" 
+              placeholder="e.g. parent@example.com" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              required 
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>Password</label>
+            <input 
+              className="input-glass"
+              type="password" 
+              placeholder="••••••••" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              required 
+            />
+          </div>
+          <button type="submit" className="btn-primary" style={{ marginTop: '10px' }}>
+            Sign In
+          </button>
+        </form>
+        <p style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-light)' }}>
+          Don't have an account? <a href="#" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: '600' }}>Sign up</a>
+        </p>
+      </div>
     </div>
   );
 };
