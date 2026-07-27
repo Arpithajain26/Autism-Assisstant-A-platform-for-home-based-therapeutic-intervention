@@ -1,0 +1,53 @@
+import React from 'react';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Activities from './pages/Activities';
+
+function App() {
+  const path = window.location.pathname;
+
+  let Component;
+  switch (path) {
+    case '/dashboard':
+      Component = <Dashboard />;
+      break;
+    case '/activities':
+      Component = <Activities />;
+      break;
+    case '/':
+    default:
+      Component = <Login />;
+      break;
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <nav className="glass-panel" style={{ 
+        margin: '20px auto', 
+        padding: '10px 30px', 
+        display: 'flex', 
+        gap: '24px',
+        alignItems: 'center',
+        width: 'max-content',
+        position: 'sticky',
+        top: '20px',
+        zIndex: 100
+      }}>
+        <div style={{ fontWeight: '700', fontSize: '1.2rem', color: 'var(--primary-color)', marginRight: '20px' }}>
+          AutismAssist
+        </div>
+        <a href="/" style={{ textDecoration: 'none', color: 'var(--text-dark)', fontWeight: '500' }}>Login</a>
+        <a href="/dashboard" style={{ textDecoration: 'none', color: 'var(--text-dark)', fontWeight: '500' }}>Dashboard</a>
+        <a href="/activities" style={{ textDecoration: 'none', color: 'var(--text-dark)', fontWeight: '500' }}>Activities</a>
+      </nav>
+      <main style={{ flex: 1, padding: '20px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+        {Component}
+      </main>
+      <footer style={{ textAlign: 'center', padding: '40px', color: 'var(--text-light)', fontSize: '0.9rem' }}>
+        &copy; 2026 Autism Assistant Pro. Helping every child shine.
+      </footer>
+    </div>
+  );
+}
+
+export default App;
