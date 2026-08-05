@@ -1,30 +1,37 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
     role: {
       type: String,
-      enum: ["parent", "child", "therapist"],
+      enum: ["parent", "therapist"],
       required: true,
     },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
-    age: { type: Number },
-    level: { type: Number, default: null }, // 1, 2, or 3
-    assessmentDone: { type: Boolean, default: false },
-    assignedTasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Activity" }],
-    completedTasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Activity" }],
-    parentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
-    },
-    children: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    specialization: { type: String },
-    assignedChildren: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    phone: { type: String, default: "" },
+    specialization: { type: String, default: "" },
+    children: [{ type: mongoose.Schema.Types.ObjectId, ref: "Child" }],
+    assignedChildren: [{ type: mongoose.Schema.Types.ObjectId, ref: "Child" }],
   },
-  { timestamps: true },
+  { timestamps: true }
 );
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
 module.exports = mongoose.model("User", userSchema);

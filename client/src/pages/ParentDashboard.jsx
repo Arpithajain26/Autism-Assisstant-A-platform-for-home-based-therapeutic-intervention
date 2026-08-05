@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { getChildren, assignTask, getActivities } from '../services/api';
+import {
+  getChildren,
+  createChild,
+  deleteChild,
+  linkByCode,
+  assignTask,
+  getActivities,
+} from '../services/api';
 
-const LEVEL_LABEL = { 1: '🌱 Beginner', 2: '🌿 Developing', 3: '🌳 Advanced' };
+const LEVEL_LABEL = { 1: '🌱 Beginner (L1)', 2: '🌿 Intermediate (L2)', 3: '🌳 Advanced (L3)' };
 const LEVEL_COLOR_BG = { 1: '#dcfce7', 2: '#fef9c3', 3: '#fee2e2' };
 const LEVEL_COLOR_TEXT = { 1: '#166534', 2: '#854d0e', 3: '#991b1b' };
 
@@ -12,122 +19,563 @@ const ParentDashboard = ({ user, onNavigate }) => {
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState('');
 
-  useEffect(() => {
-    const load = async () => {
+  // Add Child Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newChild, setNewChild] = useState({
+    name: '',
+    age: '',
+    gender: 'male',
+    profilePhoto: null,
+    supportLevel: 'Level 1 - Requiring Support',
+  });
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState('');
+
+  // Link Code State
+  const [linkCodeInput, setLinkCodeInput] = useState('');
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [linkMessage, setLinkMessage] = useState({ text: '', type: '' });
+
+  const loadData = async () => {
+    try {
       const [kids, acts] = await Promise.all([getChildren(user._id), getActivities()]);
-      setChildren(Array.isArray(kids) ? kids : []);
+      const validKids = Array.isArray(kids) ? kids : [];
+      setChildren(validKids);
       setActivities(Array.isArray(acts) ? acts : []);
-      if (kids && kids.length > 0) setSelectedChild(kids[0]);
+      if (validKids.length > 0) {
+        setSelectedChild((prev) => {
+          if (!prev) return validKids[0];
+          const found = validKids.find((k) => k._id === prev._id);
+          return found || validKids[0];
+        });
+      } else {
+        setSelectedChild(null);
+      }
+    } catch (err) {
+      console.error("Failed to load dashboard data", err);
+    } finally {
       setLoading(false);
-    };
-    load();
+    }
+  };
+
+  useEffect(() => {
+    loadData();
   }, [user._id]);
 
+  // Handle Photo Upload -> Base64 Data URL
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 3 * 1024 * 1024) {
+        setCreateError('Photo size must be less than 3MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result);
+        setNewChild((prev) => ({ ...prev, profilePhoto: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Create Child Profile
+  const handleCreateChild = async (e) => {
+    e.preventDefault();
+    setCreateError('');
+    setCreateLoading(true);
+
+    try {
+      if (!newChild.name || !newChild.age) {
+        throw new Error('Name and age are required.');
+      }
+      const res = await createChild({
+        parentId: user._id,
+        name: newChild.name.trim(),
+        age: parseInt(newChild.age),
+        gender: newChild.gender,
+        profilePhoto: newChild.profilePhoto,
+        supportLevel: newChild.supportLevel,
+      });
+
+      // Reset form & close modal
+      setNewChild({ name: '', age: '', gender: 'male', profilePhoto: null, supportLevel: 'Level 1 - Requiring Support' });
+      setPhotoPreview(null);
+      setShowAddModal(false);
+
+      if (res && res.child && res.child._id) {
+        handleStartTherapy(res.child._id);
+      } else {
+        await loadData();
+      }
+    } catch (err) {
+      setCreateError(err.message);
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
+  // Delete Child Profile
+  const handleDeleteChild = async (childId, childName) => {
+    if (window.confirm(`Are you sure you want to remove ${childName}'s profile?`)) {
+      try {
+        await deleteChild(childId);
+        await loadData();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+  };
+
+  // Claim child by Link Code
+  const handleLinkCodeSubmit = async (e) => {
+    e.preventDefault();
+    if (!linkCodeInput.trim()) return;
+    setLinkMessage({ text: '', type: '' });
+    setLinkLoading(true);
+
+    try {
+      const res = await linkByCode(user._id, linkCodeInput.trim());
+      setLinkMessage({ text: res.message || 'Child linked successfully!', type: 'success' });
+      setLinkCodeInput('');
+      await loadData();
+    } catch (err) {
+      setLinkMessage({ text: err.message, type: 'error' });
+    } finally {
+      setLinkLoading(false);
+    }
+  };
+
+  // Assign task to selected child
   const handleAssign = async (childId, actId) => {
     setAssigning(actId);
-    await assignTask(childId, actId);
-    const updated = await getChildren(user._id);
-    setChildren(updated);
-    const refreshed = updated.find(c => c._id === childId);
-    if (refreshed) setSelectedChild(refreshed);
-    setAssigning('');
+    try {
+      await assignTask(childId, actId);
+      await loadData();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setAssigning('');
+    }
+  };
+
+  // Start Therapy
+  const handleStartTherapy = (childId) => {
+    if (onNavigate) {
+      onNavigate(`/child/${childId}`);
+    }
   };
 
   const sc = selectedChild;
   const availableToAssign = sc
-    ? activities.filter(a =>
-        a.level === sc.level &&
-        !sc.assignedActivities?.some(aa => aa._id === a._id) &&
-        !sc.completedActivities?.some(ca => ca._id === a._id)
+    ? activities.filter(
+        (a) =>
+          a.level === sc.level &&
+          !sc.assignedActivities?.some((aa) => aa._id === a._id) &&
+          !sc.completedActivities?.some((ca) => ca._id === a._id)
       )
     : [];
 
   return (
-    <div className="fade-in">
-      {/* Header */}
-      <div style={{ marginBottom:'36px' }}>
-        <h1 style={{ fontSize:'2.2rem', fontWeight:'800', marginBottom:'6px' }}>Parent Dashboard 👨‍👩‍👧</h1>
-        <p style={{ color:'var(--text-muted)' }}>Welcome back, {user.name}! Track and support your child's therapy journey.</p>
+    <div className="fade-in" style={{ paddingBottom: '60px' }}>
+      {/* Header Bar */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '16px',
+          marginBottom: '32px',
+          background: 'white',
+          padding: '24px 28px',
+          borderRadius: '16px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <div>
+          <h1 style={{ fontSize: '2rem', fontWeight: '800', margin: 0, color: 'var(--text)' }}>
+            Parent Dashboard 👨‍👩‍👧
+          </h1>
+          <p style={{ color: 'var(--text-muted)', margin: '4px 0 0 0', fontSize: '0.95rem' }}>
+            Welcome, <strong>{user.name}</strong>! Manage child profiles and launch therapy sessions.
+          </p>
+        </div>
+
+        <button
+          className="btn btn-primary"
+          onClick={() => setShowAddModal(true)}
+          style={{
+            padding: '12px 24px',
+            fontSize: '0.98rem',
+            fontWeight: '700',
+            borderRadius: '12px',
+            boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)',
+          }}
+        >
+          ➕ Add Child Profile
+        </button>
       </div>
 
       {loading ? (
-        <div style={{ textAlign:'center', padding:'60px' }}><span className="spinner" style={{ width:36,height:36 }} /></div>
-      ) : children.length === 0 ? (
-        <div className="card" style={{ textAlign:'center', padding:'60px' }}>
-          <div style={{ fontSize:'3rem', marginBottom:'16px' }}>👶</div>
-          <h3 style={{ fontWeight:'700', marginBottom:'8px' }}>No children linked yet</h3>
-          <p style={{ color:'var(--text-muted)' }}>Ask your child to register with your email address to link their account.</p>
+        <div style={{ textAlign: 'center', padding: '60px' }}>
+          <span className="spinner" style={{ width: 40, height: 40 }} />
         </div>
       ) : (
-        <div style={{ display:'grid', gridTemplateColumns:'300px 1fr', gap:'24px', alignItems:'start' }}>
+        <>
+          {/* Children Overview / Cards */}
+          <div style={{ marginBottom: '36px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
+                Child Profiles ({children.length})
+              </h2>
+            </div>
 
-          {/* Child Selector */}
-          <div>
-            <h3 style={{ fontWeight:'700', marginBottom:'12px', fontSize:'0.9rem', textTransform:'uppercase', letterSpacing:'0.06em', color:'var(--text-muted)' }}>Your Children</h3>
-            {children.map(child => (
-              <button key={child._id} onClick={() => setSelectedChild(child)} style={{
-                width:'100%', display:'flex', alignItems:'center', gap:'12px',
-                padding:'14px 16px', borderRadius:'10px', marginBottom:'10px', border:'2px solid',
-                borderColor: sc?._id===child._id ? 'var(--primary)' : 'var(--border)',
-                background: sc?._id===child._id ? 'var(--primary-light)' : 'white',
-                cursor:'pointer', fontFamily:'inherit', textAlign:'left', transition:'all 0.2s',
-              }}>
-                <div style={{ width:40,height:40,borderRadius:'50%',background:'var(--primary-light)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.3rem',flexShrink:0 }}>
-                  🧒
-                </div>
-                <div>
-                  <div style={{ fontWeight:'700', color:'var(--text)' }}>{child.name}</div>
-                  <div style={{ fontSize:'0.8rem', color:'var(--text-muted)' }}>Age {child.age} · {child.level ? LEVEL_LABEL[child.level] : '⏳ Not assessed'}</div>
-                </div>
-              </button>
-            ))}
+            {children.length === 0 ? (
+              <div className="card" style={{ textAlign: 'center', padding: '48px 24px', background: '#fafafa' }}>
+                <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>🧒</div>
+                <h3 style={{ fontWeight: '700', fontSize: '1.2rem', marginBottom: '6px' }}>No Child Profiles Created Yet</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', maxWidth: '420px', margin: '0 auto 20px auto' }}>
+                  Children do not register with email accounts. Click <strong>"+ Add Child Profile"</strong> above to create a profile for your child.
+                </p>
+                <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+                  ➕ Add First Child
+                </button>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                  gap: '20px',
+                }}
+              >
+                {children.map((child) => {
+                  const isSelected = sc?._id === child._id;
+                  const totalTasks = (child.assignedActivities?.length || 0) + (child.completedActivities?.length || 0);
+                  const progressPct = totalTasks > 0 ? Math.round(((child.completedActivities?.length || 0) / totalTasks) * 100) : 0;
+
+                  return (
+                    <div
+                      key={child._id}
+                      className="card child-card-item"
+                      style={{
+                        position: 'relative',
+                        borderRadius: '16px',
+                        border: `2px solid ${isSelected ? 'var(--primary)' : 'var(--border)'}`,
+                        background: isSelected ? 'linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%)' : 'white',
+                        boxShadow: isSelected ? '0 8px 24px rgba(99, 102, 241, 0.15)' : '0 2px 10px rgba(0,0,0,0.04)',
+                        padding: '24px',
+                        transition: 'all 0.25s ease',
+                      }}
+                    >
+                      {/* Delete button */}
+                      <button
+                        title="Delete Child Profile"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteChild(child._id, child.name);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '14px',
+                          right: '14px',
+                          background: '#fee2e2',
+                          color: '#ef4444',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '28px',
+                          height: '28px',
+                          cursor: 'pointer',
+                          fontWeight: '700',
+                          fontSize: '0.9rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        ✕
+                      </button>
+
+                      {/* Header info */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+                        {child.profilePhoto ? (
+                          <img
+                            src={child.profilePhoto}
+                            alt={child.name}
+                            style={{
+                              width: '56px',
+                              height: '56px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '2px solid var(--primary)',
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: '56px',
+                              height: '56px',
+                              borderRadius: '50%',
+                              background: 'linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%)',
+                              color: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '1.5rem',
+                              fontWeight: '700',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {child.gender === 'female' ? '👧' : '👦'}
+                          </div>
+                        )}
+
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, color: 'var(--text)' }}>
+                              {child.name}
+                            </h3>
+                          </div>
+
+                          <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span
+                              style={{
+                                background: '#e0e7ff',
+                                color: '#3730a3',
+                                fontSize: '0.75rem',
+                                fontWeight: '700',
+                                padding: '2px 8px',
+                                borderRadius: '6px',
+                                fontFamily: 'monospace',
+                              }}
+                            >
+                              {child.childId || 'CHD-XXXX'}
+                            </span>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                              Age {child.age}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Level Badge */}
+                      <div style={{ marginBottom: '16px' }}>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            background: LEVEL_COLOR_BG[child.level] || '#f3f4f6',
+                            color: LEVEL_COLOR_TEXT[child.level] || '#4b5563',
+                            fontSize: '0.82rem',
+                            fontWeight: '700',
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                          }}
+                        >
+                          {child.level ? LEVEL_LABEL[child.level] : '⏳ Pending Initial Assessment'}
+                        </span>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div style={{ marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                          <span>Therapy Progress</span>
+                          <span>{child.completedActivities?.length || 0} completed</span>
+                        </div>
+                        <div style={{ width: '100%', height: '8px', background: '#e5e7eb', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ width: `${progressPct}%`, height: '100%', background: 'linear-gradient(90deg, #6366f1 0%, #10b981 100%)', transition: 'width 0.4s' }} />
+                        </div>
+                      </div>
+
+                      {/* Card Actions */}
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => handleStartTherapy(child._id)}
+                          style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            fontWeight: '700',
+                            borderRadius: '10px',
+                            padding: '10px',
+                          }}
+                        >
+                          🚀 Start Therapy →
+                        </button>
+                        <button
+                          className="btn"
+                          onClick={() => setSelectedChild(child)}
+                          style={{
+                            background: isSelected ? 'var(--primary-light)' : '#f3f4f6',
+                            color: 'var(--text)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '10px',
+                            fontSize: '0.85rem',
+                            fontWeight: '600',
+                          }}
+                        >
+                          {isSelected ? 'Viewing' : 'Details'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Child Detail */}
+          {/* Link Code Box for Therapist-created Children */}
+          <div
+            className="card"
+            style={{
+              marginBottom: '36px',
+              background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)',
+              border: '1px solid #bfdbfe',
+              padding: '24px',
+              borderRadius: '16px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '1.6rem' }}>🔗</span>
+              <h3 style={{ margin: 0, fontWeight: '700', fontSize: '1.1rem', color: '#1e40af' }}>
+                Have a Link Code from a Therapist?
+              </h3>
+            </div>
+            <p style={{ color: '#3b82f6', fontSize: '0.88rem', margin: '0 0 16px 0' }}>
+              If your child's therapist created a profile first, enter the 6-digit code provided by them to link the profile to your dashboard.
+            </p>
+
+            <form onSubmit={handleLinkCodeSubmit} style={{ display: 'flex', gap: '12px', maxWidth: '440px' }}>
+              <input
+                className="input"
+                placeholder="e.g. X7KD92"
+                value={linkCodeInput}
+                onChange={(e) => setLinkCodeInput(e.target.value.toUpperCase())}
+                style={{
+                  textTransform: 'uppercase',
+                  letterSpacing: '2px',
+                  fontWeight: '700',
+                  fontFamily: 'monospace',
+                  background: 'white',
+                }}
+                maxLength={6}
+              />
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={linkLoading || !linkCodeInput.trim()}
+                style={{ flexShrink: 0, padding: '0 20px' }}
+              >
+                {linkLoading ? 'Linking...' : 'Link Child'}
+              </button>
+            </form>
+
+            {linkMessage.text && (
+              <div
+                style={{
+                  marginTop: '12px',
+                  fontSize: '0.88rem',
+                  fontWeight: '600',
+                  color: linkMessage.type === 'error' ? '#dc2626' : '#166534',
+                }}
+              >
+                {linkMessage.type === 'error' ? '❌ ' : '✅ '}
+                {linkMessage.text}
+              </div>
+            )}
+          </div>
+
+          {/* Selected Child Detail View */}
           {sc && (
-            <div>
-              {/* Stats row */}
-              <div className="grid-2" style={{ marginBottom:'24px' }}>
-                <div className="stat-card" style={{ borderLeft:`5px solid ${LEVEL_COLOR_TEXT[sc.level] || '#6366f1'}` }}>
-                  <div className="stat-label">Current Level</div>
-                  <div style={{ fontSize:'1.4rem', fontWeight:'800', color: LEVEL_COLOR_TEXT[sc.level] || 'var(--primary)' }}>
-                    {sc.level ? LEVEL_LABEL[sc.level] : '⏳ Pending Assessment'}
+            <div style={{ marginTop: '24px' }}>
+              <h2 style={{ fontSize: '1.3rem', fontWeight: '800', marginBottom: '16px' }}>
+                Activity & Task Management — {sc.name} ({sc.childId || 'CHD-XXXX'})
+              </h2>
+
+              {/* Stats Grid */}
+              <div className="grid-2" style={{ marginBottom: '24px' }}>
+                <div className="stat-card" style={{ borderLeft: `5px solid ${LEVEL_COLOR_TEXT[sc.level] || '#6366f1'}` }}>
+                  <div className="stat-label">Assessment Level</div>
+                  <div style={{ fontSize: '1.3rem', fontWeight: '800', color: LEVEL_COLOR_TEXT[sc.level] || 'var(--primary)', marginTop: '4px' }}>
+                    {sc.level ? LEVEL_LABEL[sc.level] : '⏳ Assessment Needed'}
                   </div>
                 </div>
-                <div className="stat-card" style={{ borderLeft:'5px solid var(--green)' }}>
-                  <div className="stat-label">Tasks Completed</div>
-                  <div className="stat-num" style={{ color:'var(--green)' }}>{sc.completedActivities?.length || 0}</div>
+
+                <div className="stat-card" style={{ borderLeft: '5px solid var(--green)' }}>
+                  <div className="stat-label">Completed Tasks</div>
+                  <div className="stat-num" style={{ color: 'var(--green)' }}>
+                    {sc.completedActivities?.length || 0}
+                  </div>
                 </div>
-                <div className="stat-card" style={{ borderLeft:'5px solid var(--primary)' }}>
-                  <div className="stat-label">Assigned Tasks</div>
-                  <div className="stat-num" style={{ color:'var(--primary)' }}>{sc.assignedActivities?.length || 0}</div>
+
+                <div className="stat-card" style={{ borderLeft: '5px solid var(--primary)' }}>
+                  <div className="stat-label">Active Assigned Tasks</div>
+                  <div className="stat-num" style={{ color: 'var(--primary)' }}>
+                    {sc.assignedActivities?.length || 0}
+                  </div>
                 </div>
-                <div className="stat-card" style={{ borderLeft:'5px solid var(--accent)' }}>
+
+                <div className="stat-card" style={{ borderLeft: '5px solid var(--accent)' }}>
                   <div className="stat-label">Completion Rate</div>
-                  <div className="stat-num" style={{ color:'var(--accent)' }}>
+                  <div className="stat-num" style={{ color: 'var(--accent)' }}>
                     {(() => {
-                      const total = (sc.assignedActivities?.length||0) + (sc.completedActivities?.length||0);
-                      return total === 0 ? '—' : `${Math.round((sc.completedActivities?.length||0)/total*100)}%`;
+                      const total = (sc.assignedActivities?.length || 0) + (sc.completedActivities?.length || 0);
+                      return total === 0 ? '0%' : `${Math.round(((sc.completedActivities?.length || 0) / total) * 100)}%`;
                     })()}
                   </div>
                 </div>
               </div>
 
-              {/* Assigned tasks */}
-              <div className="card" style={{ marginBottom:'20px' }}>
-                <h3 style={{ fontWeight:'700', marginBottom:'16px' }}>📋 Current Tasks for {sc.name}</h3>
-                {(!sc.assignedActivities || sc.assignedActivities.length === 0) ? (
-                  <p style={{ color:'var(--text-muted)', fontSize:'0.9rem' }}>No tasks assigned yet. Assign some below!</p>
+              {/* Currently Assigned Tasks */}
+              <div className="card" style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <h3 style={{ fontWeight: '700', margin: 0 }}>📋 Current Assigned Tasks</h3>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleStartTherapy(sc._id)}
+                    style={{ padding: '6px 14px', fontSize: '0.85rem' }}
+                  >
+                    Open Therapy View
+                  </button>
+                </div>
+
+                {!sc.assignedActivities || sc.assignedActivities.length === 0 ? (
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
+                    No active tasks assigned yet. Assign new activities from the section below!
+                  </p>
                 ) : (
-                  <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
-                    {sc.assignedActivities.map(act => (
-                      <div key={act._id} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'12px', border:'1px solid var(--border)', borderRadius:'10px', background:'white' }}>
-                        <span style={{ fontSize:'1.3rem' }}>
-                          {act.category === 'Communication' ? '💬' : act.category === 'Motor Skills' ? '🖐️' : act.category === 'Social' ? '👫' : act.category === 'Sensory' ? '👁️' : act.category === 'Life Skills' ? '🏠' : '📋'}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {sc.assignedActivities.map((act) => (
+                      <div
+                        key={act._id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '14px',
+                          padding: '14px 18px',
+                          border: '1px solid var(--border)',
+                          borderRadius: '12px',
+                          background: 'white',
+                        }}
+                      >
+                        <span style={{ fontSize: '1.4rem' }}>
+                          {act.category === 'Communication'
+                            ? '💬'
+                            : act.category === 'Motor Skills'
+                            ? '🖐️'
+                            : act.category === 'Social'
+                            ? '👫'
+                            : act.category === 'Sensory'
+                            ? '👁️'
+                            : '📋'}
                         </span>
-                        <div style={{ flex:1 }}>
-                          <div style={{ fontWeight:'700' }}>{act.title}</div>
-                          <div style={{ fontSize:'0.82rem', color:'var(--text-muted)' }}>{act.category} · {act.duration}</div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: '700', fontSize: '0.98rem' }}>{act.title}</div>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                            {act.category} · {act.duration} · Level {act.level}
+                          </div>
                         </div>
                         <span className={`badge badge-${act.difficulty?.toLowerCase()}`}>{act.difficulty}</span>
                       </div>
@@ -136,20 +584,37 @@ const ParentDashboard = ({ user, onNavigate }) => {
                 )}
               </div>
 
-              {/* Assign more */}
+              {/* Assign More Activities */}
               {availableToAssign.length > 0 && (
                 <div className="card">
-                  <h3 style={{ fontWeight:'700', marginBottom:'16px' }}>➕ Assign New Activity</h3>
-                  <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
-                    {availableToAssign.map(act => (
-                      <div key={act._id} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'12px', border:'1px solid var(--border)', borderRadius:'10px', background:'white' }}>
-                        <div style={{ flex:1 }}>
-                          <div style={{ fontWeight:'700' }}>{act.title}</div>
-                          <div style={{ fontSize:'0.82rem', color:'var(--text-muted)' }}>{act.category} · {act.duration}</div>
+                  <h3 style={{ fontWeight: '700', marginBottom: '16px' }}>➕ Assign Recommended Activities for Level {sc.level}</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {availableToAssign.map((act) => (
+                      <div
+                        key={act._id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '14px',
+                          padding: '14px 18px',
+                          border: '1px solid var(--border)',
+                          borderRadius: '12px',
+                          background: 'white',
+                        }}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: '700' }}>{act.title}</div>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                            {act.category} · {act.duration}
+                          </div>
                         </div>
-                        <button className="btn btn-primary" style={{ padding:'7px 14px', fontSize:'0.82rem' }}
-                          onClick={() => handleAssign(sc._id, act._id)} disabled={assigning === act._id}>
-                          {assigning === act._id ? '...' : '+ Assign'}
+                        <button
+                          className="btn btn-primary"
+                          style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                          onClick={() => handleAssign(sc._id, act._id)}
+                          disabled={assigning === act._id}
+                        >
+                          {assigning === act._id ? 'Assigning...' : '+ Assign Task'}
                         </button>
                       </div>
                     ))}
@@ -158,6 +623,177 @@ const ParentDashboard = ({ user, onNavigate }) => {
               )}
             </div>
           )}
+        </>
+      )}
+
+      {/* ── ADD CHILD MODAL ────────────────────────────────────────────────── */}
+      {showAddModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px',
+          }}
+        >
+          <div
+            className="fade-in"
+            style={{
+              background: 'white',
+              borderRadius: '20px',
+              width: '100%',
+              maxWidth: '520px',
+              padding: '32px',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '1.8rem' }}>👶</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: '800', margin: 0 }}>Add Child Profile</h2>
+              </div>
+              <button
+                onClick={() => setShowAddModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.2rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '20px' }}>
+              Create a therapy profile for your child. A unique ID (e.g. CHD-1001) will be generated automatically.
+            </p>
+
+            {createError && <div className="alert alert-error" style={{ marginBottom: '16px' }}>{createError}</div>}
+
+            <form onSubmit={handleCreateChild} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Profile Photo Upload */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                {photoPreview ? (
+                  <img
+                    src={photoPreview}
+                    alt="Preview"
+                    style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '64px',
+                      height: '64px',
+                      borderRadius: '50%',
+                      background: '#f3f4f6',
+                      border: '2px dashed var(--border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.5rem',
+                      color: 'var(--text-muted)',
+                    }}
+                  >
+                    📷
+                  </div>
+                )}
+                <div>
+                  <label className="label" style={{ marginBottom: '4px' }}>Child Photo (optional)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                    style={{ fontSize: '0.82rem' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="label">Child's Full Name *</label>
+                <input
+                  className="input"
+                  placeholder="e.g. Timmy Johnson"
+                  value={newChild.name}
+                  onChange={(e) => setNewChild({ ...newChild, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <label className="label">Age (Years) *</label>
+                  <input
+                    className="input"
+                    type="number"
+                    min="1"
+                    max="18"
+                    placeholder="e.g. 5"
+                    value={newChild.age}
+                    onChange={(e) => setNewChild({ ...newChild, age: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Gender *</label>
+                  <select
+                    className="input"
+                    value={newChild.gender}
+                    onChange={(e) => setNewChild({ ...newChild, gender: e.target.value })}
+                  >
+                    <option value="male">Male 👦</option>
+                    <option value="female">Female 👧</option>
+                    <option value="other">Other 🧒</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="label">Autism Support Level (optional)</label>
+                <select
+                  className="input"
+                  value={newChild.supportLevel}
+                  onChange={(e) => setNewChild({ ...newChild, supportLevel: e.target.value })}
+                >
+                  <option value="Level 1 - Requiring Support">Level 1 - Requiring Support</option>
+                  <option value="Level 2 - Substantial Support">Level 2 - Substantial Support</option>
+                  <option value="Level 3 - Very Substantial Support">Level 3 - Very Substantial Support</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setShowAddModal(false)}
+                  style={{ flex: 1, justifyContent: 'center', background: '#f3f4f6' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={createLoading}
+                  style={{ flex: 1, justifyContent: 'center' }}
+                >
+                  {createLoading ? 'Creating...' : 'Create Profile ✨'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

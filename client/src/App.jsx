@@ -1,19 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import AuthPage from './pages/AuthPage';
-import ParentDashboard from './pages/ParentDashboard';
-import ChildDashboard from './pages/ChildDashboard';
-import TherapistDashboard from './pages/TherapistDashboard';
-import Activities from './pages/Activities';
+import React, { useState, useEffect } from "react";
 
-// ── Simple SPA router ─────────────────────────────────────────────────────────
+import Home from "./pages/Home";
+import AuthPage from "./pages/AuthPage";
+import ParentDashboard from "./pages/ParentDashboard";
+import ChildDashboard from "./pages/ChildDashboard";
+import TherapistDashboard from "./pages/TherapistDashboard";
+import Activities from "./pages/Activities";
+
+// ─────────────────────────────────────────────────────────────
+// Simple SPA Router
+// ─────────────────────────────────────────────────────────────
 function navigate(path) {
-  window.history.pushState({}, '', path);
-  window.dispatchEvent(new PopStateEvent('popstate'));
+  window.history.pushState({}, "", path);
+  window.dispatchEvent(new PopStateEvent("popstate"));
 }
 
 function getStoredUser() {
   try {
-    const user = localStorage.getItem('auth_user');
+    const user = localStorage.getItem("auth_user");
     return user ? JSON.parse(user) : null;
   } catch {
     return null;
@@ -26,25 +30,28 @@ function App() {
 
   useEffect(() => {
     const onNavChange = () => setPath(window.location.pathname);
-    window.addEventListener('popstate', onNavChange);
-    return () => window.removeEventListener('popstate', onNavChange);
+    window.addEventListener("popstate", onNavChange);
+    return () => window.removeEventListener("popstate", onNavChange);
   }, []);
 
   const handleLogin = (userData) => {
     setUser(userData);
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_user");
     setUser(null);
-    navigate('/');
+    navigate("/");
   };
 
   useEffect(() => {
-    if (!user && path !== '/') {
-      navigate('/');
+    if (!user) {
+      const publicRoutes = ["/", "/login"];
+      if (!publicRoutes.includes(path)) {
+        navigate("/");
+      }
     }
   }, [path, user]);
 
@@ -55,194 +62,191 @@ function App() {
 
   let Component;
 
+  // ============================================================
+  // PUBLIC ROUTES
+  // ============================================================
   if (!user) {
-    Component = <AuthPage onLogin={handleLogin} />;
-  } else {
     switch (path) {
-      case '/dashboard':
-        if (user.role === 'parent')
-          Component = <ParentDashboard user={user} />;
-        else if (user.role === 'therapist')
-          Component = <TherapistDashboard user={user} />;
-        else
-          Component = <ChildDashboard user={user} />;
+      case "/":
+        Component = <Home />;
         break;
 
-      case '/activities':
-        Component = <Activities user={user} />;
-        break;
-
-      case '/':
-        Component =
-          user.role === 'parent' ? (
-            <ParentDashboard user={user} />
-          ) : user.role === 'therapist' ? (
-            <TherapistDashboard user={user} />
-          ) : (
-            <ChildDashboard user={user} />
-          );
+      case "/login":
+        Component = <AuthPage onLogin={handleLogin} />;
         break;
 
       default:
-        Component = (
-          <div style={{ textAlign: 'center', padding: '100px' }}>
-            <h2>404 - Page Not Found</h2>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="btn btn-primary"
+        Component = <Home />;
+    }
+  }
+  // ============================================================
+  // PRIVATE ROUTES
+  // ============================================================
+  else {
+    if (path.startsWith("/child/")) {
+      const childId = path.split("/child/")[1];
+      Component = <ChildDashboard user={user} childId={childId} onNavigate={navigate} />;
+    } else {
+      switch (path) {
+        case "/dashboard":
+        case "/":
+          if (user.role === "parent") {
+            Component = <ParentDashboard user={user} onNavigate={navigate} />;
+          } else if (user.role === "therapist") {
+            Component = <TherapistDashboard user={user} onNavigate={navigate} />;
+          } else {
+            Component = <ChildDashboard user={user} onNavigate={navigate} />;
+          }
+          break;
+
+        case "/activities":
+          Component = <Activities user={user} />;
+          break;
+
+        default:
+          Component = (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "100px",
+              }}
             >
-              Go to Dashboard
-            </button>
-          </div>
-        );
+              <h2>404 - Page Not Found</h2>
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="btn btn-primary"
+                style={{ marginTop: "16px" }}
+              >
+                Go to Dashboard
+              </button>
+            </div>
+          );
+      }
     }
   }
 
   return (
     <div
       style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      <nav
-        className="glass"
-        style={{
-          margin: '16px auto',
-          padding: '12px 28px',
-          display: 'flex',
-          gap: '20px',
-          alignItems: 'center',
-          width: 'max-content',
-          maxWidth: 'calc(100vw - 40px)',
-          position: 'sticky',
-          top: '16px',
-          zIndex: 100,
-        }}
-      >
-        <a
-          href="/"
-          onClick={(e) => handleNavClick(e, user ? '/dashboard' : '/')}
+      {/* Show navbar only after login */}
+      {user && (
+        <nav
+          className="glass"
           style={{
-            textDecoration: 'none',
-            fontWeight: '800',
-            fontSize: '1.2rem',
-            color: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
+            margin: "16px auto",
+            padding: "12px 28px",
+            display: "flex",
+            gap: "20px",
+            alignItems: "center",
+            width: "max-content",
+            maxWidth: "calc(100vw - 40px)",
+            position: "sticky",
+            top: "16px",
+            zIndex: 100,
           }}
         >
-          🧩 <span style={{ letterSpacing: '-0.5px' }}>AutismAssist</span>
-        </a>
+          <a
+            href="/dashboard"
+            onClick={(e) => handleNavClick(e, "/dashboard")}
+            style={{
+              textDecoration: "none",
+              fontWeight: "800",
+              fontSize: "1.2rem",
+              color: "var(--primary)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            🧩 AutismAssist
+          </a>
 
-        {user && (
-          <>
-            <div
-              style={{
-                width: '1px',
-                height: '20px',
-                background: 'var(--border)',
-              }}
-            />
+          <div
+            style={{
+              width: "1px",
+              height: "20px",
+              background: "var(--border)",
+            }}
+          />
 
-            <a
-              href="/dashboard"
-              onClick={(e) => handleNavClick(e, '/dashboard')}
-              style={{
-                textDecoration: 'none',
-                color:
-                  path === '/dashboard' || path === '/'
-                    ? 'var(--primary)'
-                    : 'var(--text)',
-                fontWeight: '600',
-                fontSize: '0.95rem',
-              }}
-            >
-              Dashboard
-            </a>
+          <a
+            href="/dashboard"
+            onClick={(e) => handleNavClick(e, "/dashboard")}
+            style={{
+              textDecoration: "none",
+              color: path === "/dashboard" || path === "/" ? "var(--primary)" : "var(--text)",
+              fontWeight: "600",
+            }}
+          >
+            Dashboard
+          </a>
 
-            <a
-              href="/activities"
-              onClick={(e) => handleNavClick(e, '/activities')}
-              style={{
-                textDecoration: 'none',
-                color:
-                  path === '/activities'
-                    ? 'var(--primary)'
-                    : 'var(--text)',
-                fontWeight: '600',
-                fontSize: '0.95rem',
-              }}
-            >
-              Library
-            </a>
+          <a
+            href="/activities"
+            onClick={(e) => handleNavClick(e, "/activities")}
+            style={{
+              textDecoration: "none",
+              color: path === "/activities" ? "var(--primary)" : "var(--text)",
+              fontWeight: "600",
+            }}
+          >
+            Activities
+          </a>
 
-            <div
-              style={{
-                width: '1px',
-                height: '20px',
-                background: 'var(--border)',
-              }}
-            />
+          <div
+            style={{
+              width: "1px",
+              height: "20px",
+              background: "var(--border)",
+            }}
+          />
 
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-              }}
-            >
-              <span
-                className={`badge badge-${user.role}`}
-                style={{ fontSize: '0.7rem' }}
-              >
-                {user.role}
-              </span>
+          <span className={`badge badge-${user.role}`}>{user.role}</span>
 
-              <button
-                onClick={handleLogout}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--red)',
-                  fontWeight: '600',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                }}
-              >
-                Logout
-              </button>
-            </div>
-          </>
-        )}
-      </nav>
+          <button
+            onClick={handleLogout}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--red)",
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
+          >
+            Logout
+          </button>
+        </nav>
+      )}
 
       <main
         style={{
           flex: 1,
-          padding: '20px',
-          maxWidth: '1200px',
-          margin: '0 auto',
-          width: '100%',
+          width: "100%",
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: user ? "20px" : "0",
         }}
       >
         {Component}
       </main>
 
-      <footer
-        style={{
-          textAlign: 'center',
-          padding: '40px',
-          color: 'var(--text-muted)',
-          fontSize: '0.85rem',
-        }}
-      >
-        © 2026 Autism Assistant Pro · Empowering every journey. 🌟
-      </footer>
+      {user && (
+        <footer
+          style={{
+            textAlign: "center",
+            padding: "40px",
+            color: "var(--text-muted)",
+            fontSize: ".85rem",
+          }}
+        >
+          © 2026 Autism Assistant · Empowering every journey 🌟
+        </footer>
+      )}
     </div>
   );
 }

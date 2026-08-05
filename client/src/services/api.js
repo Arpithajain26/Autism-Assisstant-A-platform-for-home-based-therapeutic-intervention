@@ -18,6 +18,7 @@ const req = async (method, path, body) => {
 // ── Auth ─────────────────────────────────────────────────────────────────────
 export const registerUser = (payload) => req('POST', '/api/auth/register', payload);
 export const loginUser = (email, password) => req('POST', '/api/auth/login', { email, password });
+export const getMe = () => req('GET', '/api/auth/me');
 
 // ── Assessment ────────────────────────────────────────────────────────────────
 export const getAssessmentQuestions = () => req('GET', '/api/assessment/questions');
@@ -37,11 +38,29 @@ export const getRecommendations = (level, focusArea = '') => {
 
 export const getActivityById = (id) => req('GET', `/api/activities/${id}`);
 
-// ── Children ──────────────────────────────────────────────────────────────────
+// ── Children Management ────────────────────────────────────────────────────────
 export const getChildren = (userId) => req('GET', `/api/children/${userId}`).catch(() => []);
+
+export const createChild = (childData) => req('POST', '/api/children/create', childData);
+
+export const deleteChild = (childId) => req('DELETE', `/api/children/${childId}`);
+
+export const generateLinkCode = (childId) =>
+  req('POST', '/api/children/generate-link-code', { childId });
+
+export const linkByCode = (parentId, code) =>
+  req('POST', '/api/children/link-by-code', { parentId, code });
+
 export const assignTask = (childId, activityId) =>
   req('POST', '/api/children/assign-task', { childId, activityId });
+
 export const completeTask = (childId, activityId) =>
   req('POST', '/api/children/complete-task', { childId, activityId });
+
 export const getChildTasks = (childId) =>
-  req('GET', `/api/child/${childId}/tasks`).catch(() => ({ assigned: [], completed: [], level: null, assessmentDone: false }));
+  req('GET', `/api/child/${childId}/tasks`).catch(() => ({
+    assigned: [],
+    completed: [],
+    level: null,
+    assessmentDone: false,
+  }));

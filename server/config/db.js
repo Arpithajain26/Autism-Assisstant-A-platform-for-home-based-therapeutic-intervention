@@ -1,33 +1,78 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// In-memory data store (hackathon — no MongoDB needed)
 const mongoose = require("mongoose");
+const User = require("../models/User");
+const Child = require("../models/Child");
+const Activity = require("../models/Activity");
+const Question = require("../models/Question");
 
 const connectDB = async () => {
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    console.warn(
-      "⚠️  No MONGODB_URI found. Skipping MongoDB connection and using in-memory data only.",
-    );
+  // If already connected, skip
+  if (mongoose.connection.readyState === 1) {
+    console.log("🍃 MongoDB already connected.");
     return;
   }
 
+  const uri = process.env.MONGODB_URI;
+
+  // Try Atlas first
+  if (uri) {
+    try {
+      console.log("🍃 Connecting to MongoDB Atlas...");
+      await mongoose.connect(uri, {
+        serverSelectionTimeoutMS: 8000,
+        socketTimeoutMS: 45000,
+      });
+      console.log(`🍃 MongoDB Atlas Connected: ${mongoose.connection.host}`);
+      await seedDB();
+      return;
+    } catch (error) {
+      console.warn(`⚠️ Atlas connection failed: ${error.message}`);
+    }
+  }
+
+  // Try local MongoDB
   try {
-    const conn = await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    const localUri = "mongodb://127.0.0.1:27017/autism_assistant";
+    console.log("🍃 Connecting to local MongoDB...");
+    await mongoose.connect(localUri, {
+      serverSelectionTimeoutMS: 3000,
     });
-    console.log(`🍃 MongoDB Connected: ${conn.connection.host}`);
+    console.log(`🍃 Local MongoDB Connected: ${mongoose.connection.host}`);
+    await seedDB();
+    return;
   } catch (error) {
-    console.warn(`⚠️  Could not connect to MongoDB: ${error.message}`);
-    console.warn("⚠️  Continuing with in-memory data only.");
+    console.warn(`⚠️ Local MongoDB connection failed: ${error.message}`);
+  }
+
+  // In-memory MongoDB fallback (dev only)
+  try {
+    console.log("🍃 Starting In-Memory MongoDB fallback...");
+    const { MongoMemoryServer } = require("mongodb-memory-server");
+    const mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
+    console.log(`🍃 In-Memory MongoDB Connected at ${mongoUri}`);
+    console.warn(
+      "⚠️  WARNING: Using in-memory DB. Data will NOT persist after restart."
+    );
+    await seedDB();
+  } catch (err) {
+    console.error("❌ All MongoDB connection attempts failed:", err.message);
+    process.exit(1);
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Handle unexpected disconnects ─────────────────────────────────────────────
+mongoose.connection.on("disconnected", () => {
+  console.warn("⚠️ MongoDB disconnected.");
+});
 
-// ── Activities by level ───────────────────────────────────────────────────────
-const activities = [
-  // ── LEVEL 1 (Beginner) ─────────────────────────────────────────────────────
+mongoose.connection.on("error", (err) => {
+  console.error("❌ MongoDB connection error:", err.message);
+});
+
+// ── Seed Data ─────────────────────────────────────────────────────────────────
+const initialActivities = [
+  // LEVEL 1 (Beginner)
   {
     _id: "a1",
     title: "Mirror Play",
@@ -123,8 +168,7 @@ const activities = [
     ],
     goalSkills: ["Finger strength", "Bilateral coordination", "Creativity"],
   },
-
-  // ── LEVEL 2 (Intermediate) ─────────────────────────────────────────────────
+  // LEVEL 2 (Intermediate)
   {
     _id: "b1",
     title: "Emotion Flashcards",
@@ -220,8 +264,7 @@ const activities = [
     ],
     goalSkills: ["Following instructions", "Sequencing", "Independence"],
   },
-
-  // ── LEVEL 3 (Advanced) ────────────────────────────────────────────────────
+  // LEVEL 3 (Advanced)
   {
     _id: "c1",
     title: "Role Play Scenarios",
@@ -300,11 +343,7 @@ const activities = [
       "On a scale of 1-10, how was your day?",
       "Share one thing with parent",
     ],
-    goalSkills: [
-      "Self-reflection",
-      "Emotional regulation",
-      "Written expression",
-    ],
+    goalSkills: ["Self-reflection", "Emotional regulation", "Written expression"],
   },
   {
     _id: "c5",
@@ -332,10 +371,9 @@ const activities = [
   },
 ];
 
-// ── Assessment questions ───────────────────────────────────────────────────────
-const assessmentQuestions = [
+const initialQuestions = [
   {
-    id: "q1",
+    id: 1,
     question: "Can your child make eye contact when spoken to?",
     options: [
       "Rarely or never",
@@ -346,7 +384,7 @@ const assessmentQuestions = [
     scores: [1, 2, 3, 4],
   },
   {
-    id: "q2",
+    id: 2,
     question: "How does your child communicate their needs?",
     options: [
       "Points or uses gestures only",
@@ -357,7 +395,7 @@ const assessmentQuestions = [
     scores: [1, 2, 3, 4],
   },
   {
-    id: "q3",
+    id: 3,
     question: "How does your child respond to their name?",
     options: [
       "Does not respond",
@@ -368,7 +406,7 @@ const assessmentQuestions = [
     scores: [1, 2, 3, 4],
   },
   {
-    id: "q4",
+    id: 4,
     question: "Can your child dress themselves (buttons, zippers)?",
     options: [
       "Needs full assistance",
@@ -379,7 +417,7 @@ const assessmentQuestions = [
     scores: [1, 2, 3, 4],
   },
   {
-    id: "q5",
+    id: 5,
     question: "How does your child interact with other children?",
     options: [
       "Avoids interaction",
@@ -390,7 +428,7 @@ const assessmentQuestions = [
     scores: [1, 2, 3, 4],
   },
   {
-    id: "q6",
+    id: 6,
     question:
       'Can your child follow a 2-step instruction (e.g., "get your bag and put on shoes")?',
     options: [
@@ -403,48 +441,66 @@ const assessmentQuestions = [
   },
 ];
 
-// ── Users store ───────────────────────────────────────────────────────────────
-const users = [
-  {
-    _id: "u1",
-    role: "parent",
-    name: "Alex Johnson",
-    email: "parent@example.com",
-    password: "password123",
-    children: ["u3"],
-  },
-  {
-    _id: "u2",
-    role: "therapist",
-    name: "Dr. Sarah Patel",
-    email: "therapist@example.com",
-    password: "password123",
-    specialization: "ABA Therapy",
-    assignedChildren: ["u3"],
-  },
-  {
-    _id: "u3",
-    role: "child",
-    name: "Timmy Johnson",
-    email: "child@example.com",
-    password: "password123",
-    age: 7,
-    parentId: "u1",
-    therapistId: "u2",
-    level: 2,
-    assessmentDone: true,
-    assignedTasks: ["b1", "b2", "b3"],
-    completedTasks: ["a1", "a2"],
-  },
-];
+const seedDB = async () => {
+  try {
+    const actCount = await Activity.countDocuments();
+    if (actCount === 0) {
+      await Activity.insertMany(initialActivities);
+      console.log("✅ Seeded activities into MongoDB");
+    }
 
-// ── Next IDs ──────────────────────────────────────────────────────────────────
-let nextUserId = 10;
+    const qCount = await Question.countDocuments();
+    if (qCount === 0) {
+      await Question.insertMany(initialQuestions);
+      console.log("✅ Seeded assessment questions into MongoDB");
+    }
 
-module.exports = {
-  connectDB,
-  activities,
-  users,
-  assessmentQuestions,
-  getNextId: () => `u${nextUserId++}`,
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      const parent = new User({
+        name: "Alex Johnson",
+        email: "parent@example.com",
+        password: "password123",
+        role: "parent",
+        phone: "+1 555-0192",
+      });
+      await parent.save();
+
+      const therapist = new User({
+        name: "Dr. Sarah Patel",
+        email: "therapist@example.com",
+        password: "password123",
+        role: "therapist",
+        specialization: "ABA & Pediatric Speech Therapy",
+      });
+      await therapist.save();
+
+      const child = new Child({
+        name: "Timmy Johnson",
+        age: 6,
+        gender: "male",
+        parentId: parent._id,
+        therapistId: therapist._id,
+        level: 2,
+        assessmentDone: true,
+        assignedTasks: ["b1", "b2", "b3"],
+        completedTasks: ["a1", "a2"],
+      });
+      await child.save();
+
+      parent.children.push(child._id);
+      await parent.save();
+
+      therapist.assignedChildren.push(child._id);
+      await therapist.save();
+
+      console.log("✅ Seeded demo Parent, Therapist, and Child");
+      console.log("   parent@example.com / password123");
+      console.log("   therapist@example.com / password123");
+    }
+  } catch (err) {
+    console.error("❌ Seed error:", err.message);
+  }
 };
+
+module.exports = { connectDB, seedDB };
