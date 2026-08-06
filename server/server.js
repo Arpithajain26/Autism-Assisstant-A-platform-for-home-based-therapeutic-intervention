@@ -1,12 +1,16 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
 const { connectDB } = require("./config/db");
 const User = require("./models/User");
 const Child = require("./models/Child");
 const Activity = require("./models/Activity");
 const Question = require("./models/Question");
 const { verifyToken, makeToken } = require("./middleware/auth");
+
+// Validate MongoDB ObjectId format
+const isValidId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[a-fA-F0-9]{24}$/.test(id);
 
 // Connect to MongoDB
 connectDB();
@@ -132,6 +136,7 @@ app.post("/api/auth/login", async (req, res) => {
 // GET /api/auth/me (token check)
 app.get("/api/auth/me", verifyToken, async (req, res) => {
   try {
+    if (!isValidId(req.user.id)) return res.status(400).json({ error: "Invalid user ID format." });
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User not found." });
     res.json({ user: safeUser(user) });
@@ -190,6 +195,7 @@ app.post("/api/children/create", async (req, res) => {
 // GET /api/children/:userId  (Fetch all children linked to parent or therapist)
 app.get("/api/children/:userId", async (req, res) => {
   try {
+    if (!isValidId(req.params.userId)) return res.status(400).json({ error: "Invalid user ID format." });
     const user = await User.findById(req.params.userId);
     if (!user) return res.status(404).json({ error: "User not found." });
 
@@ -226,6 +232,7 @@ app.get("/api/children/:userId", async (req, res) => {
 // DELETE /api/children/:childId (Delete child profile)
 app.delete("/api/children/:childId", async (req, res) => {
   try {
+    if (!isValidId(req.params.childId)) return res.status(400).json({ error: "Invalid child ID format." });
     const child = await Child.findById(req.params.childId);
     if (!child) return res.status(404).json({ error: "Child not found." });
 
@@ -247,6 +254,7 @@ app.delete("/api/children/:childId", async (req, res) => {
 app.post("/api/children/generate-link-code", async (req, res) => {
   try {
     const { childId } = req.body;
+    if (!isValidId(childId)) return res.status(400).json({ error: "Invalid child ID format." });
     const child = await Child.findById(childId);
     if (!child) return res.status(404).json({ error: "Child not found." });
 
@@ -288,6 +296,7 @@ app.post("/api/children/link-by-code", async (req, res) => {
 // GET /api/child/:childId/tasks  (Child therapy view)
 app.get("/api/child/:childId/tasks", async (req, res) => {
   try {
+    if (!isValidId(req.params.childId)) return res.status(400).json({ error: "Invalid child ID format." });
     const child = await Child.findById(req.params.childId);
     if (!child) return res.status(404).json({ error: "Child profile not found." });
 
@@ -319,6 +328,7 @@ app.get("/api/child/:childId/tasks", async (req, res) => {
 app.post("/api/children/assign-task", async (req, res) => {
   try {
     const { childId, activityId } = req.body;
+    if (!isValidId(childId)) return res.status(400).json({ error: "Invalid child ID format." });
     const child = await Child.findById(childId);
     if (!child) return res.status(404).json({ error: "Child not found." });
 
@@ -337,6 +347,7 @@ app.post("/api/children/assign-task", async (req, res) => {
 app.post("/api/children/complete-task", async (req, res) => {
   try {
     const { childId, activityId } = req.body;
+    if (!isValidId(childId)) return res.status(400).json({ error: "Invalid child ID format." });
     const child = await Child.findById(childId);
     if (!child) return res.status(404).json({ error: "Child not found." });
 
@@ -374,6 +385,7 @@ app.post("/api/assessment/submit", async (req, res) => {
       return res.status(400).json({ error: "childId and answers array required." });
     }
 
+    if (!isValidId(childId)) return res.status(400).json({ error: "Invalid child ID format." });
     const child = await Child.findById(childId);
     if (!child) {
       return res.status(404).json({ error: "Child profile not found." });

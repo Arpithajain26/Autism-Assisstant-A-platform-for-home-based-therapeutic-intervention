@@ -6,6 +6,10 @@ import ParentDashboard from "./pages/ParentDashboard";
 import ChildDashboard from "./pages/ChildDashboard";
 import TherapistDashboard from "./pages/TherapistDashboard";
 import Activities from "./pages/Activities";
+import AboutAutism from "./pages/AboutAutism";
+import Contact from "./pages/Contact";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 // ─────────────────────────────────────────────────────────────
 // Simple SPA Router
@@ -48,7 +52,7 @@ function App() {
 
   useEffect(() => {
     if (!user) {
-      const publicRoutes = ["/", "/login"];
+      const publicRoutes = ["/", "/login", "/about", "/contact", "/privacy", "/terms"];
       if (!publicRoutes.includes(path)) {
         navigate("/");
       }
@@ -73,6 +77,22 @@ function App() {
 
       case "/login":
         Component = <AuthPage onLogin={handleLogin} />;
+        break;
+
+      case "/about":
+        Component = <AboutAutism />;
+        break;
+
+      case "/contact":
+        Component = <Contact />;
+        break;
+
+      case "/privacy":
+        Component = <PrivacyPolicy />;
+        break;
+
+      case "/terms":
+        Component = <TermsOfService />;
         break;
 
       default:

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
+import { useLang } from "../context/LanguageContext";
 
 function navigate(path) {
   window.history.pushState({}, "", path);
@@ -47,13 +48,14 @@ function Counter({ target, suffix = "", color, label }) {
 
 /* ─── HERO SECTION ───────────────────────────────────────────────────────── */
 function Hero() {
+  const { t } = useLang();
   const videoRef = useRef(null);
   const [muted, setMuted] = useState(true);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoaded(true), 100);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setLoaded(true), 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -98,7 +100,7 @@ function Hero() {
             opacity: loaded ? 1 : 0, transform: loaded ? "translateY(0)" : "translateY(-20px)",
             transition: "all .8s ease",
           }}>
-            ✨ AI-POWERED HOME THERAPY
+            {t("hero_badge")}
           </div>
 
           <h1 style={{
@@ -107,11 +109,11 @@ function Hero() {
             opacity: loaded ? 1 : 0, transform: loaded ? "translateY(0)" : "translateY(30px)",
             transition: "all .9s ease .15s",
           }}>
-            Helping Every Child<br />
+            {t("hero_h1_line1")}<br />
             <span style={{ background: "linear-gradient(135deg, #a5b4fc, #c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Learn, Grow &
+              {t("hero_h1_line2")}
             </span>
-            <br />Communicate Better
+            <br />{t("hero_h1_line3")}
           </h1>
 
           <p style={{
@@ -120,7 +122,7 @@ function Hero() {
             opacity: loaded ? 1 : 0, transform: loaded ? "translateY(0)" : "translateY(30px)",
             transition: "all .9s ease .3s",
           }}>
-            Personalized Autism Therapy powered by AI. Assess your child, monitor emotions, receive personalized therapy activities, and track weekly progress — all from one secure platform.
+            {t("hero_desc")}
           </p>
 
           <div style={{
@@ -134,7 +136,7 @@ function Hero() {
               onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
               onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
             >
-              Start Assessment →
+              {t("hero_cta_primary")}
             </button>
             <button
               onClick={() => document.getElementById("autism-info")?.scrollIntoView({ behavior: "smooth" })}
@@ -142,7 +144,7 @@ function Hero() {
               onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.2)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.transform = "translateY(0)"; }}
             >
-              Learn More ↓
+              {t("hero_cta_secondary")}
             </button>
           </div>
         </div>
@@ -152,12 +154,12 @@ function Hero() {
           display: "flex", gap: 48, marginTop: 64, flexWrap: "wrap",
           opacity: loaded ? 1 : 0, transition: "all 1s ease .7s",
         }}>
-          <Counter target={90} suffix="%" color="#a5b4fc" label="Classification Accuracy" />
-          <Counter target={85} suffix="%" color="#34d399" label="Emotion Detection Rate" />
-          <Counter target={500} suffix="+" color="#f9a8d4" label="Families Helped" />
+          <Counter target={90} suffix="%" color="#a5b4fc" label={t("hero_stat1_label")} />
+          <Counter target={85} suffix="%" color="#34d399" label={t("hero_stat2_label")} />
+          <Counter target={500} suffix="+" color="#f9a8d4" label={t("hero_stat3_label")} />
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: "2.4rem", fontWeight: 900, color: "#fbbf24" }}>AI</div>
-            <div style={{ color: "rgba(255,255,255,0.7)", fontSize: ".85rem", marginTop: 4 }}>Personalized Therapy</div>
+            <div style={{ color: "rgba(255,255,255,0.7)", fontSize: ".85rem", marginTop: 4 }}>{t("hero_stat4_label")}</div>
           </div>
         </div>
       </div>
@@ -170,19 +172,20 @@ function Hero() {
 
 /* ─── FEATURES STRIP ─────────────────────────────────────────────────────── */
 function FeaturesStrip() {
+  const { t } = useLang();
   const [ref, visible] = useReveal();
   const features = [
-    { icon: "🧠", title: "AI Assessment", desc: "90% accurate autism level classification from a short guided questionnaire." },
-    { icon: "❤️", title: "Emotion Detection", desc: "Real-time monitoring during sessions to adapt activities on the fly." },
-    { icon: "📊", title: "Progress Tracking", desc: "Weekly AI-generated reports showing measurable growth trends." },
-    { icon: "👨‍👩‍👧", title: "Family-Centered", desc: "Dashboards for parents and therapists to collaborate seamlessly." },
+    { icon: "🧠", title: t("feat1_title"), desc: t("feat1_desc") },
+    { icon: "❤️", title: t("feat2_title"), desc: t("feat2_desc") },
+    { icon: "📊", title: t("feat3_title"), desc: t("feat3_desc") },
+    { icon: "👨‍👩‍👧", title: t("feat4_title"), desc: t("feat4_desc") },
   ];
   return (
     <section id="features" ref={ref} style={{ padding: "80px 28px", background: "#f8f9ff" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 52 }}>
-          <span style={{ background: "var(--primary-light)", color: "var(--primary)", padding: "6px 16px", borderRadius: 50, fontWeight: 700, fontSize: ".8rem", letterSpacing: "1px" }}>PLATFORM FEATURES</span>
-          <h2 style={{ fontSize: "2.2rem", fontWeight: 800, color: "var(--text)", marginTop: 14 }}>Everything You Need, In One Place</h2>
+          <span style={{ background: "var(--primary-light)", color: "var(--primary)", padding: "6px 16px", borderRadius: 50, fontWeight: 700, fontSize: ".8rem", letterSpacing: "1px" }}>{t("features_badge")}</span>
+          <h2 style={{ fontSize: "2.2rem", fontWeight: 800, color: "var(--text)", marginTop: 14 }}>{t("features_h2")}</h2>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24 }}>
           {features.map((f, i) => (
@@ -206,47 +209,47 @@ function FeaturesStrip() {
   );
 }
 
-/* ─── WHAT IS AUTISM SECTION ─────────────────────────────────────────────── */
-const autismTopics = [
-  {
-    icon: "🧩",
-    title: "What is Autism Spectrum Disorder?",
-    short: "Autism is a developmental condition that affects how people communicate, interact, and experience the world.",
-    full: `Autism Spectrum Disorder (ASD) is a neurodevelopmental condition that affects approximately 1 in 36 children. It is characterized by differences in social communication, repetitive behaviors, and sensory sensitivities. The word "spectrum" reflects the wide range of experiences — some individuals may need substantial daily support, while others live fully independent lives.\n\nASD is present from birth, though signs are often noticed between ages 1–3. Common early indicators include limited eye contact, delayed speech, repetitive motions (stimming), intense focus on specific interests, and challenges with change in routine.\n\nASD is not a disease and cannot be "cured." Instead, it is a different way of experiencing the world. With the right support, children with autism can thrive, form meaningful relationships, and develop their unique strengths.`,
-  },
-  {
-    icon: "🌱",
-    title: "Why Early Intervention Matters",
-    short: "The earlier a child receives tailored support, the more effectively they can build communication and social skills.",
-    full: `Research consistently shows that early intervention — ideally before age 5 — leads to significantly better long-term outcomes. The developing brain is highly plastic in early childhood, meaning therapeutic activities can shape neural pathways more effectively during this window.\n\nEarly intervention helps children:\n• Build language and communication skills before delays become entrenched\n• Develop social understanding through structured practice\n• Reduce anxiety around sensory and environmental triggers\n• Gain life skills that improve independence\n\nCrucially, intervention works best when it's personalized. Generic therapy programs rarely address the specific constellation of strengths and challenges each child has. Our platform adapts to each child's unique profile, adjusting activities as they progress.`,
-  },
-  {
-    icon: "🤖",
-    title: "How AI Helps in Autism Therapy",
-    short: "AI enables real-time emotional monitoring and personalized activity generation — things a fixed therapy program simply cannot do.",
-    full: `Traditional therapy relies on in-clinic assessments that happen infrequently and produce static recommendations. AI changes this in two fundamental ways:\n\n1. Continuous Assessment: Instead of a one-time evaluation, AI can process behavioral and emotional data in real time. Our emotion detection technology reads engagement and distress signals during activities, allowing sessions to adapt in the moment.\n\n2. Personalized Planning: Machine learning models trained on thousands of therapy outcomes can identify which activity types work best for a child's specific profile and level — then adjust recommendations as the child progresses.\n\nOur platform achieves 90% accuracy in autism level classification, enabling the right starting point for every child. Weekly AI reports give parents and therapists the data they need to make informed decisions between sessions.`,
-  },
-  {
-    icon: "👨‍👩‍👧",
-    title: "The Role of Parents in Home Therapy",
-    short: "Parents are the most consistent presence in a child's life — making them the most powerful therapists of all.",
-    full: `Professional therapy sessions typically occur once or twice a week. Home-based intervention fills the remaining 160+ hours of a child's week with purposeful, therapeutic engagement. Research shows that parent-implemented interventions can be as effective as clinic-delivered therapy when parents are well-guided.\n\nOur platform empowers parents to:\n• Understand their child's current developmental level\n• Access a library of structured, evidence-informed activities matched to their child\n• Track which activities the child responds to positively\n• Share progress reports directly with their therapist\n• Feel confident — not overwhelmed — by the therapy process\n\nThe goal is to make high-quality therapeutic engagement a natural part of daily home life, not an additional burden.`,
-  },
-];
-
 function AutismInfoSection() {
+  const { t } = useLang();
   const [openIdx, setOpenIdx] = useState(null);
   const [ref, visible] = useReveal();
+
+  const autismTopics = [
+    {
+      icon: "🧩",
+      title: t("topic1_title"),
+      short: t("topic1_short"),
+      full: t("topic1_full"),
+    },
+    {
+      icon: "🌱",
+      title: t("topic2_title"),
+      short: t("topic2_short"),
+      full: t("topic2_full"),
+    },
+    {
+      icon: "🤖",
+      title: t("topic3_title"),
+      short: t("topic3_short"),
+      full: t("topic3_full"),
+    },
+    {
+      icon: "👨‍👩‍👧",
+      title: t("topic4_title"),
+      short: t("topic4_short"),
+      full: t("topic4_full"),
+    },
+  ];
 
   return (
     <section id="autism-info" ref={ref} style={{ padding: "90px 28px", background: "#fff" }}>
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
 
         <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <span style={{ background: "var(--primary-light)", color: "var(--primary)", padding: "6px 16px", borderRadius: 50, fontWeight: 700, fontSize: ".8rem", letterSpacing: "1px" }}>LEARN MORE</span>
-          <h2 style={{ fontSize: "2.2rem", fontWeight: 800, color: "var(--text)", marginTop: 14, marginBottom: 14 }}>Understanding Autism</h2>
+          <span style={{ background: "var(--primary-light)", color: "var(--primary)", padding: "6px 16px", borderRadius: 50, fontWeight: 700, fontSize: ".8rem", letterSpacing: "1px" }}>{t("autism_badge")}</span>
+          <h2 style={{ fontSize: "2.2rem", fontWeight: 800, color: "var(--text)", marginTop: 14, marginBottom: 14 }}>{t("autism_h2")}</h2>
           <p style={{ color: "var(--text-muted)", lineHeight: 1.7, maxWidth: 600, margin: "0 auto" }}>
-            Tap any topic to read a full explanation. The more you understand, the better you can support your child's journey.
+            {t("autism_subtitle")}
           </p>
         </div>
 
@@ -394,18 +397,121 @@ function ReviewCard({ r, visible, delay }) {
 
 function Reviews() {
   const [ref, visible] = useReveal();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Group reviews into pairs (3 slides total)
+  const slides = [];
+  for (let i = 0; i < reviews.length; i += 2) {
+    slides.push(reviews.slice(i, i + 2));
+  }
+
+  const totalSlides = slides.length;
+
+  const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % totalSlides);
+  const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(nextSlide, 4500);
+    return () => clearInterval(interval);
+  }, [currentIndex, isPaused, totalSlides]);
+
   return (
     <section id="reviews" ref={ref} style={{ padding: "90px 28px", background: "#fff" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
           <span style={{ background: "var(--primary-light)", color: "var(--primary)", padding: "6px 16px", borderRadius: 50, fontWeight: 700, fontSize: ".8rem", letterSpacing: "1px" }}>TESTIMONIALS</span>
           <h2 style={{ fontSize: "2.2rem", fontWeight: 800, color: "var(--text)", marginTop: 14 }}>What Families & Therapists Say</h2>
           <p style={{ color: "var(--text-muted)", marginTop: 12, lineHeight: 1.7 }}>Real feedback from people using the platform week to week.</p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 22 }}>
-          {reviews.map((r, i) => (
-            <ReviewCard key={i} r={r} visible={visible} delay={i * 0.1} />
-          ))}
+
+        {/* Carousel Container */}
+        <div
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          style={{ position: "relative", overflow: "hidden", padding: "10px 4px 30px" }}
+        >
+          {/* Slide Track */}
+          <div
+            style={{
+              display: "flex",
+              transform: `translateX(-${currentIndex * 100}%)`,
+              transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+              width: "100%",
+            }}
+          >
+            {slides.map((pair, slideIdx) => (
+              <div
+                key={slideIdx}
+                style={{
+                  minWidth: "100%",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                  gap: 24,
+                  padding: "0 8px",
+                  boxSizing: "border-box",
+                }}
+              >
+                {pair.map((r, cardIdx) => (
+                  <ReviewCard key={cardIdx} r={r} visible={visible} delay={cardIdx * 0.1} />
+                ))}
+              </div>
+            ))}
+          </div>
+
+          {/* Nav Controls & Indicators */}
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 20, marginTop: 36 }}>
+            <button
+              onClick={prevSlide}
+              aria-label="Previous Reviews"
+              style={{
+                width: 44, height: 44, borderRadius: "50%", border: "2px solid #6366f1",
+                background: "#fff", color: "#6366f1", fontSize: "1.4rem", fontWeight: 800,
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all .3s ease", boxShadow: "0 4px 14px rgba(99,102,241,0.15)"
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#6366f1"; e.currentTarget.style.color = "#fff"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = "#6366f1"; }}
+            >
+              ‹
+            </button>
+
+            {/* Pagination Dots */}
+            <div style={{ display: "flex", gap: 10 }}>
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  style={{
+                    width: idx === currentIndex ? 28 : 10,
+                    height: 10,
+                    borderRadius: 10,
+                    border: "none",
+                    background: idx === currentIndex ? "#6366f1" : "#cbd5e1",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                  }}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={nextSlide}
+              aria-label="Next Reviews"
+              style={{
+                width: 44, height: 44, borderRadius: "50%", border: "2px solid #6366f1",
+                background: "#fff", color: "#6366f1", fontSize: "1.4rem", fontWeight: 800,
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all .3s ease", boxShadow: "0 4px 14px rgba(99,102,241,0.15)"
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#6366f1"; e.currentTarget.style.color = "#fff"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = "#6366f1"; }}
+            >
+              ›
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -442,11 +548,11 @@ function CTA() {
             onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
             onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
           >
-            Get Started — It's Free
+            Start Free Assessment →
           </button>
           <button
-            onClick={() => document.getElementById("autism-info")?.scrollIntoView({ behavior: "smooth" })}
-            style={{ padding: "15px 36px", borderRadius: 12, border: "2px solid rgba(255,255,255,0.6)", background: "transparent", color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer", transition: "all .3s", fontFamily: "inherit" }}
+            onClick={() => navigate("/about")}
+            style={{ padding: "15px 36px", borderRadius: 12, border: "2px solid rgba(255,255,255,0.4)", background: "transparent", color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer", transition: "all .3s", fontFamily: "inherit" }}
             onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
@@ -460,11 +566,38 @@ function CTA() {
 
 /* ─── FOOTER ─────────────────────────────────────────────────────────────── */
 function Footer() {
+  const handleFooterLink = (item) => {
+    switch (item) {
+      case "About Us":
+      case "What is Autism?":
+        navigate("/about");
+        break;
+      case "Contact":
+        navigate("/contact");
+        break;
+      case "Privacy Policy":
+        navigate("/privacy");
+        break;
+      case "Terms of Service":
+        navigate("/terms");
+        break;
+      case "Assessment":
+      case "Activities":
+      case "Therapist Portal":
+      case "Progress Reports":
+        navigate("/login");
+        break;
+      default:
+        document.getElementById("autism-info")?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const links = {
     Platform: ["Assessment", "Activities", "Progress Reports", "Therapist Portal"],
     Resources: ["What is Autism?", "Parent Guides", "Therapy FAQ", "Research"],
     Company: ["About Us", "Privacy Policy", "Terms of Service", "Contact"],
   };
+
   return (
     <footer style={{ background: "#0f0f1a", color: "rgba(255,255,255,0.85)", padding: "60px 28px 32px" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
@@ -496,7 +629,9 @@ function Footer() {
               <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
                 {items.map((item) => (
                   <li key={item}>
-                    <span style={{ color: "rgba(255,255,255,0.5)", fontSize: ".88rem", cursor: "pointer", transition: "color .2s" }}
+                    <span
+                      onClick={() => handleFooterLink(item)}
+                      style={{ color: "rgba(255,255,255,0.5)", fontSize: ".88rem", cursor: "pointer", transition: "color .2s" }}
                       onMouseEnter={e => e.currentTarget.style.color = "#a5b4fc"}
                       onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
                     >{item}</span>
@@ -546,8 +681,8 @@ export default function Home() {
     <div style={{ width: "100vw", marginLeft: "calc(-50vw + 50%)" }}>
       <Navbar />
       <Hero />
-      <FeaturesStrip />
       <AutismInfoSection />
+      <FeaturesStrip />
       <HowItWorks />
       <Reviews />
       <CTA />

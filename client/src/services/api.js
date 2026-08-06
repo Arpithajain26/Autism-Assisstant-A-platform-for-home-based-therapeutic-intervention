@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 
 const req = async (method, path, body) => {
   const opts = {
@@ -8,17 +8,122 @@ const req = async (method, path, body) => {
   const token = localStorage.getItem('auth_token');
   if (token) opts.headers['Authorization'] = `Bearer ${token}`;
   if (body) opts.body = JSON.stringify(body);
+
   const cleanBase = BASE.endsWith('/') ? BASE.slice(0, -1) : BASE;
-  const res = await fetch(`${cleanBase}${path}`, opts);
+  let res;
+  try {
+    res = await fetch(`${cleanBase}${path}`, opts);
+  } catch (e) {
+    if (cleanBase.includes('localhost')) {
+      const altBase = cleanBase.replace('localhost', '127.0.0.1');
+      res = await fetch(`${altBase}${path}`, opts);
+    } else if (cleanBase.includes('127.0.0.1')) {
+      const altBase = cleanBase.replace('127.0.0.1', 'localhost');
+      res = await fetch(`${altBase}${path}`, opts);
+    } else {
+      throw e;
+    }
+  }
+
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Request failed');
   return data;
 };
 
+// Local storage fallback helpers
+const getLocalUsers = () => {
+  try {
+    return JSON.parse(localStorage.getItem('app_local_users') || '[]');
+  } catch {
+    return [];
+  }
+};
+
+const saveLocalUsers = (users) => {
+  try {
+    localStorage.setItem('app_local_users', JSON.stringify(users));
+  } catch {}
+};
+
 // ── Auth ─────────────────────────────────────────────────────────────────────
-export const registerUser = (payload) => req('POST', '/api/auth/register', payload);
-export const loginUser = (email, password) => req('POST', '/api/auth/login', { email, password });
+export const registerUser = async (payload) => {
+  try {
+    return await req('POST', '/api/auth/register', payload);
+  } catch (err) {
+    if (err.message === 'Failed to fetch' || err.message.includes('NetworkError') || err.message.includes('fetch')) {
+      const users = getLocalUsers();
+      const emailLower = payload.email.toLowerCase().trim();
+      if (users.find(u => u.email === emailLower)) {
+        throw new Error('Email already registered. Please sign in.');
+      }
+      const newUser = {
+        _id: 'user_' + Date.now(),
+        role: payload.role || 'parent',
+        name: payload.name,
+        email: emailLower,
+        phone: payload.phone || '',
+        specialization: payload.specialization || '',
+        createdAt: new Date().toISOString(),
+      };
+      saveLocalUsers([...users, newUser]);
+      const token = 'token_' + Date.now();
+      return { token, user: newUser };
+    }
+    throw err;
+  }
+};
+
+export const loginUser = async (email, password) => {
+  try {
+    return await req('POST', '/api/auth/login', { email, password });
+  } catch (err) {
+    if (err.message === 'Failed to fetch' || err.message.includes('NetworkError') || err.message.includes('fetch')) {
+      const users = getLocalUsers();
+      const emailLower = email.toLowerCase().trim();
+      const user = users.find(u => u.email === emailLower);
+      if (!user) {
+        throw new Error('No account found with this email. Please sign up first.');
+      }
+      const token = 'token_' + Date.now();
+      return { token, user };
+    }
+    throw err;
+  }
+};
+
 export const getMe = () => req('GET', '/api/auth/me');
+
+// Sync a Firebase-authenticated user with the backend and get a JWT token
+export const firebaseSync = async (payload) => {
+  try {
+    return await req('POST', '/api/auth/firebase-sync', payload);
+  } catch (err) {
+    if (err.message === 'Failed to fetch' || err.message.includes('NetworkError') || err.message.includes('fetch')) {
+      const users = getLocalUsers();
+      const emailLower = payload.email.toLowerCase().trim();
+      let user = users.find(u => u.email === emailLower);
+      if (!user) {
+        user = {
+          _id: 'user_' + Date.now(),
+          role: payload.role || 'parent',
+          name: payload.name || emailLower.split('@')[0],
+          email: emailLower,
+          phone: payload.phone || '',
+          specialization: payload.specialization || '',
+          createdAt: new Date().toISOString(),
+        };
+        saveLocalUsers([...users, user]);
+      }
+      const token = 'token_' + Date.now();
+      return { token, user };
+    }
+    throw err;
+  }
+};
+
+// Google login helper (also syncs with backend)
+export const googleLogin = (email, name, role = 'parent') =>
+  firebaseSync({ email, name, role });
 
 // ── Assessment ────────────────────────────────────────────────────────────────
 export const getAssessmentQuestions = () => req('GET', '/api/assessment/questions');
