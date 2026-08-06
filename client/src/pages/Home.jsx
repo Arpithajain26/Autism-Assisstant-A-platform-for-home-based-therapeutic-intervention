@@ -397,34 +397,121 @@ function ReviewCard({ r, visible, delay }) {
 
 function Reviews() {
   const [ref, visible] = useReveal();
-  const [showAll, setShowAll] = useState(false);
-  const displayedReviews = showAll ? reviews : reviews.slice(0, 2);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Group reviews into pairs (3 slides total)
+  const slides = [];
+  for (let i = 0; i < reviews.length; i += 2) {
+    slides.push(reviews.slice(i, i + 2));
+  }
+
+  const totalSlides = slides.length;
+
+  const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % totalSlides);
+  const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(nextSlide, 4500);
+    return () => clearInterval(interval);
+  }, [currentIndex, isPaused, totalSlides]);
 
   return (
     <section id="reviews" ref={ref} style={{ padding: "90px 28px", background: "#fff" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
           <span style={{ background: "var(--primary-light)", color: "var(--primary)", padding: "6px 16px", borderRadius: 50, fontWeight: 700, fontSize: ".8rem", letterSpacing: "1px" }}>TESTIMONIALS</span>
           <h2 style={{ fontSize: "2.2rem", fontWeight: 800, color: "var(--text)", marginTop: 14 }}>What Families & Therapists Say</h2>
           <p style={{ color: "var(--text-muted)", marginTop: 12, lineHeight: 1.7 }}>Real feedback from people using the platform week to week.</p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 22 }}>
-          {displayedReviews.map((r, i) => (
-            <ReviewCard key={i} r={r} visible={visible} delay={i * 0.1} />
-          ))}
-        </div>
-        <div style={{ textAlign: "center", marginTop: 40 }}>
-          <button
-            onClick={() => setShowAll(!showAll)}
+
+        {/* Carousel Container */}
+        <div
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          style={{ position: "relative", overflow: "hidden", padding: "10px 4px 30px" }}
+        >
+          {/* Slide Track */}
+          <div
             style={{
-              padding: "12px 28px", borderRadius: 50, border: "2px solid #6366f1",
-              background: showAll ? "#6366f1" : "rgba(99,102,241,0.06)",
-              color: showAll ? "#fff" : "#4f46e5", fontWeight: 700, fontSize: "0.92rem",
-              cursor: "pointer", transition: "all .3s ease", fontFamily: "inherit"
+              display: "flex",
+              transform: `translateX(-${currentIndex * 100}%)`,
+              transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+              width: "100%",
             }}
           >
-            {showAll ? "Show Fewer Reviews ↑" : "View More Reviews (4+) ↓"}
-          </button>
+            {slides.map((pair, slideIdx) => (
+              <div
+                key={slideIdx}
+                style={{
+                  minWidth: "100%",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                  gap: 24,
+                  padding: "0 8px",
+                  boxSizing: "border-box",
+                }}
+              >
+                {pair.map((r, cardIdx) => (
+                  <ReviewCard key={cardIdx} r={r} visible={visible} delay={cardIdx * 0.1} />
+                ))}
+              </div>
+            ))}
+          </div>
+
+          {/* Nav Controls & Indicators */}
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 20, marginTop: 36 }}>
+            <button
+              onClick={prevSlide}
+              aria-label="Previous Reviews"
+              style={{
+                width: 44, height: 44, borderRadius: "50%", border: "2px solid #6366f1",
+                background: "#fff", color: "#6366f1", fontSize: "1.4rem", fontWeight: 800,
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all .3s ease", boxShadow: "0 4px 14px rgba(99,102,241,0.15)"
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#6366f1"; e.currentTarget.style.color = "#fff"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = "#6366f1"; }}
+            >
+              ‹
+            </button>
+
+            {/* Pagination Dots */}
+            <div style={{ display: "flex", gap: 10 }}>
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  style={{
+                    width: idx === currentIndex ? 28 : 10,
+                    height: 10,
+                    borderRadius: 10,
+                    border: "none",
+                    background: idx === currentIndex ? "#6366f1" : "#cbd5e1",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                  }}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={nextSlide}
+              aria-label="Next Reviews"
+              style={{
+                width: 44, height: 44, borderRadius: "50%", border: "2px solid #6366f1",
+                background: "#fff", color: "#6366f1", fontSize: "1.4rem", fontWeight: 800,
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all .3s ease", boxShadow: "0 4px 14px rgba(99,102,241,0.15)"
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#6366f1"; e.currentTarget.style.color = "#fff"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = "#6366f1"; }}
+            >
+              ›
+            </button>
+          </div>
         </div>
       </div>
     </section>
