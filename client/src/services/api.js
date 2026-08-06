@@ -20,6 +20,13 @@ export const registerUser = (payload) => req('POST', '/api/auth/register', paylo
 export const loginUser = (email, password) => req('POST', '/api/auth/login', { email, password });
 export const getMe = () => req('GET', '/api/auth/me');
 
+// Sync a Firebase-authenticated user with the backend and get a JWT token
+export const firebaseSync = (payload) => req('POST', '/api/auth/firebase-sync', payload);
+
+// Google login helper (also syncs with backend)
+export const googleLogin = (email, name, role = 'parent') =>
+  req('POST', '/api/auth/firebase-sync', { email, name, role });
+
 // ── Assessment ────────────────────────────────────────────────────────────────
 export const getAssessmentQuestions = () => req('GET', '/api/assessment/questions');
 export const submitAssessment = (childId, answers) =>

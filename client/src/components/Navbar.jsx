@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLang } from "../context/LanguageContext";
 
 function navigate(path) {
   window.history.pushState({}, "", path);
@@ -6,6 +7,7 @@ function navigate(path) {
 }
 
 export default function Navbar() {
+  const { lang, setLang, t } = useLang();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -23,7 +25,18 @@ export default function Navbar() {
 
   const scrollTo = (id) => {
     setOpen(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    if (window.location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      }, 150);
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const toggleLang = () => {
+    setLang(lang === "en" ? "kn" : "en");
   };
 
   return (
@@ -36,13 +49,13 @@ export default function Navbar() {
         zIndex: 100,
         transition: "all .4s ease",
         background: scrolled
-          ? "rgba(255,255,255,0.92)"
-          : "rgba(10,10,30,0.3)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
+          ? "rgba(255,255,255,0.95)"
+          : "rgba(10,10,30,0.4)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
         borderBottom: scrolled
           ? "1px solid rgba(209,213,219,0.5)"
-          : "1px solid rgba(255,255,255,0.1)",
+          : "1px solid rgba(255,255,255,0.12)",
         boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.08)" : "none",
       }}
     >
@@ -77,15 +90,16 @@ export default function Navbar() {
         </a>
 
         {/* Desktop Nav Links */}
-        <div style={{ display: "flex", gap: 28, alignItems: "center" }} className="nav-desktop">
+        <div style={{ display: "flex", gap: 24, alignItems: "center" }} className="nav-desktop">
           {[
-            { label: "Features", action: () => scrollTo("features") },
-            { label: "About Autism", action: () => scrollTo("autism-info") },
-            { label: "How it Works", action: () => scrollTo("how-it-works") },
-            { label: "Reviews", action: () => scrollTo("reviews") },
-          ].map((item) => (
+            { label: t("nav_features"), action: () => scrollTo("features") },
+            { label: t("nav_about_autism"), action: () => scrollTo("autism-info") },
+            { label: t("nav_how_it_works"), action: () => scrollTo("how-it-works") },
+            { label: t("nav_reviews"), action: () => scrollTo("reviews") },
+            { label: t("nav_contact"), action: () => navigate("/contact") },
+          ].map((item, idx) => (
             <button
-              key={item.label}
+              key={idx}
               onClick={item.action}
               style={{
                 background: "none",
@@ -112,17 +126,41 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Desktop Buttons */}
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }} className="nav-desktop">
+        {/* Desktop Controls (Language Switcher & Auth) */}
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }} className="nav-desktop">
+          {/* Language Switch Button */}
+          <button
+            onClick={toggleLang}
+            title="Switch Language"
+            style={{
+              padding: "7px 15px",
+              borderRadius: 50,
+              border: scrolled ? "1.5px solid #6366f1" : "1.5px solid rgba(255,255,255,0.4)",
+              background: scrolled ? "rgba(99,102,241,0.08)" : "rgba(255,255,255,0.15)",
+              backdropFilter: "blur(10px)",
+              color: scrolled ? "#4f46e5" : "#fff",
+              fontWeight: 700,
+              fontSize: "0.85rem",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              transition: "all .3s ease",
+              fontFamily: "inherit"
+            }}
+          >
+            🌐 <span>{lang === "en" ? "English" : "ಕನ್ನಡ"}</span>
+          </button>
+
           <a
             href="/login"
             onClick={(e) => handleNav(e, "/login")}
             style={{
               textDecoration: "none",
-              padding: "9px 20px",
+              padding: "8px 18px",
               borderRadius: 50,
               fontWeight: 600,
-              fontSize: ".9rem",
+              fontSize: ".88rem",
               color: scrolled ? "var(--primary)" : "#fff",
               border: `1px solid ${scrolled ? "var(--primary)" : "rgba(255,255,255,0.4)"}`,
               background: "transparent",
@@ -131,20 +169,20 @@ export default function Navbar() {
               fontFamily: "inherit",
             }}
           >
-            Login
+            {t("nav_login")}
           </a>
           <a
             href="/login"
             onClick={(e) => handleNav(e, "/login")}
             style={{
               textDecoration: "none",
-              padding: "9px 22px",
+              padding: "8px 20px",
               borderRadius: 50,
               fontWeight: 700,
-              fontSize: ".9rem",
+              fontSize: ".88rem",
               background: scrolled
                 ? "var(--primary)"
-                : "rgba(99,102,241,0.85)",
+                : "linear-gradient(135deg, #6366f1, #8b5cf6)",
               color: "#fff",
               border: "none",
               cursor: "pointer",
@@ -153,25 +191,41 @@ export default function Navbar() {
               display: "inline-block",
             }}
           >
-            Get Started
+            {t("nav_get_started")}
           </a>
         </div>
 
-        {/* Mobile Toggle */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="nav-mobile-toggle"
-          style={{
-            display: "none",
-            background: "none",
-            border: "none",
-            fontSize: "1.5rem",
-            cursor: "pointer",
-            color: scrolled ? "var(--text)" : "#fff",
-          }}
-        >
-          {open ? "✕" : "☰"}
-        </button>
+        {/* Mobile Controls */}
+        <div style={{ display: "none", alignItems: "center", gap: 10 }} className="nav-mobile-controls">
+          <button
+            onClick={toggleLang}
+            style={{
+              padding: "5px 10px",
+              borderRadius: 20,
+              border: "1px solid #6366f1",
+              background: "rgba(99,102,241,0.1)",
+              color: scrolled ? "#4f46e5" : "#fff",
+              fontWeight: 700,
+              fontSize: "0.78rem",
+              cursor: "pointer",
+            }}
+          >
+            {lang === "en" ? "EN" : "KN"}
+          </button>
+          <button
+            onClick={() => setOpen(!open)}
+            className="nav-mobile-toggle"
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: "1.5rem",
+              cursor: "pointer",
+              color: scrolled ? "var(--text)" : "#fff",
+            }}
+          >
+            {open ? "✕" : "☰"}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -182,18 +236,24 @@ export default function Navbar() {
             display: "flex",
             flexDirection: "column",
             gap: 14,
-            background: "rgba(255,255,255,0.97)",
+            background: "rgba(255,255,255,0.98)",
             backdropFilter: "blur(16px)",
             borderTop: "1px solid var(--border)",
           }}
         >
-          {["Features", "About Autism", "How it Works", "Reviews"].map((label) => (
+          {[
+            { label: t("nav_features"), action: () => scrollTo("features") },
+            { label: t("nav_about_autism"), action: () => scrollTo("autism-info") },
+            { label: t("nav_how_it_works"), action: () => scrollTo("how-it-works") },
+            { label: t("nav_reviews"), action: () => scrollTo("reviews") },
+            { label: t("nav_contact"), action: () => { setOpen(false); navigate("/contact"); } },
+          ].map((item, i) => (
             <button
-              key={label}
-              onClick={() => scrollTo(label.toLowerCase().replace(/ /g, "-"))}
+              key={i}
+              onClick={item.action}
               style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left", fontWeight: 600, color: "var(--text-muted)", fontSize: ".95rem", padding: "4px 0" }}
             >
-              {label}
+              {item.label}
             </button>
           ))}
           <hr style={{ border: "none", borderTop: "1px solid var(--border)" }} />
@@ -202,7 +262,7 @@ export default function Navbar() {
             onClick={(e) => handleNav(e, "/login")}
             style={{ color: "var(--primary)", fontWeight: 700, textDecoration: "none" }}
           >
-            Login
+            {t("nav_login")}
           </a>
           <a
             href="/login"
@@ -210,7 +270,7 @@ export default function Navbar() {
             className="btn btn-primary"
             style={{ borderRadius: 12, textAlign: "center", textDecoration: "none" }}
           >
-            Get Started
+            {t("nav_get_started")}
           </a>
         </div>
       )}
@@ -218,7 +278,7 @@ export default function Navbar() {
       <style>{`
         @media (max-width: 768px) {
           .nav-desktop { display: none !important; }
-          .nav-mobile-toggle { display: block !important; }
+          .nav-mobile-controls { display: flex !important; }
         }
       `}</style>
     </nav>
