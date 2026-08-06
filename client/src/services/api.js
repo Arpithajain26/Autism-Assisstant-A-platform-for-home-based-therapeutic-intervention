@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 
 const req = async (method, path, body) => {
   const opts = {
@@ -8,8 +8,23 @@ const req = async (method, path, body) => {
   const token = localStorage.getItem('auth_token');
   if (token) opts.headers['Authorization'] = `Bearer ${token}`;
   if (body) opts.body = JSON.stringify(body);
+
   const cleanBase = BASE.endsWith('/') ? BASE.slice(0, -1) : BASE;
-  const res = await fetch(`${cleanBase}${path}`, opts);
+  let res;
+  try {
+    res = await fetch(`${cleanBase}${path}`, opts);
+  } catch (e) {
+    if (cleanBase.includes('localhost')) {
+      const altBase = cleanBase.replace('localhost', '127.0.0.1');
+      res = await fetch(`${altBase}${path}`, opts);
+    } else if (cleanBase.includes('127.0.0.1')) {
+      const altBase = cleanBase.replace('127.0.0.1', 'localhost');
+      res = await fetch(`${altBase}${path}`, opts);
+    } else {
+      throw e;
+    }
+  }
+
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Request failed');
   return data;
