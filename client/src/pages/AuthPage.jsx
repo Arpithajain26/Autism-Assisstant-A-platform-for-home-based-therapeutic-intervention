@@ -149,7 +149,7 @@ const RoleCard = ({ role, selected, onSelect, title, desc, icon }) => (
 );
 
 export default function AuthPage({ onLogin }) {
-  const { lang, t } = useLang();
+  const { lang, setLang, toggleLang, t } = useLang();
   
   // URL query param check (e.g. /login?mode=register)
   const initialMode = new URLSearchParams(window.location.search).get('mode') === 'register' ? 'register' : 'login';
