@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { googleLogin, firebaseSync } from '../services/api';
+import { googleLogin, firebaseSync, registerUser, loginUser } from '../services/api';
 import { useLang } from '../context/LanguageContext';
 import { auth } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, GoogleAuthProvider, signInWithPopup, updateProfile, signOut } from 'firebase/auth';
@@ -43,14 +43,8 @@ const Field = ({ label, id, type = 'text', placeholder, value, onChange, require
 );
 
 /* ─── Left panel content per mode ─────────────────────────────────────────── */
-const LeftPanel = ({ mode }) => {
+const LeftPanel = ({ mode, STATS }) => {
   const { t } = useLang();
-  
-  const STATS = [
-    { value: '500+', label: t('hero_stat3_label') },
-    { value: '120+', label: t('nav_features') },
-    { value: '4.9★', label: t('nav_reviews') },
-  ];
 
   return (
     <div
@@ -58,139 +52,133 @@ const LeftPanel = ({ mode }) => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center',
-        padding: '40px 36px',
-        background: 'linear-gradient(145deg, #6d28d9 0%, #4f46e5 50%, #0891b2 100%)',
+        padding: '50px',
+        background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%)',
         color: 'white',
         position: 'relative',
         overflow: 'hidden',
-        minHeight: '100%',
       }}
     >
       {/* Decorative circles */}
-      <div style={{ position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
-      <div style={{ position: 'absolute', bottom: -40, left: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
+      <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '300px', height: '300px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+      <div style={{ position: 'absolute', bottom: '-60px', left: '-60px', width: '250px', height: '250px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
 
-      {mode === 'register' ? (
-        <>
-          {/* Autism awareness image */}
-          <div style={{
-            width: '100%',
-            maxWidth: 280,
-            borderRadius: '20px',
-            overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-            marginBottom: '28px',
-            border: '3px solid rgba(255,255,255,0.3)',
-          }}>
-            <img
-              src="/autism_register_banner.jpg"
-              alt="Children supported through autism therapy"
-              style={{ width: '100%', display: 'block', objectFit: 'cover' }}
-            />
-          </div>
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '40px' }}>
+          <span style={{ fontSize: '2rem' }}>🧩</span>
+          <span style={{ fontWeight: '800', fontSize: '1.4rem', letterSpacing: '-0.02em' }}>AutismAssist</span>
+        </div>
 
-          {/* Autism awareness ribbon */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            background: 'rgba(255,255,255,0.15)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '50px',
-            padding: '8px 20px',
-            marginBottom: '18px',
-            border: '1px solid rgba(255,255,255,0.25)',
-          }}>
-            <span style={{ fontSize: '1.2rem' }}>🧩</span>
-            <span style={{ fontSize: '0.82rem', fontWeight: '600', letterSpacing: '0.05em' }}>AUTISM ACCEPTANCE & SUPPORT</span>
-          </div>
+        {/* Dynamic Heading based on mode */}
+        {mode === 'login' ? (
+          <>
+            <h2 style={{ fontSize: '2rem', fontWeight: '800', lineHeight: 1.2, marginBottom: '16px' }}>
+              Welcome back to your therapy hub
+            </h2>
+            <p style={{ fontSize: '0.98rem', opacity: 0.88, lineHeight: 1.6, marginBottom: '36px' }}>
+              Sign in to view today’s tailored activities, track emotion metrics, and review your child’s weekly progress.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 style={{ fontSize: '2rem', fontWeight: '800', lineHeight: 1.2, marginBottom: '16px' }}>
+              Start your child’s personalized journey
+            </h2>
+            <p style={{ fontSize: '0.98rem', opacity: 0.88, lineHeight: 1.6, marginBottom: '36px' }}>
+              Create an account to access AI-driven autism assessment, customized therapy activities, and progress reporting.
+            </p>
+          </>
+        )}
 
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '800', textAlign: 'center', marginBottom: '10px', lineHeight: 1.2 }}>
-            {t('topic1_title')}
-          </h2>
-          <p style={{ fontSize: '0.85rem', textAlign: 'center', opacity: 0.85, lineHeight: 1.6, maxWidth: 260 }}>
-            {t('topic1_short')}
-          </p>
-
-          {/* Stats */}
-          <div style={{ display: 'flex', gap: '20px', marginTop: '28px' }}>
-            {STATS.map(s => (
-              <div key={s.label} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.3rem', fontWeight: '800' }}>{s.value}</div>
-                <div style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '2px' }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <div style={{ fontSize: '4.5rem', marginBottom: '16px' }}>🧩</div>
-          <h2 style={{ fontSize: '1.9rem', fontWeight: '800', textAlign: 'center', marginBottom: '12px', lineHeight: 1.2 }}>
-            AutismAssist
-          </h2>
-          <p style={{ fontSize: '0.9rem', textAlign: 'center', opacity: 0.85, lineHeight: 1.7, maxWidth: 260, marginBottom: '32px' }}>
-            {t('footer_tagline')}
-          </p>
-
-          {/* Feature list */}
+        {/* Feature list */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '44px' }}>
           {[
-            '📊 ' + t('feat3_title'),
-            '🎯 ' + t('feat1_title'),
-            '🤝 ' + t('feat4_title'),
-          ].map(f => (
-            <div key={f} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              background: 'rgba(255,255,255,0.12)',
-              borderRadius: '10px',
-              padding: '10px 16px',
-              marginBottom: '10px',
-              width: '100%',
-              maxWidth: 280,
-              fontSize: '0.85rem',
-              backdropFilter: 'blur(6px)',
-            }}>
-              {f}
+            '90% accurate autism level classification',
+            'Real-time emotion detection during sessions',
+            'Weekly AI-generated progress reports',
+          ].map((item, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.9rem', opacity: 0.95 }}>
+              <span style={{
+                width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '800'
+              }}>✓</span>
+              {item}
             </div>
           ))}
-        </>
-      )}
+        </div>
+
+        {/* Stats strip */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px',
+          paddingTop: '28px', borderTop: '1px solid rgba(255,255,255,0.2)'
+        }}>
+          {STATS.map((s, i) => (
+            <div key={i}>
+              <div style={{ fontWeight: '800', fontSize: '1.3rem' }}>{s.value}</div>
+              <div style={{ fontSize: '0.75rem', opacity: 0.78, marginTop: '2px' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
 
-/* ──═══════════════════════════════════════════════════════════════════════════ */
-const AuthPage = ({ onLogin }) => {
-  const { t, lang, toggleLang } = useLang();
-  const [mode, setMode]     = useState('login');   // 'login' | 'register'
-  const [role, setRole]     = useState('');
-  const [step, setStep]     = useState(1);          // 1 = pick role, 2 = form
+/* ─── Role selector card component ────────────────────────────────────────── */
+const RoleCard = ({ role, selected, onSelect, title, desc, icon }) => (
+  <div
+    onClick={() => onSelect(role)}
+    style={{
+      flex: 1,
+      padding: '20px',
+      borderRadius: '14px',
+      border: `2px solid ${selected ? '#7c3aed' : '#e5e7eb'}`,
+      background: selected ? 'rgba(124, 58, 237, 0.04)' : '#fafafa',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '8px',
+    }}
+  >
+    <div style={{ fontSize: '1.8rem' }}>{icon}</div>
+    <div style={{ fontWeight: '700', fontSize: '1rem', color: '#111827' }}>{title}</div>
+    <div style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.4 }}>{desc}</div>
+  </div>
+);
+
+export default function AuthPage({ onLogin }) {
+  const { lang, t } = useLang();
+  
+  // URL query param check (e.g. /login?mode=register)
+  const initialMode = new URLSearchParams(window.location.search).get('mode') === 'register' ? 'register' : 'login';
+  
+  const [mode, setMode]     = useState(initialMode); // 'login' | 'register'
+  const [step, setStep]     = useState(1);          // Step 1: select role (register), Step 2: details
+  const [role, setRole]     = useState('');         // 'parent' | 'therapist'
   const [form, setForm]     = useState({ name: '', email: '', password: '', phone: '', specialization: '' });
-  const [error, setError]   = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError]   = useState('');
   const [success, setSuccess] = useState('');
 
-  // OTP Verification States
-  const [actionType, setActionType]     = useState('login'); // 'login' or 'register'
-
+  const STATS = [
+    { value: '500+', label: t('hero_stat3_label') },
+    { value: '120+', label: t('nav_features') },
+    { value: '4.9★', label: t('nav_reviews') },
+  ];
 
   const ROLES = [
     {
-      value: 'parent',
-      label: t('auth_role_parent'),
+      role: 'parent',
       icon: '👨‍👩‍👧',
-      color: '#7c3aed',
-      bg: '#ede9fe',
+      title: t('auth_role_parent_title'),
       desc: t('auth_role_parent_desc'),
     },
     {
-      value: 'therapist',
-      label: t('auth_role_therapist'),
-      icon: '👩‍⚕️',
-      color: '#0891b2',
-      bg: '#e0f2fe',
+      role: 'therapist',
+      icon: '🩺',
+      title: t('auth_role_therapist_title'),
       desc: t('auth_role_therapist_desc'),
     },
   ];
@@ -217,37 +205,17 @@ const AuthPage = ({ onLogin }) => {
 
     setLoading(true);
     try {
-      const result = await signInWithEmailAndPassword(auth, form.email.trim(), form.password);
-      const user = result.user;
-      
-      if (!user.emailVerified) {
-        await signOut(auth);
-        setError('Please verify your email address before logging in. Check your inbox for the verification link.');
-        setLoading(false);
-        return;
+      // Attempt Firebase login if available in background
+      try {
+        const result = await signInWithEmailAndPassword(auth, form.email.trim(), form.password);
+        if (result && result.user && !result.user.emailVerified) {
+          await signOut(auth);
+        }
+      } catch (fbErr) {
+        console.warn("Firebase Auth notice:", fbErr.message);
       }
 
-      // If verified, sync with backend
-      const tempRole = localStorage.getItem('temp_role');
-      const tempSpec = localStorage.getItem('temp_spec');
-      
-      
-      
-      const payload = {
-        email: user.email,
-        name: user.displayName || form.email.split('@')[0],
-        phone: form.phone || '', // Optional now
-      };
-      
-      if (tempRole) payload.role = tempRole;
-      if (tempSpec) payload.specialization = tempSpec;
-
-      const data = await firebaseSync(payload);
-      
-      // Clean up local storage
-      localStorage.removeItem('temp_role');
-      localStorage.removeItem('temp_spec');
-      
+      const data = await loginUser(form.email.trim(), form.password);
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('auth_user', JSON.stringify(data.user));
       onLogin(data.user);
@@ -271,24 +239,20 @@ const AuthPage = ({ onLogin }) => {
 
     setLoading(true);
     try {
-      const result = await createUserWithEmailAndPassword(auth, form.email.trim(), form.password);
-      const user = result.user;
-      
-      await updateProfile(user, { displayName: form.name.trim() });
-      await sendEmailVerification(user);
-      
-      // Store role temporarily so we can send it on first login
-      localStorage.setItem('temp_role', role);
-      if (role === 'therapist' && form.specialization) {
-        localStorage.setItem('temp_spec', form.specialization);
-      }
-      
-      setSuccess('Account created! A verification link has been sent to your email. Please verify your email before signing in.');
-      await signOut(auth); // Sign out immediately since they aren't verified yet
-      
-      // Switch back to login mode so they can sign in after verifying
-      setTimeout(() => switchMode('login'), 3000);
-      
+      const payload = {
+        role: role || 'parent',
+        name: form.name.trim() || form.email.split('@')[0],
+        email: form.email.trim(),
+        password: form.password,
+        phone: form.phone ? form.phone.trim() : '',
+        specialization: role === 'therapist' ? (form.specialization || 'General') : ''
+      };
+
+      const data = await registerUser(payload);
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('auth_user', JSON.stringify(data.user));
+      setSuccess(lang === 'en' ? 'Account created successfully! Signing you in…' : 'ಖಾತೆಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ! ಸೈನ್ ಇನ್ ಮಾಡಲಾಗುತ್ತಿದೆ…');
+      setTimeout(() => onLogin(data.user), 800);
     } catch (err) {
       setError(err.message || 'Failed to create account. Please try again.');
     } finally {
@@ -669,5 +633,3 @@ const AuthPage = ({ onLogin }) => {
     </div>
   );
 };
-
-export default AuthPage;

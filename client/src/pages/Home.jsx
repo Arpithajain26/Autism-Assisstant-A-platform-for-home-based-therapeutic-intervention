@@ -397,6 +397,9 @@ function ReviewCard({ r, visible, delay }) {
 
 function Reviews() {
   const [ref, visible] = useReveal();
+  const [showAll, setShowAll] = useState(false);
+  const displayedReviews = showAll ? reviews : reviews.slice(0, 2);
+
   return (
     <section id="reviews" ref={ref} style={{ padding: "90px 28px", background: "#fff" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
@@ -406,9 +409,22 @@ function Reviews() {
           <p style={{ color: "var(--text-muted)", marginTop: 12, lineHeight: 1.7 }}>Real feedback from people using the platform week to week.</p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 22 }}>
-          {reviews.map((r, i) => (
+          {displayedReviews.map((r, i) => (
             <ReviewCard key={i} r={r} visible={visible} delay={i * 0.1} />
           ))}
+        </div>
+        <div style={{ textAlign: "center", marginTop: 40 }}>
+          <button
+            onClick={() => setShowAll(!showAll)}
+            style={{
+              padding: "12px 28px", borderRadius: 50, border: "2px solid #6366f1",
+              background: showAll ? "#6366f1" : "rgba(99,102,241,0.06)",
+              color: showAll ? "#fff" : "#4f46e5", fontWeight: 700, fontSize: "0.92rem",
+              cursor: "pointer", transition: "all .3s ease", fontFamily: "inherit"
+            }}
+          >
+            {showAll ? "Show Fewer Reviews ↑" : "View More Reviews (4+) ↓"}
+          </button>
         </div>
       </div>
     </section>
@@ -445,11 +461,11 @@ function CTA() {
             onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
             onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
           >
-            Get Started — It's Free
+            Start Free Assessment →
           </button>
           <button
-            onClick={() => document.getElementById("autism-info")?.scrollIntoView({ behavior: "smooth" })}
-            style={{ padding: "15px 36px", borderRadius: 12, border: "2px solid rgba(255,255,255,0.6)", background: "transparent", color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer", transition: "all .3s", fontFamily: "inherit" }}
+            onClick={() => navigate("/about")}
+            style={{ padding: "15px 36px", borderRadius: 12, border: "2px solid rgba(255,255,255,0.4)", background: "transparent", color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer", transition: "all .3s", fontFamily: "inherit" }}
             onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
@@ -578,8 +594,8 @@ export default function Home() {
     <div style={{ width: "100vw", marginLeft: "calc(-50vw + 50%)" }}>
       <Navbar />
       <Hero />
-      <FeaturesStrip />
       <AutismInfoSection />
+      <FeaturesStrip />
       <HowItWorks />
       <Reviews />
       <CTA />
