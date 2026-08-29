@@ -59,7 +59,7 @@ function Hero() {
   }, []);
 
   return (
-    <section style={{ position: "relative", height: "100vh", minHeight: 600, overflow: "hidden", display: "flex", alignItems: "center" }}>
+    <section style={{ position: "relative", width: "100%", height: "100vh", minHeight: 600, overflow: "hidden", display: "flex", alignItems: "center" }}>
       {/* Background Video */}
       <video
         ref={videoRef}
@@ -678,7 +678,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div style={{ width: "100vw", marginLeft: "calc(-50vw + 50%)" }}>
+    <div style={{ width: "100%", overflowX: "hidden" }}>
       <Navbar />
       <Hero />
       <AutismInfoSection />

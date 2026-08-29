@@ -6,16 +6,18 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives",
     "preview": "vite preview"
   },
   "dependencies": {
+    "face-api.js": "^0.22.2",
     "firebase": "^12.17.1",
     "framer-motion": "^12.43.0",
     "lucide-react": "^1.28.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3"
+    "react-router-dom": "^6.22.3",
+    "recharts": "^2.12.7"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

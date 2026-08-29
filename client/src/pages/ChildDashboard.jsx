@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getChildTasks, completeTask, getActivities } from '../services/api';
 import Assessment from './Assessment';
-
-const LEVEL_LABEL = { 1: '🌱 Emerging (Level 1)', 2: '🌿 Developing (Level 2)', 3: '🌳 Advancing (Level 3)' };
+import gameInstructions from '../gameInstructions';
+import { getAgeLevelConfig } from '../utils/ageLevelMapping';
 const CATEGORY_ICON = { Communication: '💬', 'Motor Skills': '🖐️', Social: '👫', Sensory: '👁️', 'Life Skills': '🏠', Emotional: '❤️' };
 
 const ChildDashboard = ({ user, childId, onNavigate }) => {
@@ -31,6 +31,18 @@ const ChildDashboard = ({ user, childId, onNavigate }) => {
   useEffect(() => {
     fetchTasks();
   }, [targetChildId]);
+
+  useEffect(() => {
+    if (tasks?._id) {
+      localStorage.setItem("currentChild", JSON.stringify({
+        _id: tasks._id,
+        name: tasks.name || 'Child',
+        level: Number(tasks.level) || 2,
+        age: tasks.age || 6,
+        profilePhoto: tasks.profilePhoto || tasks.photo || tasks.avatar || null
+      }));
+    }
+  }, [tasks]);
 
   useEffect(() => {
     if (tasks?.level) {
@@ -157,7 +169,9 @@ const ChildDashboard = ({ user, childId, onNavigate }) => {
     );
   }
 
-  const level = tasks?.level;
+  const level = tasks?.level || 2;
+  const childAge = tasks?.age || 6;
+  const currentTier = getAgeLevelConfig(childAge, level);
   const assigned = tasks?.assigned || [];
   const completed = tasks?.completed || [];
   const childName = tasks?.name || 'Child';
@@ -189,12 +203,19 @@ const ChildDashboard = ({ user, childId, onNavigate }) => {
         <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>🎈</div>
         <h1 style={{ fontSize: '2.2rem', fontWeight: '800', margin: '0 0 6px 0' }}>Hi, {childName}! 👋</h1>
         <p style={{ margin: 0, opacity: 0.9, fontSize: '1rem' }}>
-          Welcome to your therapy space! Let's do some fun activities together.
+          {currentTier.emoji} {currentTier.label} (Level {level}) Identified &bull; Welcome to your therapy space! Let's do some fun activities together.
         </p>
       </div>
 
       {/* Progress Stats */}
-      <div className="grid-2" style={{ marginBottom: '32px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+        <div className="stat-card" style={{ borderLeft: '5px solid #ea580c', background: 'white' }}>
+          <div className="stat-label">Daily Streak</div>
+          <div className="stat-num" style={{ color: '#ea580c' }}>
+            🔥 {tasks?.streak || 0}
+          </div>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '4px' }}>days active in a row 🏆</p>
+        </div>
         <div className="stat-card" style={{ borderLeft: '5px solid var(--green)', background: 'white' }}>
           <div className="stat-label">Completed Tasks</div>
           <div className="stat-num" style={{ color: 'var(--green)' }}>{completed.length}</div>
@@ -230,14 +251,41 @@ const ChildDashboard = ({ user, childId, onNavigate }) => {
 
       {/* Assigned Tasks Grid */}
       <section style={{ marginBottom: '36px' }}>
-        <h2 style={{ fontWeight: '800', fontSize: '1.35rem', marginBottom: '18px' }}>🎯 Today's Therapy Activities</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+          <h2 style={{ fontWeight: '800', fontSize: '1.35rem', margin: 0 }}>🎯 Today's Therapy Activities</h2>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              localStorage.setItem("currentChild", JSON.stringify({ _id: targetChildId, name: childName, level: level || 2, age: tasks?.age || 6 }));
+              if (onNavigate) onNavigate('/activities');
+              else window.location.href = '/activities';
+            }}
+            style={{ fontWeight: '700', padding: '8px 16px', borderRadius: '10px', fontSize: '0.9rem' }}
+          >
+            📚 Browse All {currentTier.label} (Level {level}) Activities →
+          </button>
+        </div>
+
         {assigned.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: '48px 24px', borderRadius: '16px' }}>
-            <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>🎉</div>
-            <h3 style={{ fontWeight: '700', fontSize: '1.2rem', marginBottom: '6px' }}>All Done for Now!</h3>
-            <p style={{ color: 'var(--text-muted)', margin: 0 }}>
-              Great job! Ask your parent or therapist to assign more activities.
+            <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>{currentTier.emoji}</div>
+            <h3 style={{ fontWeight: '700', fontSize: '1.2rem', marginBottom: '6px' }}>
+              {currentTier.label} (Level {level}) Therapy Plan Ready!
+            </h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '20px', maxWidth: '500px', margin: '0 auto 20px' }}>
+              Your child is in <strong>{currentTier.label} (Level {level})</strong>. Click below to open the dedicated activity library with live face detection, session timers, and step-by-step guides!
             </p>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                localStorage.setItem("currentChild", JSON.stringify({ _id: targetChildId, name: childName, level: level || 2, age: tasks?.age || 6 }));
+                if (onNavigate) onNavigate('/activities');
+                else window.location.href = '/activities';
+              }}
+              style={{ fontWeight: '700', padding: '14px 28px', borderRadius: '12px', fontSize: '1rem' }}
+            >
+              ▶ Start {currentTier.label} Activities Now →
+            </button>
           </div>
         ) : (
           <div className="grid-3">

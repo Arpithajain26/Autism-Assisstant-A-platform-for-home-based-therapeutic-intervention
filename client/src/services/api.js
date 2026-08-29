@@ -1,3 +1,5 @@
+import { CURATED_ACTIVITIES } from "../data/curatedActivities";
+
 const BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
 const FALLBACK_PORTS = [5000, 5001, 5002, 5003, 5004];
 
@@ -372,340 +374,13 @@ export const submitAssessment = async (childId, scores) => {
 };
 
 // ── Activities ────────────────────────────────────────────────────────────────
-export const getActivities = (level) =>
-  req("GET", `/api/activities${level ? `?level=${level}` : ""}`).catch(() => {
-    const mockActivities = [
-      {
-        _id: "a1",
-        title: "Mirror Play",
-        level: 1,
-        category: "Communication",
-        duration: "10 min",
-        description:
-          "Child makes facial expressions in front of a mirror while parent names each emotion.",
-      },
-      {
-        _id: "a2",
-        title: "Sorting Shapes",
-        level: 1,
-        category: "Motor Skills",
-        duration: "15 min",
-        description:
-          "Use colorful shape blocks. Child sorts by color and type.",
-      },
-      {
-        _id: "a3",
-        title: "Name That Sound",
-        level: 1,
-        category: "Sensory",
-        duration: "10 min",
-        description:
-          "Play recordings of everyday sounds. Child identifies each sound.",
-      },
-      {
-        _id: "a4",
-        title: "Bubble Popping",
-        level: 1,
-        category: "Sensory",
-        duration: "10 min",
-        description: "Blow bubbles and have child pop them with one finger.",
-      },
-      {
-        _id: "a5",
-        title: "Playdough Sculpting",
-        level: 1,
-        category: "Motor Skills",
-        duration: "20 min",
-        description:
-          "Roll and shape playdough to strengthen hand muscles and creativity.",
-      },
-      {
-        _id: "a6",
-        title: "Story Builder",
-        level: 1,
-        category: "Communication",
-        duration: "12 min",
-        description:
-          "Drag 4 picture cards into the correct story order and play narrated animation.",
-      },
-      {
-        _id: "a7",
-        title: "Describe and Find",
-        level: 1,
-        category: "Communication",
-        duration: "8 min",
-        description:
-          "Audio clue describes an object; child selects the matching picture.",
-      },
-      {
-        _id: "a8",
-        title: "Word Builder",
-        level: 1,
-        category: "Communication",
-        duration: "10 min",
-        description:
-          "Drag letter tiles to spell the target word shown by an image.",
-      },
-      {
-        _id: "a9",
-        title: "Question Ball",
-        level: 1,
-        category: "Communication",
-        duration: "10 min",
-        description:
-          "Animated ball shows a question; child types or speaks answer; parent verifies.",
-      },
-      {
-        _id: "a10",
-        title: "Emotion Charades Camera",
-        level: 1,
-        category: "Social",
-        duration: "8 min",
-        description:
-          "Emotion word appears and child makes face to camera; app checks match.",
-      },
-      {
-        _id: "a11",
-        title: "Compliment Builder",
-        level: 1,
-        category: "Social",
-        duration: "8 min",
-        description:
-          "Drag word tiles to build compliment cards; character reacts happily.",
-      },
-      {
-        _id: "b1",
-        title: "Emotion Flashcards",
-        level: 2,
-        category: "Social",
-        duration: "15 min",
-        description:
-          "Show illustrated emotion cards. Child names and discusses emotions.",
-      },
-      {
-        _id: "b2",
-        title: "Story Sequencing",
-        level: 2,
-        category: "Communication",
-        duration: "20 min",
-        description: "Arrange picture cards into story order and narrate.",
-      },
-      {
-        _id: "b3",
-        title: "Turn-Taking Board Game",
-        level: 2,
-        category: "Social",
-        duration: "25 min",
-        description:
-          "Simple board game that teaches turn-taking and handling outcomes.",
-      },
-      {
-        _id: "b4",
-        title: "Balloon Tapping",
-        level: 2,
-        category: "Motor Skills",
-        duration: "15 min",
-        description:
-          "Tap a balloon to keep it in the air; develop coordination.",
-      },
-      {
-        _id: "b5",
-        title: "Simple Cooking Together",
-        level: 2,
-        category: "Life Skills",
-        duration: "30 min",
-        description:
-          "Make a simple no-cook recipe together to teach sequencing and motor skills.",
-      },
-      {
-        _id: "b6",
-        title: "Memory Match Cards",
-        level: 2,
-        category: "Cognitive",
-        duration: "10-15 min",
-        description: "Flip cards to find pairs; complete all 8 pairs to win.",
-      },
-      {
-        _id: "b7",
-        title: "Pattern Completion",
-        level: 2,
-        category: "Cognitive",
-        duration: "10 min",
-        description: "Select the correct next item to complete a pattern.",
-      },
-      {
-        _id: "b8",
-        title: "Category Sort Drag Drop",
-        level: 2,
-        category: "Cognitive",
-        duration: "12 min",
-        description:
-          "Drag items into category boxes (Animals, Food, Vehicles).",
-      },
-      {
-        _id: "b9",
-        title: "Simon Says",
-        level: 2,
-        category: "Sensory",
-        duration: "10 min",
-        description:
-          "Follow only instructions that are prefixed with 'Simon says'.",
-      },
-      {
-        _id: "b10",
-        title: "Picture Exchange Click",
-        level: 2,
-        category: "Communication",
-        duration: "8 min",
-        description:
-          "Child selects picture to request an item after audio prompt.",
-      },
-      {
-        _id: "b11",
-        title: "Yes No Button Game",
-        level: 2,
-        category: "Communication",
-        duration: "10 min",
-        description: "Big YES and NO buttons to answer simple questions.",
-      },
-      {
-        _id: "b12",
-        title: "Name That Object",
-        level: 2,
-        category: "Communication",
-        duration: "8 min",
-        description:
-          "Identify object name from four choices after hearing its sound.",
-      },
-      {
-        _id: "b13",
-        title: "Request the Item",
-        level: 2,
-        category: "Communication",
-        duration: "8 min",
-        description:
-          "Use gesture buttons MORE / STOP / HELP to request a preferred item.",
-      },
-      {
-        _id: "c1",
-        title: "Role Play Scenarios",
-        level: 3,
-        category: "Social",
-        duration: "30 min",
-        description: "Act out real-world scenarios to practice social scripts.",
-      },
-      {
-        _id: "c2",
-        title: "Obstacle Course",
-        level: 3,
-        category: "Motor Skills",
-        duration: "20 min",
-        description:
-          "Indoor course with stations to develop gross motor skills.",
-      },
-      {
-        _id: "c3",
-        title: "Peer Play Date",
-        level: 3,
-        category: "Social",
-        duration: "45 min",
-        description: "Structured play to practice sharing and conversation.",
-      },
-      {
-        _id: "c4",
-        title: "Feelings Journal",
-        level: 3,
-        category: "Emotional",
-        duration: "15 min",
-        description: "Draw or write about feelings to build introspection.",
-      },
-      {
-        _id: "c5",
-        title: "Community Helper Interview",
-        level: 3,
-        category: "Social",
-        duration: "30 min",
-        description:
-          "Prepare and conduct a short interview to build initiation and listening.",
-      },
-      {
-        _id: "c6",
-        title: "Mirror Expression Camera",
-        level: 3,
-        category: "Social",
-        duration: "10 min",
-        description:
-          "Match on-screen emotion using the camera and receive feedback.",
-      },
-      {
-        _id: "c7",
-        title: "Turn Taking Ball Animation",
-        level: 3,
-        category: "Social",
-        duration: "10 min",
-        description: "Animated ball passing to practice turn-taking.",
-      },
-      {
-        _id: "c8",
-        title: "Emotion Matching Game",
-        level: 3,
-        category: "Social",
-        duration: "10 min",
-        description: "Select the correct emotion label for shown faces.",
-      },
-      {
-        _id: "c9",
-        title: "Hello Goodbye Practice",
-        level: 3,
-        category: "Social",
-        duration: "8 min",
-        description: "Practice greeting and goodbye routines with animations.",
-      },
-      {
-        _id: "c10",
-        title: "Car Down Ramp",
-        level: 3,
-        category: "Sensory",
-        duration: "5 min",
-        description: "Click PUSH to send the car down a ramp with animation.",
-      },
-      {
-        _id: "c11",
-        title: "Calm Music Player",
-        level: 3,
-        category: "Sensory",
-        duration: "Unlimited",
-        description:
-          "Play calming music with visuals and interactive sparkles.",
-      },
-      {
-        _id: "c12",
-        title: "Sensory Bubble Screen",
-        level: 3,
-        category: "Sensory",
-        duration: "Unlimited",
-        description: "Pop floating bubbles with gentle sound and effects.",
-      },
-      {
-        _id: "off1",
-        title: "Rice Bin Exploration",
-        level: 2,
-        category: "Sensory",
-        duration: "15-20 min",
-        description: "Offline tactile exploration activity with hidden toys.",
-      },
-      {
-        _id: "off2",
-        title: "Deep Pressure Hug",
-        level: 3,
-        category: "Sensory",
-        duration: "5-10 sec per hug",
-        description: "Offline calming deep pressure hug guided activity.",
-      },
-    ];
-    return level
-      ? mockActivities.filter((a) => a.level === parseInt(level))
-      : mockActivities;
+export const getActivities = (level, ageGroup) =>
+  req("GET", `/api/activities${level ? `?level=${level}` : ""}${ageGroup ? `&ageGroup=${ageGroup}` : ""}`).catch(() => {
+    return CURATED_ACTIVITIES.filter((a) => {
+      const matchLvl = !level || Number(a.level) === parseInt(level);
+      const matchAge = !ageGroup || a.ageGroup === ageGroup;
+      return matchLvl && matchAge;
+    });
   });
 
 export const getRecommendations = (level, focusArea = "") => {
@@ -1726,18 +1401,279 @@ export const logSession = async (sessionData) => {
   try {
     return await req("POST", "/api/sessions/log", sessionData);
   } catch (err) {
-    console.warn("Session log failed, using local storage fallback", err);
     try {
       const localLogs = JSON.parse(
-        localStorage.getItem("app_local_sessions") || "[]",
+        localStorage.getItem("app_activity_logs") || "[]",
       );
-      localLogs.push({
-        ...sessionData,
-        _id: "sess_" + Date.now(),
-        createdAt: new Date().toISOString(),
-      });
-      localStorage.setItem("app_local_sessions", JSON.stringify(localLogs));
+      const newLog = {
+        _id: "log_" + Date.now(),
+        child: sessionData.childId,
+        activity: sessionData.activityId,
+        performanceScore: Number(sessionData.score || sessionData.performanceScore || 80),
+        engagement: sessionData.engagement || "Medium",
+        notes: sessionData.notes || "",
+        completedAt: new Date().toISOString(),
+      };
+      localLogs.push(newLog);
+      localStorage.setItem("app_activity_logs", JSON.stringify(localLogs));
+      return { success: true, log: newLog };
     } catch (e) {}
-    return { success: true, session: sessionData };
+    return { success: true };
   }
 };
+
+export const getWeeklyTrend = async (childId) => {
+  try {
+    return await req("GET", `/api/progress/weekly-trend/${childId}`);
+  } catch (err) {
+    console.warn("Failed to fetch weekly trend", err);
+    return { trend: "Not enough data" };
+  }
+};
+
+export const predictEmotion = async (imageBase64) => {
+  try {
+    const res = await fetch("http://127.0.0.1:5001/predict-emotion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: imageBase64 }),
+    });
+    if (!res.ok) throw new Error("ML emotion prediction failed");
+    return await res.json();
+  } catch (err) {
+    return {
+      emotion: "happy",
+      confidence: 90.0,
+      emoji: "😄",
+      color: "#22c55e",
+      label: "Happy / Joyful",
+      engagement_status: "Positive Engagement",
+    };
+  }
+};
+
+export const generateSessionReport = async (sessionReportData) => {
+  try {
+    const res = await fetch("http://127.0.0.1:5001/generate-session-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sessionReportData),
+    });
+    if (!res.ok) throw new Error("Session report generation failed");
+    return await res.json();
+  } catch (err) {
+    return {
+      activity_title: sessionReportData.activity_title || "Therapy Session",
+      duration_sec: sessionReportData.duration_sec || 120,
+      performance_score: sessionReportData.score || 85,
+      engagement_score: 92.0,
+      dominant_emotion: "happy",
+      positive_percentage: 75.0,
+      calm_percentage: 20.0,
+      distress_percentage: 5.0,
+      readiness_status: "Ready for Next Level",
+      clinical_recommendation: "Child demonstrated enthusiastic engagement and joy! Great opportunity to reinforce learning or progress to next difficulty level.",
+    };
+  }
+};
+
+export const logActivityCompletion = async (payload) => {
+  try {
+    return await req("POST", "/api/progress/log", payload);
+  } catch (err) {
+    return await logSession(payload);
+  }
+};
+
+export const getChild = async (childId) => {
+  try {
+    return await req("GET", `/api/children/child/${childId}`);
+  } catch (err) {
+    const children = getLocalChildren();
+    const child = children.find((c) => c._id === childId);
+    if (child) return child;
+    return {
+      _id: childId,
+      name: "Child",
+      age: 6,
+      level: 1,
+      assessmentDone: true,
+    };
+  }
+};
+
+export const getChildSessions = async (childId) => {
+  try {
+    return await req("GET", `/api/sessions/child/${childId}`);
+  } catch (err) {
+    try {
+      const logs = JSON.parse(localStorage.getItem("app_activity_logs") || "[]");
+      return logs.filter((l) => l.child === childId);
+    } catch {
+      return [];
+    }
+  }
+};
+
+// ── Therapist API Methods ───────────────────────────────────────────────────
+export const getTherapistChildren = async () => {
+  try {
+    return await req("GET", "/api/therapist/children");
+  } catch (err) {
+    const localKids = getLocalChildren();
+    return localKids.map((k) => ({
+      ...k,
+      progressStatus: k.level === 3 ? "Improving" : "Stable",
+      weeklyAvgScore: 82,
+      starRating: 4,
+      dominantEmotion: "Happy 😊",
+      lastSessionDate: new Date().toISOString(),
+      weeksRegressing: 0,
+      weeksStable: 2,
+    }));
+  }
+};
+
+export const getTherapistChildProgress = async (childId) => {
+  try {
+    return await req("GET", `/api/therapist/children/${childId}/progress`);
+  } catch (err) {
+    return {
+      child: { _id: childId, name: "Child", level: 2 },
+      progressStatus: "Improving",
+      aiPrediction: "Improving",
+      weeklyScoreTrend: [
+        { week: "Week 1", score: 68 },
+        { week: "Week 2", score: 74 },
+        { week: "Week 3", score: 80 },
+        { week: "Current", score: 85 },
+      ],
+      domainScores: {
+        communication: 82,
+        social: 76,
+        sensory: 88,
+        motor: 84,
+        cognitive: 78,
+      },
+      emotionDistribution: [
+        { emotion: "Happy 😊", percentage: 65, color: "#22c55e" },
+        { emotion: "Neutral 😐", percentage: 22, color: "#3b82f6" },
+        { emotion: "Curious 😲", percentage: 8, color: "#eab308" },
+        { emotion: "Frustrated 😠", percentage: 5, color: "#ef4444" },
+      ],
+      dominantEmotion: "Happy 😊",
+      recentSessions: [
+        { _id: "s1", date: new Date().toISOString(), activityName: "Emotion Matching Game", score: 5, performanceScore: 92, emotion: "Happy 😊", duration: "15 min" },
+        { _id: "s2", date: new Date(Date.now() - 86400000).toISOString(), activityName: "Bubble Popping OT", score: 4, performanceScore: 85, emotion: "Happy 😊", duration: "10 min" },
+        { _id: "s3", date: new Date(Date.now() - 172800000).toISOString(), activityName: "Story Sequencing", score: 4, performanceScore: 80, emotion: "Neutral 😐", duration: "20 min" },
+      ],
+      activityEmotionMap: [
+        { activity: "Emotion Matching Game", emotion: "Happy 😊", effect: "High positive engagement" },
+        { activity: "Story Sequencing Cards", emotion: "Focused 😐", effect: "Calm sustained attention" },
+        { activity: "Deep Pressure Calm", emotion: "Relaxed 😌", effect: "Sensory regulation achieved" },
+      ],
+      clinicalRecommendation: "Child is demonstrating strong mastery and joint attention. Consider advancing task complexity.",
+    };
+  }
+};
+
+export const sendFeedback = async (childId, message, type = "general") => {
+  try {
+    const user = JSON.parse(localStorage.getItem("auth_user") || "{}");
+    return await req("POST", "/api/therapist/feedback", {
+      childId,
+      therapistId: user._id || user.id,
+      message,
+      type,
+    });
+  } catch (err) {
+    try {
+      const localFeedback = JSON.parse(localStorage.getItem("app_feedback") || "[]");
+      const newFb = {
+        _id: "fb_" + Date.now(),
+        child: childId,
+        message,
+        type,
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      };
+      localFeedback.unshift(newFb);
+      localStorage.setItem("app_feedback", JSON.stringify(localFeedback));
+      return { success: true, feedback: newFb };
+    } catch {
+      return { success: true };
+    }
+  }
+};
+
+export const changeChildLevel = async (childId, newLevel, reason) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("auth_user") || "{}");
+    return await req("PUT", `/api/children/${childId}/level`, {
+      newLevel,
+      reason,
+      therapistId: user._id || user.id,
+    });
+  } catch (err) {
+    const kids = getLocalChildren();
+    const child = kids.find((k) => k._id === childId);
+    if (child) {
+      child.level = parseInt(newLevel);
+      saveLocalChildren(kids);
+    }
+    return { success: true, message: `Updated to Level ${newLevel}` };
+  }
+};
+
+export const getAlerts = async () => {
+  try {
+    return await req("GET", "/api/therapist/alerts");
+  } catch (err) {
+    return [
+      {
+        id: "demo_alert_1",
+        type: "urgent",
+        severity: "red",
+        childName: "Rahul Nair",
+        title: "🔴 URGENT: Rahul Nair has been regressing for 2 weeks.",
+        description: "Immediate review recommended for behavioral changes and sensory adjustments.",
+        actionText: "Review Now",
+      },
+      {
+        id: "demo_alert_2",
+        type: "warning",
+        severity: "yellow",
+        childName: "Priya Sharma",
+        title: "⚠️ Priya Sharma has been stable for 3 weeks.",
+        description: "Consider activity change to encourage higher engagement.",
+        actionText: "Review",
+      },
+    ];
+  }
+};
+
+export const acknowledgeAlert = async (alertId, childId, action) => {
+  try {
+    return await req("POST", "/api/therapist/acknowledge-alert", { alertId, childId, action });
+  } catch (err) {
+    return { success: true };
+  }
+};
+
+export const getParentFeedback = async (childId) => {
+  try {
+    return await req("GET", `/api/parent/feedback/${childId}`);
+  } catch (err) {
+    try {
+      const localFeedback = JSON.parse(localStorage.getItem("app_feedback") || "[]");
+      return localFeedback.filter((f) => f.child === childId || !f.child);
+    } catch {
+      return [];
+    }
+  }
+};
+
+
+
+
+

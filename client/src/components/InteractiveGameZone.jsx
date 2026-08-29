@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import FlashcardGame from "./FlashcardGame";
 
 // Web Audio API Synthesizer for self-contained sound effects
 const playSynthSound = (type) => {
@@ -1413,65 +1414,705 @@ function HelperInterviewGame({ language, onComplete }) {
 }
 
 
-/* ─── CENTRAL ROUTER ─────────────────────────────────────────────────────── */
-export default function InteractiveGameZone({ activity, language = "en", currentEmotion = "Happy", emotionConfidence = 0, onComplete }) {
-  
-  const renderGame = () => {
-    switch (activity?.title) {
-      case "Mirror Play":
-        return <MirrorPlayGame language={language} currentEmotion={currentEmotion} confidence={emotionConfidence} onComplete={onComplete} />;
-      case "Sorting Shapes":
-      case "Sorting shapes":
-        return <SortingShapesGame language={language} onComplete={onComplete} />;
-      case "Name That Sound":
-        return <NameThatSoundGame language={language} onComplete={onComplete} />;
-      case "Bubble Popping":
-        return <BubblePoppingGame onComplete={onComplete} />;
-      case "Playdough Sculpting":
-        return <PlaydoughSculptingGame language={language} onComplete={onComplete} />;
-      case "Story Sequencing":
-        return <StorySequencingGame language={language} onComplete={onComplete} />;
-      case "Turn-Taking Board Game":
-        return <BoardGameGame language={language} onComplete={onComplete} />;
-      case "Balloon Tapping":
-        return <BalloonTappingGame onComplete={onComplete} />;
-      case "Simple Cooking Together":
-        return <CookingGame language={language} onComplete={onComplete} />;
-      case "Role Play Scenarios":
-        return <RolePlayGame language={language} onComplete={onComplete} />;
-      case "Obstacle Course":
-        return <ObstacleCourseGame language={language} onComplete={onComplete} />;
-      case "Peer Play Date":
-        return <SharingSimulatorGame language={language} onComplete={onComplete} />;
-      case "Feelings Journal":
-        return <FeelingsJournalGame language={language} onComplete={onComplete} />;
-      case "Community Helper Interview":
-        return <HelperInterviewGame language={language} onComplete={onComplete} />;
-      default:
-        // Default fallback if no specific match
-        return (
-          <div style={{ textAlign: "center", padding: "20px" }}>
-            <h3 style={{ fontSize: "1.2rem", fontWeight: "900", color: "#4f46e5" }}>🎮 {activity?.title} Game Zone!</h3>
-            <p style={{ color: "#4b5563", fontSize: "0.9rem", margin: "8px 0 16px" }}>
-              Please complete all steps in this session to get rewards!
-            </p>
-            <button
-              onClick={() => onComplete && onComplete(5)}
+// 16. WORD BUILDER GAME
+function WordBuilderGame({ language, onComplete }) {
+  const words = [
+    { word: "CAT", wordKn: "ಬೆಕ್ಕು", icon: "🐱", hint: "A furry pet" },
+    { word: "STAR", wordKn: "ನಕ್ಷತ್ರ", icon: "⭐", hint: "Shines in sky" },
+    { word: "FISH", wordKn: "ಮೀನು", icon: "🐟", hint: "Swims in water" },
+    { word: "SUN", wordKn: "ಸೂರ್ಯ", icon: "☀️", hint: "Bright and warm" }
+  ];
+
+  const [wordIdx, setWordIdx] = useState(0);
+  const current = words[wordIdx];
+  const [currentLetters, setCurrentLetters] = useState([]);
+  const [scrambled, setScrambled] = useState([]);
+
+  useEffect(() => {
+    setCurrentLetters([]);
+    const letters = current.word.split("");
+    const shuffled = [...letters].sort(() => Math.random() - 0.5);
+    setScrambled(shuffled);
+  }, [wordIdx]);
+
+  const handlePickLetter = (letter, idx) => {
+    playSynthSound("pop");
+    const nextLetters = [...currentLetters, letter];
+    setCurrentLetters(nextLetters);
+    setScrambled(prev => prev.filter((_, i) => i !== idx));
+
+    if (nextLetters.join("") === current.word) {
+      playSynthSound("correct");
+      setTimeout(() => {
+        if (wordIdx + 1 >= words.length) {
+          onComplete && onComplete(5);
+        } else {
+          setWordIdx(i => i + 1);
+        }
+      }, 700);
+    } else if (nextLetters.length === current.word.length) {
+      playSynthSound("wrong");
+      setTimeout(() => {
+        setCurrentLetters([]);
+        setScrambled([...current.word.split("")].sort(() => Math.random() - 0.5));
+      }, 500);
+    }
+  };
+
+  return (
+    <div style={{ textAlign: "center", padding: "16px" }}>
+      <div style={{ fontSize: "1.1rem", fontWeight: "900", color: "#6366f1", marginBottom: "10px" }}>
+        🔤 Word Builder Adventure!
+      </div>
+      <div style={{ fontSize: "4.5rem", animation: "float 2s infinite" }}>{current.icon}</div>
+      <div style={{ fontSize: "1rem", color: "#6b7280", fontWeight: "800", margin: "6px 0 16px" }}>
+        {language === "kn" ? current.wordKn : current.hint}
+      </div>
+
+      {/* Target Word Slots */}
+      <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "20px" }}>
+        {current.word.split("").map((_, i) => (
+          <div
+            key={i}
+            style={{
+              width: "50px",
+              height: "50px",
+              borderRadius: "14px",
+              background: currentLetters[i] ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "#f1f5f9",
+              border: "3px solid #c7d2fe",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "1.8rem",
+              fontWeight: "900",
+              boxShadow: currentLetters[i] ? "0 4px 14px rgba(99,102,241,0.3)" : "none"
+            }}
+          >
+            {currentLetters[i] || ""}
+          </div>
+        ))}
+      </div>
+
+      {/* Scrambled Clickable Letter Tiles */}
+      <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+        {scrambled.map((l, i) => (
+          <button
+            key={i}
+            onClick={() => handlePickLetter(l, i)}
+            className="bounce-btn"
+            style={{
+              width: "54px",
+              height: "54px",
+              borderRadius: "16px",
+              background: "#ffffff",
+              border: "3px solid #6366f1",
+              color: "#4338ca",
+              fontSize: "1.8rem",
+              fontWeight: "900",
+              cursor: "pointer",
+              boxShadow: "0 6px 16px rgba(0,0,0,0.08)"
+            }}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 17. 5-FINGER STAR BREATHING PACER
+function StarBreathingGame({ language, onComplete }) {
+  const [phase, setPhase] = useState("Inhale");
+  const [count, setCount] = useState(1);
+  const [cycles, setCycles] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCount(c => {
+        if (c >= 4) {
+          setPhase(p => {
+            if (p === "Inhale") {
+              playSynthSound("synth_bell");
+              return "Exhale";
+            } else {
+              setCycles(cy => {
+                const next = cy + 1;
+                if (next >= 3) {
+                  onComplete && onComplete(5);
+                }
+                return next;
+              });
+              playSynthSound("pop");
+              return "Inhale";
+            }
+          });
+          return 1;
+        }
+        return c + 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const isInhale = phase === "Inhale";
+
+  return (
+    <div style={{ textAlign: "center", padding: "16px" }}>
+      <div style={{ fontSize: "1.1rem", fontWeight: "900", color: "#059669", marginBottom: "14px" }}>
+        ⭐ Calm Star Breathing Pacer
+      </div>
+
+      <div style={{
+        width: "160px",
+        height: "160px",
+        margin: "0 auto 20px",
+        borderRadius: "50%",
+        background: isInhale ? "linear-gradient(135deg,#a7f3d0,#34d399)" : "linear-gradient(135deg,#bae6fd,#60a5fa)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#fff",
+        transform: isInhale ? "scale(1.2)" : "scale(0.85)",
+        transition: "transform 4s ease-in-out, background 1s ease",
+        boxShadow: "0 10px 30px rgba(5,150,105,0.2)"
+      }}>
+        <div style={{ fontSize: "3.5rem" }}>{isInhale ? "🌸" : "💨"}</div>
+        <div style={{ fontWeight: "900", fontSize: "1.2rem", marginTop: "4px" }}>
+          {language === "kn" ? (isInhale ? "ಉಸಿರು ಒಳಗೆ" : "ಉಸಿರು ಹೊರಗೆ") : phase}
+        </div>
+        <div style={{ fontSize: "1.2rem", fontWeight: "800" }}>{count}s</div>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
+        {[0, 1, 2].map(i => (
+          <span key={i} style={{ fontSize: "1.8rem", opacity: i < cycles ? 1 : 0.25 }}>⭐</span>
+        ))}
+      </div>
+      <p style={{ color: "#475569", fontSize: "0.85rem", marginTop: "10px", fontWeight: "700" }}>
+        {language === "kn" ? "ನಕ್ಷತ್ರದ ಜೊತೆಗೆ ನಿಧಾನವಾಗಿ ಉಸಿರಾಡಿ..." : "Breathe slowly with the calming star..."}
+      </p>
+    </div>
+  );
+}
+
+// 18. CAUSE & EFFECT BALL CHUTE
+function BallChuteGame({ language, onComplete }) {
+  const [balls, setBalls] = useState([]);
+  const [score, setScore] = useState(0);
+
+  const handleDrop = () => {
+    playSynthSound("synth_car");
+    playSynthSound("pop");
+    const colors = ["#ef4444", "#3b82f6", "#f59e0b", "#10b981", "#8b5cf6"];
+    const id = Date.now();
+    setBalls(prev => [...prev, { id, color: colors[prev.length % colors.length] }]);
+    const nextScore = score + 1;
+    setScore(nextScore);
+
+    if (nextScore >= 4) {
+      setTimeout(() => onComplete && onComplete(5), 1000);
+    }
+  };
+
+  return (
+    <div style={{ textAlign: "center", padding: "16px" }}>
+      <div style={{ fontSize: "1.1rem", fontWeight: "900", color: "#f59e0b", marginBottom: "14px" }}>
+        🎪 Ball Drop & Chute Fun!
+      </div>
+
+      <div style={{
+        height: "180px",
+        background: "linear-gradient(180deg,#fffbeb,#fef3c7)",
+        borderRadius: "20px",
+        border: "3px dashed #fde68a",
+        position: "relative",
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: "16px"
+      }}>
+        {balls.map((b, i) => (
+          <div
+            key={b.id}
+            style={{
+              position: "absolute",
+              width: "42px",
+              height: "42px",
+              borderRadius: "50%",
+              backgroundColor: b.color,
+              bottom: "16px",
+              left: `${15 + (i * 20)}%`,
+              animation: "bounceIn 0.5s ease",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#fff",
+              fontWeight: "900"
+            }}
+          >
+            ⚽
+          </div>
+        ))}
+        {balls.length === 0 && (
+          <span style={{ fontSize: "0.9rem", color: "#b45309", fontWeight: "800" }}>
+            {language === "kn" ? "ಚೆಂಡನ್ನು ಬಿಡಲು ಕೆಳಗಿನ ಬಟನ್ ಒತ್ತಿ!" : "Tap the button to drop balls into the chute!"}
+          </span>
+        )}
+      </div>
+
+      <button
+        onClick={handleDrop}
+        className="bounce-btn"
+        style={{
+          background: "linear-gradient(135deg,#f59e0b,#d97706)",
+          color: "#fff",
+          padding: "12px 28px",
+          border: "none",
+          borderRadius: "16px",
+          fontWeight: "900",
+          fontSize: "1rem",
+          cursor: "pointer",
+          boxShadow: "0 6px 18px rgba(245,158,11,0.3)"
+        }}
+      >
+        🔴 Drop Ball! ({score}/4)
+      </button>
+    </div>
+  );
+}
+
+// 19. SENSORY TREASURE DIG (Canvas Scratch & Reveal)
+function SensoryDigGame({ language, onComplete }) {
+  const [revealed, setRevealed] = useState([false, false, false]);
+
+  const handleDig = (idx) => {
+    playSynthSound("pop");
+    const next = [...revealed];
+    next[idx] = true;
+    setRevealed(next);
+
+    if (next.every(Boolean)) {
+      playSynthSound("correct");
+      setTimeout(() => onComplete && onComplete(5), 800);
+    }
+  };
+
+  return (
+    <div style={{ textAlign: "center", padding: "16px" }}>
+      <div style={{ fontSize: "1.1rem", fontWeight: "900", color: "#8b5cf6", marginBottom: "12px" }}>
+        🏖️ Sensory Sand Treasure Hunt!
+      </div>
+      <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: "0 0 16px" }}>
+        {language === "kn" ? "ಮರಳನ್ನು ಅಗೆದು ಗುಪ್ತ ರತ್ನಗಳನ್ನು ಹುಡುಕಿ!" : "Tap the sand piles to dig and uncover hidden gems!"}
+      </p>
+
+      <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
+        {[
+          { icon: "💎", name: "Diamond", color: "#38bdf8" },
+          { icon: "👑", name: "Crown", color: "#facc15" },
+          { icon: "⭐", name: "Star", color: "#f43f5e" }
+        ].map((item, i) => (
+          <div
+            key={i}
+            onClick={() => !revealed[i] && handleDig(i)}
+            style={{
+              width: "90px",
+              height: "90px",
+              borderRadius: "20px",
+              background: revealed[i] ? "linear-gradient(135deg,#f0fdf4,#dcfce7)" : "linear-gradient(135deg,#fde68a,#d97706)",
+              border: revealed[i] ? "3px solid #22c55e" : "3px dashed #b45309",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "2.5rem",
+              cursor: revealed[i] ? "default" : "pointer",
+              boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
+              animation: revealed[i] ? "starPop 0.4s ease" : "pulse 2s infinite"
+            }}
+          >
+            {revealed[i] ? item.icon : "🏖️"}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 20. 4-ZONES OF REGULATION GAME
+function ZonesRegulationGame({ language, onComplete }) {
+  const feelings = [
+    { name: "Sad 😢", zone: "blue", nameKn: "ದುಃಖ" },
+    { name: "Calm 😊", zone: "green", nameKn: "ಶಾಂತ" },
+    { name: "Excited 🤩", zone: "yellow", nameKn: "ಉತ್ಸಾಹ" },
+    { name: "Mad 😡", zone: "red", nameKn: "ಕೋಪ" }
+  ];
+
+  const [idx, setIdx] = useState(0);
+  const current = feelings[idx];
+
+  const handleZone = (selectedZone) => {
+    if (selectedZone === current.zone) {
+      playSynthSound("correct");
+      if (idx + 1 >= feelings.length) {
+        onComplete && onComplete(5);
+      } else {
+        setIdx(i => i + 1);
+      }
+    } else {
+      playSynthSound("wrong");
+    }
+  };
+
+  return (
+    <div style={{ textAlign: "center", padding: "16px" }}>
+      <div style={{ fontSize: "1.1rem", fontWeight: "900", color: "#10b981", marginBottom: "14px" }}>
+        🧭 4 Zones of Emotion Detective!
+      </div>
+
+      <div style={{
+        background: "#f8fafc",
+        padding: "16px",
+        borderRadius: "20px",
+        border: "2px solid #e2e8f0",
+        display: "inline-block",
+        marginBottom: "16px"
+      }}>
+        <div style={{ fontSize: "2rem", fontWeight: "900" }}>{current.name}</div>
+        <div style={{ fontSize: "0.85rem", color: "#64748b" }}>{language === "kn" ? current.nameKn : "Which zone does this feeling belong to?"}</div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", maxWidth: "340px", margin: "0 auto" }}>
+        {[
+          { zone: "blue", label: "Blue Zone 💤", labelKn: "ನೀಲಿ ವಲಯ (ಆಯಾಸ)", bg: "#dbeafe", color: "#1e40af" },
+          { zone: "green", label: "Green Zone 🌿", labelKn: "ಹಸಿರು ವಲಯ (ಶಾಂತ)", bg: "#dcfce7", color: "#166534" },
+          { zone: "yellow", label: "Yellow Zone ⚡", labelKn: "ಹಳದಿ ವಲಯ (ಉತ್ಸಾಹ)", bg: "#fef3c7", color: "#854d0e" },
+          { zone: "red", label: "Red Zone 🔥", labelKn: "ಕೆಂಪು ವಲಯ (ಕೋಪ)", bg: "#fee2e2", color: "#991b1b" }
+        ].map(z => (
+          <button
+            key={z.zone}
+            onClick={() => handleZone(z.zone)}
+            style={{
+              background: z.bg,
+              color: z.color,
+              border: `2px solid ${z.color}44`,
+              padding: "12px 8px",
+              borderRadius: "14px",
+              fontWeight: "900",
+              fontSize: "0.85rem",
+              cursor: "pointer"
+            }}
+          >
+            {language === "kn" ? z.labelKn : z.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 21. INTERACTIVE TASK CHECKLIST GAME
+function TaskRoutineGame({ activity, language, onComplete }) {
+  const steps = activity?.instructions?.length ? activity.instructions : [
+    { en: "Step 1: Check your focus", kn: "ಹಂತ 1: ನಿಮ್ಮ ಗಮನ ಪರಿಶೀಲಿಸಿ" },
+    { en: "Step 2: Prepare your action", kn: "ಹಂತ 2: ಕ್ರಿಯೆ ಸಿದ್ಧಪಡಿಸಿ" },
+    { en: "Step 3: Execute the goal", kn: "ಹಂತ 3: ಗುರಿ ಸಾಧಿಸಿ" },
+    { en: "Step 4: Celebrate success!", kn: "ಹಂತ 4: ಯಶಸ್ಸು ಆಚರಿಸಿ!" }
+  ];
+
+  const [checked, setChecked] = useState([]);
+
+  const toggleStep = (index) => {
+    playSynthSound("correct");
+    if (!checked.includes(index)) {
+      const next = [...checked, index];
+      setChecked(next);
+      if (next.length === steps.length) {
+        setTimeout(() => onComplete && onComplete(5), 600);
+      }
+    }
+  };
+
+  return (
+    <div style={{ textAlign: "center", padding: "16px" }}>
+      <div style={{ fontSize: "1.1rem", fontWeight: "900", color: "#6366f1", marginBottom: "14px" }}>
+        📋 Interactive Routine Checklist
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxWidth: "420px", margin: "0 auto" }}>
+        {steps.map((step, idx) => {
+          const isDone = checked.includes(idx);
+          return (
+            <div
+              key={idx}
+              onClick={() => toggleStep(idx)}
               style={{
-                background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                color: "#fff",
-                border: "none",
-                padding: "10px 24px",
-                borderRadius: "12px",
-                fontWeight: "900",
-                cursor: "pointer"
+                background: isDone ? "#dcfce7" : "#ffffff",
+                border: isDone ? "2px solid #22c55e" : "2px solid #e2e8f0",
+                padding: "12px 16px",
+                borderRadius: "16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "all 0.2s"
               }}
             >
-              Mark Completed! 🏆
-            </button>
-          </div>
-        );
+              <div style={{
+                width: "28px",
+                height: "28px",
+                borderRadius: "50%",
+                background: isDone ? "#22c55e" : "#f1f5f9",
+                color: isDone ? "#fff" : "#94a3b8",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: "900",
+                fontSize: "0.9rem"
+              }}>
+                {isDone ? "✓" : idx + 1}
+              </div>
+              <div style={{ fontSize: "0.85rem", fontWeight: "800", color: isDone ? "#166534" : "#334155" }}>
+                {language === "kn" ? step.kn : step.en}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// 22. SOCIAL DILEMMA DECISION GAME
+function SocialDilemmaGame({ language, onComplete }) {
+  const dilemmas = [
+    {
+      q: "A friend drops their blocks by accident. What should you do?",
+      qKn: "ಸ್ನೇಹಿತನ ಬ್ಲಾಕ್‌ಗಳು ಕೆಳಗೆ ಬಿದ್ದವು. ನೀವೇನು ಮಾಡುವಿರಿ?",
+      options: [
+        { text: "Help pick them up 🤝", textKn: "ಎತ್ತಲು ಸಹಾಯ ಮಾಡುವೆ", correct: true },
+        { text: "Laugh and walk away ❌", textKn: "ನಕ್ಕು ಹೋಗುವೆ", correct: false }
+      ]
+    },
+    {
+      q: "You want to play with the toy car your friend is using. What can you say?",
+      qKn: "ಸ್ನೇಹಿತ ಆಡುತ್ತಿರುವ ಕಾರು ನಿಮಗೂ ಬೇಕು. ಏನು ಹೇಳುವಿರಿ?",
+      options: [
+        { text: "Can I have a turn next please? 🚗", textKn: "ನಂತರ ನನಗೂ ಕೊಡುವಿರಾ?", correct: true },
+        { text: "Snatch it quickly ❌", textKn: "ಕಸಿದುಕೊಳ್ಳುವೆ", correct: false }
+      ]
     }
+  ];
+
+  const [idx, setIdx] = useState(0);
+  const current = dilemmas[idx];
+
+  const handlePick = (isCorrect) => {
+    if (isCorrect) {
+      playSynthSound("correct");
+      if (idx + 1 >= dilemmas.length) {
+        onComplete && onComplete(5);
+      } else {
+        setIdx(i => i + 1);
+      }
+    } else {
+      playSynthSound("wrong");
+    }
+  };
+
+  return (
+    <div style={{ textAlign: "center", padding: "16px" }}>
+      <div style={{ fontSize: "1.1rem", fontWeight: "900", color: "#ec4899", marginBottom: "14px" }}>
+        🤝 Social Problem Solver!
+      </div>
+
+      <div style={{
+        background: "linear-gradient(135deg,#fdf2f8,#fce7f3)",
+        padding: "16px",
+        borderRadius: "20px",
+        border: "2px solid #fbcfe8",
+        marginBottom: "18px"
+      }}>
+        <div style={{ fontSize: "0.95rem", fontWeight: "900", color: "#9d174d" }}>
+          {language === "kn" ? current.qKn : current.q}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxWidth: "340px", margin: "0 auto" }}>
+        {current.options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => handlePick(opt.correct)}
+            className="bounce-btn"
+            style={{
+              background: "#ffffff",
+              border: "2px solid #f472b6",
+              padding: "12px",
+              borderRadius: "16px",
+              fontWeight: "900",
+              fontSize: "0.9rem",
+              color: "#831843",
+              cursor: "pointer"
+            }}
+          >
+            {language === "kn" ? opt.textKn : opt.text}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 23. PECS REQUEST CARD EXCHANGE GAME
+function RequestExchangeGame({ language, onComplete }) {
+  const items = [
+    { id: "apple", icon: "🍎", name: "Apple", nameKn: "ಸೇಬು" },
+    { id: "car", icon: "🚗", name: "Toy Car", nameKn: "ಆಟಿಕೆ ಕಾರು" },
+    { id: "juice", icon: "🧃", name: "Juice", nameKn: "ಜ್ಯೂಸ್" },
+    { id: "ball", icon: "⚽", name: "Ball", nameKn: "ಚೆಂಡು" }
+  ];
+
+  const [selected, setSelected] = useState(null);
+
+  const handleExchange = (item) => {
+    playSynthSound("pop");
+    setSelected(item);
+    playSynthSound("correct");
+    setTimeout(() => {
+      onComplete && onComplete(5);
+    }, 900);
+  };
+
+  return (
+    <div style={{ textAlign: "center", padding: "16px" }}>
+      <div style={{ fontSize: "1.1rem", fontWeight: "900", color: "#6366f1", marginBottom: "14px" }}>
+        🙋 Picture Request Board (PECS)
+      </div>
+      <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "0 0 16px" }}>
+        {language === "kn" ? "ನೀವು ವಿನಂತಿಸಲು ಬಯಸುವ ಕಾರ್ಡ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ:" : "Tap a picture card to exchange your request:"}
+      </p>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", maxWidth: "300px", margin: "0 auto" }}>
+        {items.map(item => (
+          <button
+            key={item.id}
+            onClick={() => handleExchange(item)}
+            className="bounce-btn"
+            style={{
+              background: selected?.id === item.id ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "#ffffff",
+              color: selected?.id === item.id ? "#fff" : "#1e293b",
+              border: "3px solid #c7d2fe",
+              padding: "16px 8px",
+              borderRadius: "20px",
+              cursor: "pointer",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "6px"
+            }}
+          >
+            <span style={{ fontSize: "2.4rem" }}>{item.icon}</span>
+            <span style={{ fontWeight: "900", fontSize: "0.9rem" }}>
+              {language === "kn" ? item.nameKn : item.name}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+/* ─── CENTRAL ROUTER (100% ONLINE INTERACTIVE GAMES) ─────────────────────────── */
+export default function InteractiveGameZone({ activity, language = "en", currentEmotion = "Happy", emotionConfidence = 0, onComplete }) {
+  
+  const title = (activity?.title || "").toLowerCase();
+  const category = (activity?.category || "").toLowerCase();
+
+  const renderGame = () => {
+    // 1. Direct Keyword / Title Matching
+    if (title.includes("word") || title.includes("letter") || title.includes("spell")) {
+      return <WordBuilderGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("breath") || title.includes("calm") || title.includes("star")) {
+      return <StarBreathingGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("ball") || title.includes("drop") || title.includes("chute") || title.includes("roll")) {
+      return <BallChuteGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("sand") || title.includes("dig") || title.includes("sensory bin") || title.includes("treasure")) {
+      return <SensoryDigGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("zone") || title.includes("trigger") || title.includes("detective") || title.includes("clue")) {
+      return <ZonesRegulationGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("bubble") || title.includes("pop")) {
+      return <BubblePoppingGame onComplete={onComplete} />;
+    }
+    if (title.includes("mirror") || title.includes("mimic") || title.includes("face")) {
+      return <MirrorPlayGame language={language} currentEmotion={currentEmotion} confidence={emotionConfidence} onComplete={onComplete} />;
+    }
+    if (title.includes("sound") || title.includes("music") || title.includes("audio")) {
+      return <NameThatSoundGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("shape") || title.includes("sorting") || title.includes("sort")) {
+      return <SortingShapesGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("color") || title.includes("flashcard") || title.includes("match")) {
+      return <FlashcardGame activity={activity} language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("request") || title.includes("pecs") || title.includes("picture exchange")) {
+      return <RequestExchangeGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("story") || title.includes("sequence") || title.includes("flow")) {
+      return <StorySequencingGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("dilemma") || title.includes("friend") || title.includes("problem") || title.includes("perspective")) {
+      return <SocialDilemmaGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("board") || title.includes("turn") || title.includes("game")) {
+      return <BoardGameGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("cook") || title.includes("snack") || title.includes("meal") || title.includes("food")) {
+      return <CookingGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("helper") || title.includes("interview") || title.includes("community")) {
+      return <HelperInterviewGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("obstacle") || title.includes("jump") || title.includes("course") || title.includes("agility")) {
+      return <ObstacleCourseGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("journal") || title.includes("feelings")) {
+      return <FeelingsJournalGame language={language} onComplete={onComplete} />;
+    }
+    if (title.includes("balloon") || title.includes("tap")) {
+      return <BalloonTappingGame onComplete={onComplete} />;
+    }
+    if (title.includes("paint") || title.includes("draw") || title.includes("sculpt") || title.includes("clay") || title.includes("doh")) {
+      return <PlaydoughSculptingGame language={language} onComplete={onComplete} />;
+    }
+
+    // 2. Category Fallbacks
+    if (category.includes("communication") || category.includes("talk")) {
+      return <FlashcardGame activity={activity} language={language} onComplete={onComplete} />;
+    }
+    if (category.includes("social") || category.includes("friend")) {
+      return <SocialDilemmaGame language={language} onComplete={onComplete} />;
+    }
+    if (category.includes("sensory") || category.includes("motor") || category.includes("move")) {
+      return <SensoryDigGame language={language} onComplete={onComplete} />;
+    }
+    if (category.includes("cognitive") || category.includes("think")) {
+      return <SortingShapesGame language={language} onComplete={onComplete} />;
+    }
+
+    // 3. Complete Interactive Task Routine Fallback
+    return <TaskRoutineGame activity={activity} language={language} onComplete={onComplete} />;
   };
 
   return (
@@ -1487,6 +2128,7 @@ export default function InteractiveGameZone({ activity, language = "en", current
         @keyframes bounceIn{0%{transform:scale(0.3);opacity:0}60%{transform:scale(1.15)}80%{transform:scale(0.95)}100%{transform:scale(1);opacity:1}}
         @keyframes float {0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
         @keyframes pulse {0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+        @keyframes starPop {0%{transform:scale(0.2);opacity:0}50%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
       `}</style>
       {renderGame()}
     </div>

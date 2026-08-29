@@ -6,16 +6,81 @@ import {
   linkByCode,
   assignTask,
   getActivities,
+  getParentFeedback,
 } from '../services/api';
 
 const LEVEL_LABEL = { 1: '🌱 Beginner (L1)', 2: '🌿 Intermediate (L2)', 3: '🌳 Advanced (L3)' };
 const LEVEL_COLOR_BG = { 1: '#dcfce7', 2: '#fef9c3', 3: '#fee2e2' };
 const LEVEL_COLOR_TEXT = { 1: '#166534', 2: '#854d0e', 3: '#991b1b' };
 
+// FeedbackCard component for parent dashboard
+const FeedbackCard = ({ feedback }) => (
+  <div
+    style={{
+      background: feedback.isRead ? '#f8faff' : '#EEF1FF',
+      border: `2px solid ${feedback.isRead ? '#e2e8f0' : '#4F6EF7'}`,
+      borderRadius: '16px',
+      padding: '20px',
+      marginBottom: '14px',
+    }}
+  >
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: '10px',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+        }}
+      >
+        <span style={{ fontSize: '1.5rem' }}>👨‍⚕️</span>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e293b' }}>
+            {feedback.therapist?.name || 'Dr. Therapist'} ({feedback.type ? feedback.type.replace('_', ' ').toUpperCase() : 'GUIDANCE'})
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+            {new Date(feedback.createdAt || Date.now()).toLocaleDateString()}
+          </div>
+        </div>
+      </div>
+      {!feedback.isRead && (
+        <span
+          style={{
+            background: '#4F6EF7',
+            color: 'white',
+            padding: '3px 10px',
+            borderRadius: '99px',
+            fontSize: '0.72rem',
+            fontWeight: 700,
+          }}
+        >
+          NEW
+        </span>
+      )}
+    </div>
+    <div
+      style={{
+        fontSize: '0.92rem',
+        color: '#1e293b',
+        lineHeight: '1.6',
+      }}
+    >
+      {feedback.message}
+    </div>
+  </div>
+);
+
+
 const ParentDashboard = ({ user, onNavigate }) => {
   const [children, setChildren] = useState([]);
   const [activities, setActivities] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
+  const [feedbackList, setFeedbackList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState('');
 
@@ -62,6 +127,17 @@ const ParentDashboard = ({ user, onNavigate }) => {
   useEffect(() => {
     loadData();
   }, [user._id]);
+
+  useEffect(() => {
+    if (selectedChild?._id) {
+      getParentFeedback(selectedChild._id)
+        .then((res) => setFeedbackList(Array.isArray(res) ? res : []))
+        .catch(() => setFeedbackList([]));
+    } else {
+      setFeedbackList([]);
+    }
+  }, [selectedChild?._id]);
+
 
   // Handle Photo Upload -> Base64 Data URL
   const handlePhotoChange = (e) => {
@@ -162,6 +238,19 @@ const ParentDashboard = ({ user, onNavigate }) => {
 
   // Start Therapy
   const handleStartTherapy = (childId) => {
+    const kid = children.find((k) => k._id === childId) || selectedChild;
+    if (kid) {
+      localStorage.setItem(
+        "currentChild",
+        JSON.stringify({
+          _id: kid._id,
+          name: kid.name || "Child",
+          level: Number(kid.level) || 1,
+          age: Number(kid.age) || 6,
+          profilePhoto: kid.profilePhoto || kid.photo || kid.avatar || null,
+        })
+      );
+    }
     if (onNavigate) {
       onNavigate(`/child/${childId}`);
     }
@@ -390,34 +479,36 @@ const ParentDashboard = ({ user, onNavigate }) => {
                       </div>
 
                       {/* Card Actions */}
-                      <div style={{ display: 'flex', gap: '10px' }}>
+                      <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
                         <button
                           className="btn btn-primary"
                           onClick={() => handleStartTherapy(child._id)}
                           style={{
-                            flex: 1,
+                            width: '100%',
                             justifyContent: 'center',
                             fontWeight: '700',
                             borderRadius: '10px',
                             padding: '10px',
                           }}
                         >
-                          🚀 Start Therapy →
+                          🚀 Start Therapy
                         </button>
-                        <button
-                          className="btn"
-                          onClick={() => setSelectedChild(child)}
-                          style={{
-                            background: isSelected ? 'var(--primary-light)' : '#f3f4f6',
-                            color: 'var(--text)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '10px',
-                            fontSize: '0.85rem',
-                            fontWeight: '600',
-                          }}
-                        >
-                          {isSelected ? 'Viewing' : 'Details'}
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                          <button
+                            className="btn"
+                            onClick={() => setSelectedChild(child)}
+                            style={{ flex: 1, borderRadius: '10px' }}
+                          >
+                            Details
+                          </button>
+                          <button
+                            className="btn"
+                            onClick={() => onNavigate(`/progress/${child._id}`)}
+                            style={{ flex: 1, borderRadius: '10px' }}
+                          >
+                            📈 View Progress
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -494,12 +585,33 @@ const ParentDashboard = ({ user, onNavigate }) => {
                 Activity & Task Management — {sc.name} ({sc.childId || 'CHD-XXXX'})
               </h2>
 
+              {/* Therapist Guidance & Feedback Section */}
+              {feedbackList.length > 0 && (
+                <div style={{ marginBottom: '24px' }}>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: '700', color: '#1e293b', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    💬 Clinical Guidance from Therapist ({feedbackList.length})
+                  </h3>
+                  <div>
+                    {feedbackList.map((fb) => (
+                      <FeedbackCard key={fb._id} feedback={fb} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Stats Grid */}
-              <div className="grid-2" style={{ marginBottom: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
                 <div className="stat-card" style={{ borderLeft: `5px solid ${LEVEL_COLOR_TEXT[sc.level] || '#6366f1'}` }}>
                   <div className="stat-label">Assessment Level</div>
-                  <div style={{ fontSize: '1.3rem', fontWeight: '800', color: LEVEL_COLOR_TEXT[sc.level] || 'var(--primary)', marginTop: '4px' }}>
+                  <div style={{ fontSize: '1.2rem', fontWeight: '800', color: LEVEL_COLOR_TEXT[sc.level] || 'var(--primary)', marginTop: '4px' }}>
                     {sc.level ? LEVEL_LABEL[sc.level] : '⏳ Assessment Needed'}
+                  </div>
+                </div>
+
+                <div className="stat-card" style={{ borderLeft: '5px solid #ea580c' }}>
+                  <div className="stat-label">Daily Streak</div>
+                  <div className="stat-num" style={{ color: '#ea580c' }}>
+                    🔥 {sc.streak || 0}
                   </div>
                 </div>
 

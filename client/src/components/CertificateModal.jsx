@@ -1,11 +1,23 @@
 import React from "react";
 
-export default function CertificateModal({ childName, activityTitle, xpEarned, stars = 5, onClose }) {
+export default function CertificateModal({ childName, childPhoto, activityTitle, xpEarned, stars = 5, onClose }) {
   const dateStr = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
+
+  // Resolve photo from prop or localStorage
+  const resolvedPhoto = childPhoto || (() => {
+    try {
+      const stored = localStorage.getItem("currentChild");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return parsed?.profilePhoto || parsed?.photo || parsed?.avatar || null;
+      }
+    } catch {}
+    return null;
+  })();
 
   const handlePrint = () => {
     // Open a simple print window with just the certificate
@@ -28,18 +40,32 @@ export default function CertificateModal({ childName, activityTitle, xpEarned, s
             }
             .cert-container {
               width: 800px;
-              height: 520px;
+              height: 540px;
               background: #fffdf5;
               border: 20px solid #f59e0b;
               border-image: linear-gradient(135deg, #f59e0b, #ec4899, #6366f1) 20;
               box-sizing: border-box;
-              padding: 30px;
+              padding: 24px 30px;
               text-align: center;
               position: relative;
               box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             }
+            .photo-badge-wrapper {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin-bottom: 8px;
+            }
+            .child-photo {
+              width: 84px;
+              height: 84px;
+              border-radius: 50%;
+              object-fit: cover;
+              border: 4px solid #f59e0b;
+              box-shadow: 0 4px 14px rgba(245,158,11,0.4);
+            }
             .star-badge {
-              font-size: 4rem;
+              font-size: 3.5rem;
               line-height: 1;
               margin-bottom: 5px;
             }
@@ -55,7 +81,7 @@ export default function CertificateModal({ childName, activityTitle, xpEarned, s
               color: #4b5563;
               text-transform: uppercase;
               letter-spacing: 2px;
-              margin: 0 0 20px;
+              margin: 0 0 10px;
             }
             .recipient {
               font-size: 2.2rem;
@@ -64,18 +90,18 @@ export default function CertificateModal({ childName, activityTitle, xpEarned, s
               border-bottom: 2px solid #e5e7eb;
               display: inline-block;
               padding: 0 30px 5px;
-              margin-bottom: 15px;
+              margin-bottom: 12px;
             }
             .details {
-              font-size: 1.1rem;
+              font-size: 1.05rem;
               color: #374151;
-              line-height: 1.6;
-              margin-bottom: 25px;
+              line-height: 1.5;
+              margin-bottom: 20px;
             }
             .footer-row {
               display: flex;
               justify-content: space-around;
-              margin-top: 30px;
+              margin-top: 20px;
             }
             .signature {
               border-top: 1px solid #9ca3af;
@@ -88,9 +114,14 @@ export default function CertificateModal({ childName, activityTitle, xpEarned, s
         </head>
         <body>
           <div class="cert-container">
-            <div class="star-badge">🏆</div>
+            <div class="photo-badge-wrapper">
+              ${resolvedPhoto 
+                ? `<img src="${resolvedPhoto}" alt="${childName}" class="child-photo" />`
+                : `<div class="star-badge">🏆</div>`
+              }
+            </div>
             <h2>Certificate of Achievement</h2>
-            <div style="font-size:0.9rem; color:#9ca3af; margin-bottom:15px;">THIS IS PROUDLY PRESENTED TO</div>
+            <div style="font-size:0.85rem; color:#9ca3af; margin-bottom:8px;">THIS IS PROUDLY PRESENTED TO</div>
             <div class="recipient">${childName}</div>
             <div class="details">
               For successfully playing and mastering the educational game<br/>
@@ -148,7 +179,7 @@ export default function CertificateModal({ childName, activityTitle, xpEarned, s
         borderRadius: "28px",
         width: "90%",
         maxWidth: "680px",
-        padding: "36px 28px",
+        padding: "32px 28px",
         textAlign: "center",
         boxShadow: "0 30px 70px rgba(0,0,0,0.5)",
         animation: "certPop 0.5s cubic-bezier(.34,1.56,.64,1) both",
@@ -161,19 +192,73 @@ export default function CertificateModal({ childName, activityTitle, xpEarned, s
         <div style={{ position: "absolute", bottom: "15%", left: "10%", fontSize: "1.6rem", opacity: 0.2 }}>🎈</div>
         <div style={{ position: "absolute", bottom: "12%", right: "12%", fontSize: "1.6rem", opacity: 0.2 }}>🎉</div>
 
-        {/* Gold Ribbon Badge */}
+        {/* Child Profile Photo or Gold Ribbon Badge */}
         <div style={{
-          fontSize: "4.5rem",
-          animation: "badgeGlow 2s infinite",
-          display: "inline-block",
-          marginBottom: "10px",
-          lineHeight: 1
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginBottom: "12px"
         }}>
-          🏆
+          <div style={{
+            position: "relative",
+            width: "86px",
+            height: "86px",
+            borderRadius: "50%",
+            padding: "3px",
+            background: "linear-gradient(135deg, #f59e0b, #ec4899, #6366f1)",
+            boxShadow: "0 8px 20px rgba(245,158,11,0.35)",
+            animation: "badgeGlow 3s infinite"
+          }}>
+            {resolvedPhoto ? (
+              <img
+                src={resolvedPhoto}
+                alt={childName}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  display: "block",
+                  background: "#ffffff"
+                }}
+              />
+            ) : (
+              <div style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #fef3c7, #fffbeb)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "2.6rem"
+              }}>
+                🏆
+              </div>
+            )}
+            <div style={{
+              position: "absolute",
+              bottom: "-2px",
+              right: "-2px",
+              background: "#f59e0b",
+              color: "#fff",
+              borderRadius: "50%",
+              width: "24px",
+              height: "24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "0.8rem",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+              border: "2px solid #ffffff"
+            }}>
+              ⭐
+            </div>
+          </div>
         </div>
 
         <h2 style={{
-          fontSize: "1.5rem",
+          fontSize: "1.45rem",
           fontWeight: "900",
           color: "#d97706",
           textTransform: "uppercase",
@@ -183,15 +268,15 @@ export default function CertificateModal({ childName, activityTitle, xpEarned, s
         }}>
           Certificate of Achievement
         </h2>
-        <div style={{ fontSize: "0.82rem", color: "#9ca3af", fontWeight: "800", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "18px" }}>
+        <div style={{ fontSize: "0.82rem", color: "#9ca3af", fontWeight: "800", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "12px" }}>
           this is proudly presented to
         </div>
 
         <div style={{
-          fontSize: "2.4rem",
+          fontSize: "2.2rem",
           fontWeight: "900",
           color: "#4f46e5",
-          margin: "0 0 16px 0",
+          margin: "0 0 14px 0",
           display: "inline-block",
           borderBottom: "3px dashed #cbd5e1",
           padding: "0 30px 4px 30px",
@@ -201,16 +286,16 @@ export default function CertificateModal({ childName, activityTitle, xpEarned, s
         </div>
 
         <p style={{
-          fontSize: "1.05rem",
-          lineHeight: "1.6",
+          fontSize: "1rem",
+          lineHeight: "1.5",
           color: "#4b5563",
-          margin: "0 auto 28px auto",
+          margin: "0 auto 24px auto",
           maxWidth: "500px",
           fontWeight: "700"
         }}>
           For successfully playing and mastering the educational game
           <br />
-          <strong style={{ color: "#111827", fontSize: "1.2rem" }}>"{activityTitle}"</strong>
+          <strong style={{ color: "#111827", fontSize: "1.15rem" }}>"{activityTitle}"</strong>
           <br />
           earning a perfect score of <strong style={{ color: "#d97706" }}>{stars} / 5 Stars</strong> and claiming <strong style={{ color: "#4f46e5" }}>{xpEarned} XP</strong>!
         </p>
@@ -220,9 +305,9 @@ export default function CertificateModal({ childName, activityTitle, xpEarned, s
           justifyContent: "space-between",
           alignItems: "center",
           maxWidth: "460px",
-          margin: "0 auto 28px auto",
+          margin: "0 auto 24px auto",
           borderTop: "1px solid #e5e7eb",
-          paddingTop: "14px"
+          paddingTop: "12px"
         }}>
           <div>
             <div style={{ fontWeight: "900", color: "#111827", fontSize: "0.9rem" }}>Autism Assistant</div>

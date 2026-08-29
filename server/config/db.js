@@ -369,6 +369,319 @@ const initialActivities = [
     ],
     goalSkills: ["Initiation", "Active listening", "Question formation"],
   },
+  // --- Additional activities added to cover the full game list requested ---
+  // Level 1 continued
+  {
+      _id: "a6",
+      title: "Story Builder",
+      level: 1,
+      difficulty: "Beginner",
+      category: "Communication",
+      duration: "12 min",
+      focusAreas: ["communication", "sequencing", "language"],
+      description:
+        "4 picture cards appear on screen. Child drags and drops cards in story order and plays the narrated animation.",
+      steps: [
+        "Show 4 picture cards",
+        "Child arranges them in order",
+        "Play story animation",
+        "Ask child to retell the story",
+      ],
+      goalSkills: ["Sequencing", "Narrative language", "Fine motor"],
+  },
+  {
+      _id: "a7",
+      title: "Describe and Find",
+      level: 1,
+      difficulty: "Beginner",
+      category: "Communication",
+      duration: "8 min",
+      focusAreas: ["listening", "vocabulary", "attention"],
+      description:
+        "Audio clue describes an object. Child clicks the matching picture from several options.",
+      steps: [
+        "Play description audio",
+        "Child clicks the correct object",
+        "Provide feedback and repeat",
+      ],
+      goalSkills: ["Listening comprehension", "Word-object mapping"],
+  },
+  {
+      _id: "a8",
+      title: "Word Builder",
+      level: 1,
+      difficulty: "Beginner",
+      category: "Communication",
+      duration: "10 min",
+      focusAreas: ["letters", "spelling", "fine motor"],
+      description:
+        "Letter tiles appear scattered. Child drags letters to spell the target word shown by image.",
+      steps: ["Show target image", "Child arranges letters", "Confirm spelling"],
+      goalSkills: ["Letter recognition", "Spelling", "Dexterity"],
+  },
+  {
+      _id: "a9",
+      title: "Question Ball",
+      level: 1,
+      difficulty: "Beginner",
+      category: "Communication",
+      duration: "10 min",
+      focusAreas: ["expressive language", "choice-making"],
+      description:
+        "Animated ball bounces and shows a question. Child types or speaks an answer; parent verifies.",
+      steps: ["Read or listen to question", "Respond (text or voice)", "Parent confirms response"],
+      goalSkills: ["Expressive language", "Turn-taking"],
+  },
+  {
+      _id: "a10",
+      title: "Emotion Charades Camera",
+      level: 1,
+      difficulty: "Beginner",
+      category: "Social",
+      duration: "8 min",
+      focusAreas: ["emotion recognition", "camera interaction"],
+      description:
+        "Emotion word appears; child makes face to camera. face-api.js checks match and gives feedback.",
+      steps: ["Show emotion word", "Child imitates face to camera", "App checks and gives feedback"],
+      goalSkills: ["Emotion recognition", "Facial expression"],
+  },
+  {
+      _id: "a11",
+      title: "Compliment Builder",
+      level: 1,
+      difficulty: "Beginner",
+      category: "Social",
+      duration: "8 min",
+      focusAreas: ["language", "positive social interaction"],
+      description:
+        "Drag word tiles to build a compliment for the character. Character reacts happily.",
+      steps: ["Choose word tiles", "Build a short compliment", "Save compliment card"],
+      goalSkills: ["Sentence building", "Social positivity"],
+  },
+  // Level 2 (additions)
+  {
+      _id: "b6",
+      title: "Memory Match Cards",
+      level: 2,
+      difficulty: "Intermediate",
+      category: "Cognitive",
+      duration: "10-15 min",
+      focusAreas: ["memory", "attention"],
+      description:
+        "16 cards face down; flip 2 to match pairs. Complete all pairs to win with timer.",
+      steps: ["Flip two cards", "Keep matches face up", "Complete all pairs"],
+      goalSkills: ["Working memory", "Visual matching"],
+  },
+  {
+      _id: "b7",
+      title: "Pattern Completion",
+      level: 2,
+      difficulty: "Intermediate",
+      category: "Cognitive",
+      duration: "10 min",
+      focusAreas: ["pattern recognition", "visual sequencing"],
+      description:
+        "Show pattern with missing item; child chooses correct next shape or color from options.",
+      steps: ["Show pattern", "Child selects correct option", "Provide feedback"],
+      goalSkills: ["Prediction", "Patterning"],
+  },
+  {
+      _id: "b8",
+      title: "Category Sort Drag Drop",
+      level: 2,
+      difficulty: "Intermediate",
+      category: "Cognitive",
+      duration: "12 min",
+      focusAreas: ["categorization", "drag-and-drop"],
+      description:
+        "Drag items into category boxes (Animals, Food, Vehicles). Correct items snap in place.",
+      steps: ["Drag item to category", "Correct items stay", "Score at end"],
+      goalSkills: ["Categorization", "Classification"],
+  },
+  {
+      _id: "b9",
+      title: "Simon Says",
+      level: 2,
+      difficulty: "Intermediate",
+      category: "Sensory",
+      duration: "10 min",
+      focusAreas: ["listening", "impulse control"],
+      description:
+        "Character issues 'Simon says' actions. Child must follow only when prompted by 'Simon says'.",
+      steps: ["Listen to instruction", "Act only when 'Simon says'", "Keep score across rounds"],
+      goalSkills: ["Inhibition", "Listening"],
+  },
+  {
+      _id: "b10",
+      title: "Picture Exchange Click",
+      level: 2,
+      difficulty: "Intermediate",
+      category: "Communication",
+      duration: "8 min",
+      focusAreas: ["requesting", "choice-making"],
+      description:
+        "Child selects a picture card to request an item after audio prompt. Parent confirms selection.",
+      steps: ["Play 'What do you want?'", "Child clicks picture", "Animate giving item"],
+      goalSkills: ["Functional communication", "Choice"],
+  },
+  {
+      _id: "b11",
+      title: "Yes No Button Game",
+      level: 2,
+      difficulty: "Intermediate",
+      category: "Communication",
+      duration: "10 min",
+      focusAreas: ["labeling", "yes-no understanding"],
+      description:
+        "Big YES and NO buttons with picture and question. Child presses correct answer.",
+      steps: ["Show picture and question", "Child presses YES or NO", "Feedback provided"],
+      goalSkills: ["Yes/no comprehension", "Decision making"],
+  },
+  {
+      _id: "b12",
+      title: "Name That Object",
+      level: 2,
+      difficulty: "Intermediate",
+      category: "Communication",
+      duration: "8 min",
+      focusAreas: ["vocabulary", "auditory recognition"],
+      description:
+        "Show object image and play sound; child selects correct name from four cards.",
+      steps: ["Play sound", "Child selects name card", "Provide reward"],
+      goalSkills: ["Word-object mapping", "Listening"],
+  },
+  {
+      _id: "b13",
+      title: "Request the Item",
+      level: 2,
+      difficulty: "Intermediate",
+      category: "Communication",
+      duration: "8 min",
+      focusAreas: ["functional requesting", "choice"],
+      description:
+        "Child uses gesture buttons (MORE / STOP / HELP) to request an on-screen preferred item.",
+      steps: ["Show item out of reach", "Child selects gesture", "Animate result"],
+      goalSkills: ["Requesting", "Response to prompts"],
+  },
+  // Level 3 (additions)
+  {
+      _id: "c6",
+      title: "Mirror Expression Camera",
+      level: 3,
+      difficulty: "Advanced",
+      category: "Social",
+      duration: "10 min",
+      focusAreas: ["facial matching", "camera"],
+      description:
+        "Child matches an on-screen emotion using the camera; face-api.js verifies the expression.",
+      steps: ["Display target emotion", "Child mirrors to camera", "Give star and proceed"],
+      goalSkills: ["Facial expression", "Matching"],
+  },
+  {
+      _id: "c7",
+      title: "Turn Taking Ball Animation",
+      level: 3,
+      difficulty: "Advanced",
+      category: "Social",
+      duration: "10 min",
+      focusAreas: ["turn-taking", "waiting"],
+      description:
+        "Animated ball passes between characters. Child clicks to pass back when it's their turn.",
+      steps: ["Wait for YOUR TURN", "Click to roll ball back", "Complete rounds"],
+      goalSkills: ["Waiting", "Turn-taking"],
+  },
+  {
+      _id: "c8",
+      title: "Emotion Matching Game",
+      level: 3,
+      difficulty: "Advanced",
+      category: "Social",
+      duration: "10 min",
+      focusAreas: ["labeling emotions", "audio feedback"],
+      description:
+        "Show emotion face and four label options. Child selects correct label and hears audio confirmation.",
+      steps: ["View emotion", "Select label", "Hear audio feedback"],
+      goalSkills: ["Emotion vocabulary", "Listening"],
+  },
+  {
+      _id: "c9",
+      title: "Hello Goodbye Practice",
+      level: 3,
+      difficulty: "Advanced",
+      category: "Social",
+      duration: "8 min",
+      focusAreas: ["greeting routines", "sequencing"],
+      description:
+        "Practice greeting and goodbye routines with animated character that waves and responds.",
+      steps: ["Click WAVE to greet", "Character waves back", "Click GOODBYE to end"],
+      goalSkills: ["Social routines", "Timing"],
+  },
+  {
+      _id: "c10",
+      title: "Car Down Ramp",
+      level: 3,
+      difficulty: "Advanced",
+      category: "Sensory",
+      duration: "5 min",
+      focusAreas: ["cause-effect", "animation"],
+      description:
+        "Child clicks PUSH button to make car roll down a ramp. Simple cause-effect interaction.",
+      steps: ["Press PUSH", "Watch car roll", "Repeat if desired"],
+      goalSkills: ["Cause-effect", "Fine motor"],
+  },
+  {
+      _id: "c11",
+      title: "Calm Music Player",
+      level: 3,
+      difficulty: "Advanced",
+      category: "Sensory",
+      duration: "Unlimited",
+      focusAreas: ["sensory", "auditory"],
+      description:
+        "Play calming music with visuals; child taps to add sparkles. Volume control for parent.",
+      steps: ["Play music", "Tap to add effects", "Adjust volume"],
+      goalSkills: ["Self-soothing", "Cause-effect"],
+  },
+  {
+      _id: "c12",
+      title: "Sensory Bubble Screen",
+      level: 3,
+      difficulty: "Advanced",
+      category: "Sensory",
+      duration: "Unlimited",
+      focusAreas: ["visual", "touch"],
+      description:
+        "Colorful bubbles float; child taps to pop with gentle sound. New bubbles spawn continuously.",
+      steps: ["Tap a bubble", "Enjoy pop feedback", "Keep playing"],
+      goalSkills: ["Touch interaction", "Visual tracking"],
+  },
+  // Offline games
+  {
+      _id: "off1",
+      title: "Rice Bin Exploration",
+      level: 2,
+      difficulty: "Offline",
+      category: "Sensory",
+      duration: "15-20 min",
+      focusAreas: ["sensory motor", "exploration"],
+      description:
+        "Parent hides small toys in a rice bin for child to find. Parent logs score and notes after session.",
+      steps: ["Prepare rice bin", "Hide 3 toys", "Child explores and finds toys", "Parent logs results"],
+      goalSkills: ["Tactile exploration", "Object permanence"],
+  },
+  {
+      _id: "off2",
+      title: "Deep Pressure Hug",
+      level: 3,
+      difficulty: "Offline",
+      category: "Sensory",
+      duration: "5-10 sec per hug",
+      focusAreas: ["sensory motor", "calming"],
+      description:
+        "Parent gives a firm gentle hug for 10 seconds to provide deep pressure calming; logs child's comfort level.",
+      steps: ["Provide a gentle firm hug for 10 seconds", "Observe child's comfort", "Log result"],
+      goalSkills: ["Regulation", "Body awareness"],
+  },
 ];
 
 const initialQuestions = [
@@ -443,11 +756,11 @@ const initialQuestions = [
 
 const seedDB = async () => {
   try {
-    const actCount = await Activity.countDocuments();
-    if (actCount === 0) {
-      await Activity.insertMany(initialActivities);
-      console.log("✅ Seeded activities into MongoDB");
+    // Upsert activities: insert any that are missing without overwriting existing records
+    for (const act of initialActivities) {
+      await Activity.updateOne({ _id: act._id }, { $setOnInsert: act }, { upsert: true });
     }
+    console.log("✅ Ensured activities exist in MongoDB (upserted missing entries)");
 
     const qCount = await Question.countDocuments();
     if (qCount === 0) {

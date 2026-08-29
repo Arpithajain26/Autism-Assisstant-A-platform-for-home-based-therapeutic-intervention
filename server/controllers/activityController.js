@@ -61,3 +61,25 @@ exports.getRecommendations = async (req, res) => {
     res.status(500).json({ message: 'Error fetching recommendations', error: error.message });
   }
 };
+
+exports.logSession = async (req, res) => {
+  try {
+    const { childId, activityId, score, emotion, confidence, duration, completedAt } = req.body;
+    const Session = require('../models/Session');
+    const session = await Session.create({
+      child: childId, activity: activityId,
+      score, emotion, confidence, duration,
+      completedAt: completedAt || new Date(),
+      week: getWeekNumber(new Date())
+    });
+    res.status(201).json({ success: true, session });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+function getWeekNumber(date) {
+  const start = new Date(date.getFullYear(), 0, 1);
+  return Math.ceil((((date - start) / 86400000) + start.getDay() + 1) / 7);
+}
+
