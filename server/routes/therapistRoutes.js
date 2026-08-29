@@ -8,7 +8,11 @@ const {
   updateChildLevel,
   getTherapistAlerts,
   acknowledgeAlert,
+  getAllTherapists,
 } = require("../controllers/therapistController");
+
+// List all 6 therapists
+router.get("/all", getAllTherapists);
 
 // Therapist child and progress endpoints
 router.get("/children", getTherapistChildren);

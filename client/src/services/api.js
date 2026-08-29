@@ -1673,6 +1673,14 @@ export const getParentFeedback = async (childId) => {
   }
 };
 
+export const getAllTherapists = async () => {
+  try {
+    return await req("GET", "/api/therapist/all");
+  } catch (err) {
+    return [];
+  }
+};
+
 
 
 

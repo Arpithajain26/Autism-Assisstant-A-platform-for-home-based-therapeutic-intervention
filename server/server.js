@@ -261,18 +261,37 @@ app.post("/api/children/create", async (req, res) => {
         .json({ error: "Child's name and age are required." });
     }
 
+    const childAge = parseInt(age);
+    const childLevel = supportLevel?.includes("3") ? 3 : supportLevel?.includes("2") ? 2 : 1;
+
+    // Automatically find matching therapist based on Age & Level if not explicitly specified
+    let matchedTherapistId = therapistId || null;
+    if (!matchedTherapistId) {
+      try {
+        const { findBestTherapistForChild } = require("./seed/seedTherapists");
+        const therapists = await User.find({ role: "therapist" });
+        if (therapists.length > 0) {
+          const matched = findBestTherapistForChild(childAge, childLevel, therapists);
+          if (matched) matchedTherapistId = matched._id;
+        }
+      } catch (matchErr) {
+        console.warn("Therapist auto-matching error:", matchErr.message);
+      }
+    }
+
     const newChild = new Child({
       name,
-      age: parseInt(age),
+      age: childAge,
       gender: gender || "male",
       profilePhoto: profilePhoto || null,
       supportLevel: supportLevel || null,
+      level: childLevel,
       parentId: parentId || null,
-      therapistId: therapistId || null,
+      therapistId: matchedTherapistId,
     });
 
     // If created by therapist without parentId, generate link code
-    if (!parentId && therapistId) {
+    if (!parentId && matchedTherapistId) {
       newChild.linkCode = generateLinkCode();
     }
 
@@ -286,8 +305,8 @@ app.post("/api/children/create", async (req, res) => {
     }
 
     // Link child ID to Therapist doc if therapistId exists
-    if (therapistId) {
-      await User.findByIdAndUpdate(therapistId, {
+    if (matchedTherapistId) {
+      await User.findByIdAndUpdate(matchedTherapistId, {
         $addToSet: { assignedChildren: newChild._id },
       });
     }

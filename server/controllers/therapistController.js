@@ -302,3 +302,18 @@ exports.acknowledgeAlert = async (req, res) => {
     res.status(500).json({ error: error.message || "Failed to acknowledge alert" });
   }
 };
+
+// 8. GET /api/therapist/all (List all 6 therapists with profiles and stats)
+exports.getAllTherapists = async (req, res) => {
+  try {
+    const therapists = await User.find({ role: "therapist" })
+      .select("-password")
+      .populate("assignedChildren", "name age level gender childId")
+      .lean();
+
+    res.json(therapists);
+  } catch (error) {
+    console.error("getAllTherapists error:", error);
+    res.status(500).json({ error: error.message || "Failed to fetch therapists" });
+  }
+};

@@ -4,6 +4,7 @@ import {
   getAlerts,
   createChild,
   generateLinkCode,
+  getAllTherapists,
 } from "../services/api";
 import ChildDetailModal from "../components/ChildDetailModal";
 
@@ -17,11 +18,14 @@ const STATUS_BADGES = {
   Improving: { label: "↑ Improving", labelKn: "↑ ಸುಧಾರಿಸುತ್ತಿದೆ", color: "#166534", bg: "#dcfce7", border: "#86efac" },
   Stable: { label: "→ Stable", labelKn: "→ ಸ್ಥಿರವಾಗಿದೆ", color: "#854d0e", bg: "#fef9c3", border: "#fde047" },
   Regressing: { label: "↓ Regressing", labelKn: "↓ ಹಿಂದುಳಿಯುತ್ತಿದೆ", color: "#991b1b", bg: "#fee2e2", border: "#fca5a5" },
+  "Collecting Data": { label: "⏳ Collecting Data", labelKn: "⏳ ಮಾಹಿತಿ ಸಂಗ್ರಹ", color: "#475569", bg: "#f1f5f9", border: "#cbd5e1" },
 };
 
 export default function TherapistDashboard({ user, onNavigate }) {
   const [lang, setLang] = useState("en"); // "en" or "kn"
-  const [activeNav, setActiveNav] = useState("overview"); // overview, children, reports, messages, alerts, settings
+  const [activeNav, setActiveNav] = useState("overview"); // overview, children, specialists, reports, messages, alerts, settings
+  const [therapistsList, setTherapistsList] = useState([]);
+  const [activeTherapistId, setActiveTherapistId] = useState(user?._id || null);
   const [children, setChildren] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,15 +42,30 @@ export default function TherapistDashboard({ user, onNavigate }) {
 
   const t = (en, kn) => (lang === "kn" ? kn : en);
 
-  const therapist = user || JSON.parse(localStorage.getItem("auth_user") || "{}");
+  // Determine current active therapist profile
+  const currentTherapist =
+    therapistsList.find((th) => th._id === activeTherapistId) ||
+    user ||
+    therapistsList[0] ||
+    JSON.parse(localStorage.getItem("auth_user") || "{}");
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const [kids, altList] = await Promise.all([
-        getTherapistChildren().catch(() => []),
+      const [allTherapists, altList] = await Promise.all([
+        getAllTherapists().catch(() => []),
         getAlerts().catch(() => []),
       ]);
+
+      const tList = Array.isArray(allTherapists) ? allTherapists : [];
+      setTherapistsList(tList);
+
+      const targetId = activeTherapistId || (tList.length > 0 ? tList[0]._id : null) || user?._id;
+      if (!activeTherapistId && targetId) {
+        setActiveTherapistId(targetId);
+      }
+
+      const kids = await getTherapistChildren().catch(() => []);
       setChildren(Array.isArray(kids) ? kids : []);
       setAlerts(Array.isArray(altList) ? altList : []);
     } catch (err) {
@@ -60,6 +79,12 @@ export default function TherapistDashboard({ user, onNavigate }) {
     loadDashboardData();
   }, [user?._id]);
 
+  // Filter children for the active therapist
+  const displayedChildren = children.filter((c) => {
+    if (!activeTherapistId) return true;
+    return String(c.therapistId) === String(activeTherapistId) || !c.therapistId;
+  });
+
   const handleOpenDetail = (child, tab = "overview") => {
     setSelectedChild(child);
     setInitialModalTab(tab);
@@ -70,7 +95,7 @@ export default function TherapistDashboard({ user, onNavigate }) {
     setAddLoading(true);
     try {
       const res = await createChild({
-        therapistId: therapist._id || therapist.id,
+        therapistId: activeTherapistId || currentTherapist._id || currentTherapist.id,
         name: newPatient.name.trim(),
         age: parseInt(newPatient.age),
         gender: newPatient.gender,
@@ -90,10 +115,10 @@ export default function TherapistDashboard({ user, onNavigate }) {
   };
 
   // Compute Statistics
-  const totalChildren = children.length;
-  const improvingCount = children.filter((c) => c.progressStatus === "Improving").length;
-  const attentionCount = children.filter((c) => c.progressStatus === "Regressing" || c.weeksStable >= 3).length;
-  const feedbackSentCount = 8; // aggregate
+  const totalChildren = displayedChildren.length;
+  const improvingCount = displayedChildren.filter((c) => c.progressStatus === "Improving").length;
+  const attentionCount = displayedChildren.filter((c) => c.progressStatus === "Regressing" || c.weeksStable >= 3).length;
+  const feedbackSentCount = 8;
   const pendingFeedbackCount = attentionCount + (alerts.length ? 1 : 0);
   const unreadAlertsCount = alerts.length;
 
@@ -109,7 +134,7 @@ export default function TherapistDashboard({ user, onNavigate }) {
       {/* ── Dark Sidebar Navigation ────────────────────────────────────────── */}
       <aside
         style={{
-          width: "260px",
+          width: "270px",
           background: "#0f172a",
           color: "#f8fafc",
           display: "flex",
@@ -127,7 +152,7 @@ export default function TherapistDashboard({ user, onNavigate }) {
               Autism Assistant
             </div>
             <div style={{ fontSize: "0.72rem", color: "#94a3b8", fontWeight: "600", textTransform: "uppercase" }}>
-              {t("Therapist Portal", "ವೈದ್ಯರ ವೇದಿಕೆ")}
+              {t("Therapist Clinical Portal", "ವೈದ್ಯರ ಕ್ಲಿನಿಕಲ್ ವೇದಿಕೆ")}
             </div>
           </div>
         </div>
@@ -136,11 +161,11 @@ export default function TherapistDashboard({ user, onNavigate }) {
         <nav style={{ display: "flex", flexDirection: "column", gap: "6px", flex: 1 }}>
           {[
             { id: "overview", icon: "🏠", label: t("Overview", "ಅವಲೋಕನ") },
-            { id: "children", icon: "👶", label: t("My Children", "ನನ್ನ ಮಕ್ಕಳು"), badge: totalChildren },
+            { id: "children", icon: "👶", label: t("Assigned Children", "ನಿಯೋಜಿತ ಮಕ್ಕಳು"), badge: totalChildren },
+            { id: "specialists", icon: "👨‍⚕️", label: t("Specialist Directory", "6 ವೈದ್ಯರ ಪ್ರೊಫೈಲ್‌ಗಳು"), badge: therapistsList.length || 6 },
             { id: "reports", icon: "📊", label: t("Progress Reports", "ಪ್ರಗತಿ ವರದಿಗಳು") },
             { id: "messages", icon: "💬", label: t("Messages", "ಸಂದೇಶಗಳು"), badge: pendingFeedbackCount, badgeColor: "#ef4444" },
             { id: "alerts", icon: "🔔", label: t("Alerts", "ಎಚ್ಚರಿಕೆಗಳು"), badge: unreadAlertsCount, badgeColor: "#f97316" },
-            { id: "settings", icon: "⚙️", label: t("Settings", "ಸಂಯೋಜನೆಗಳು") },
           ].map((nav) => {
             const isSel = activeNav === nav.id;
             return (
@@ -186,39 +211,55 @@ export default function TherapistDashboard({ user, onNavigate }) {
           })}
         </nav>
 
-        {/* Therapist Profile Badge at bottom of sidebar */}
+        {/* Active Therapist Profile Badge in Sidebar */}
         <div
           style={{
             background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: "1px solid rgba(255,255,255,0.12)",
             borderRadius: "14px",
-            padding: "14px",
+            padding: "12px",
             display: "flex",
             alignItems: "center",
             gap: "12px",
           }}
         >
-          <div
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #4F6EF7 0%, #a855f7 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "1.2rem",
-              fontWeight: "700",
-            }}
-          >
-            👨‍⚕️
-          </div>
+          {currentTherapist.profilePhoto ? (
+            <img
+              src={currentTherapist.profilePhoto}
+              alt={currentTherapist.name}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "2px solid #4F6EF7",
+                flexShrink: 0,
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #4F6EF7 0%, #a855f7 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "1.3rem",
+                fontWeight: "700",
+                flexShrink: 0,
+              }}
+            >
+              👨‍⚕️
+            </div>
+          )}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: "700", fontSize: "0.88rem", color: "white", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {therapist.name || "Dr. Therapist"}
+            <div style={{ fontWeight: "800", fontSize: "0.88rem", color: "white", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {currentTherapist.name || "Dr. Therapist"}
             </div>
             <div style={{ fontSize: "0.72rem", color: "#94a3b8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {therapist.specialization || "Clinical Specialist"}
+              {currentTherapist.specialization || "Clinical Autism Specialist"}
             </div>
           </div>
         </div>
@@ -226,6 +267,77 @@ export default function TherapistDashboard({ user, onNavigate }) {
 
       {/* ── Main Content Area ──────────────────────────────────────────────── */}
       <main style={{ flex: 1, padding: "28px 36px", overflowY: "auto", minWidth: 0 }}>
+        {/* TOP BAR: SPECIALIST SWITCHER */}
+        {therapistsList.length > 0 && (
+          <div
+            style={{
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
+              borderRadius: "16px",
+              padding: "14px 20px",
+              marginBottom: "24px",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "14px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "1.4rem" }}>🩺</span>
+              <div>
+                <div style={{ fontSize: "0.82rem", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
+                  {t("Active Specialist View (Click to Switch):", "ವೈದ್ಯರ ಪ್ರೊಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ:")}
+                </div>
+                <div style={{ fontSize: "0.95rem", fontWeight: "800", color: "#1e293b" }}>
+                  {currentTherapist.name} ({currentTherapist.qualification || "BCBA"})
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Switcher Avatars */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              {therapistsList.map((th) => {
+                const isSelected = th._id === activeTherapistId;
+                return (
+                  <button
+                    key={th._id}
+                    onClick={() => setActiveTherapistId(th._id)}
+                    title={`${th.name} — ${th.specialization} (Target: Ages ${th.targetAgeMin}-${th.targetAgeMax})`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "6px 12px",
+                      borderRadius: "20px",
+                      border: isSelected ? "2px solid #4F6EF7" : "1px solid #e2e8f0",
+                      background: isSelected ? "#eef2ff" : "#ffffff",
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    <img
+                      src={th.profilePhoto}
+                      alt={th.name}
+                      style={{
+                        width: 26,
+                        height: 26,
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        border: isSelected ? "1.5px solid #4F6EF7" : "1px solid #cbd5e1",
+                      }}
+                    />
+                    <span style={{ fontSize: "0.8rem", fontWeight: isSelected ? "800" : "600", color: isSelected ? "#4F6EF7" : "#475569" }}>
+                      {th.name.split(" ")[1]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* SECTION 1: HEADER */}
         <header
           style={{
@@ -239,49 +351,14 @@ export default function TherapistDashboard({ user, onNavigate }) {
         >
           <div>
             <h1 style={{ fontSize: "1.85rem", fontWeight: "800", color: "#0f172a", margin: "0 0 4px 0" }}>
-              {t("Therapist Clinical Dashboard", "ವೈದ್ಯರ ಕ್ಲಿನಿಕಲ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್")} 👩‍⚕️
+              {t("Therapist Clinical Hub", "ವೈದ್ಯರ ಕ್ಲಿನಿಕಲ್ ವೇದಿಕೆ")} 👩‍⚕️
             </h1>
             <p style={{ margin: 0, color: "#64748b", fontSize: "0.92rem" }}>
-              {t("Welcome back", "ಸ್ವಾಗತ")}, <strong>{therapist.name || "Dr. Specialist"}</strong> (
-              {therapist.specialization || "BCBA / Clinical Specialist"})
+              {currentTherapist.name} · {currentTherapist.specialization} · <em>{currentTherapist.clinic}</em>
             </p>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            {/* Pending Feedback Badge */}
-            {pendingFeedbackCount > 0 && (
-              <div
-                style={{
-                  background: "#fee2e2",
-                  color: "#991b1b",
-                  border: "1px solid #fca5a5",
-                  padding: "6px 14px",
-                  borderRadius: "20px",
-                  fontSize: "0.82rem",
-                  fontWeight: "800",
-                }}
-              >
-                🔴 {pendingFeedbackCount} {t("Pending Feedback", "ಬಾಕಿ ಉಳಿದ ಪ್ರತಿಕ್ರಿಯೆ")}
-              </div>
-            )}
-
-            {/* Unread Alerts Badge */}
-            {unreadAlertsCount > 0 && (
-              <div
-                style={{
-                  background: "#ffedd5",
-                  color: "#9a3412",
-                  border: "1px solid #fdba74",
-                  padding: "6px 14px",
-                  borderRadius: "20px",
-                  fontSize: "0.82rem",
-                  fontWeight: "800",
-                }}
-              >
-                🟠 {unreadAlertsCount} {t("Active Alerts", "ಎಚ್ಚರಿಕೆಗಳು")}
-              </div>
-            )}
-
             {/* Language Toggle */}
             <button
               onClick={() => setLang((l) => (l === "en" ? "kn" : "en"))}
@@ -324,387 +401,446 @@ export default function TherapistDashboard({ user, onNavigate }) {
           </div>
         </header>
 
-        {/* SECTION 2: ALERT BANNER */}
-        {alerts.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "28px" }}>
-            {alerts.map((alt, idx) => {
-              const isRed = alt.severity === "red" || alt.type === "urgent";
-              return (
+        {/* TAB 1 & 2: OVERVIEW & CHILDREN CARDS */}
+        {(activeNav === "overview" || activeNav === "children") && (
+          <div>
+            {/* ALERT BANNER */}
+            {alerts.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "28px" }}>
+                {alerts.map((alt, idx) => {
+                  const isRed = alt.severity === "red" || alt.type === "urgent";
+                  return (
+                    <div
+                      key={alt.id || idx}
+                      style={{
+                        background: isRed ? "#fef2f2" : "#fefce8",
+                        border: `1.5px solid ${isRed ? "#fca5a5" : "#fde047"}`,
+                        color: isRed ? "#991b1b" : "#854d0e",
+                        borderRadius: "16px",
+                        padding: "16px 22px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: "12px",
+                        boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <span style={{ fontSize: "1.6rem" }}>{isRed ? "🔴" : "⚠️"}</span>
+                        <div>
+                          <div style={{ fontWeight: "800", fontSize: "0.98rem" }}>{alt.title}</div>
+                          <div style={{ fontSize: "0.85rem", opacity: 0.9, marginTop: "2px" }}>
+                            {alt.description}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const matched = children.find((c) => c._id === alt.childId || c.name === alt.childName) || children[0];
+                          if (matched) handleOpenDetail(matched, "overview");
+                        }}
+                        style={{
+                          padding: "8px 18px",
+                          borderRadius: "10px",
+                          border: "none",
+                          background: isRed ? "#dc2626" : "#ca8a04",
+                          color: "white",
+                          fontWeight: "800",
+                          fontSize: "0.85rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {alt.actionText || t("Review Now", "ಪರಿಶೀಲಿಸಿ")} →
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* QUICK STATS ROW */}
+            <section
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: "18px",
+                marginBottom: "32px",
+              }}
+            >
+              {[
+                { label: t("Assigned to Specialist", "ತಜ್ಞರಿಗೆ ನಿಯೋಜಿಸಲಾದ ಮಕ್ಕಳು"), val: totalChildren, icon: "👶", color: "#4F6EF7", bg: "#eef2ff" },
+                { label: t("Children Improving", "ಸುಧಾರಿಸುತ್ತಿರುವವರು"), val: improvingCount, icon: "📈", color: "#16a34a", bg: "#dcfce7" },
+                { label: t("Children Needing Attention", "ಗಮನ ಅಗತ್ಯವಿರುವವರು"), val: attentionCount, icon: "⚠️", color: "#dc2626", bg: "#fee2e2" },
+                { label: t("Clinical Specialization", "ಕ್ಲಿನಿಕಲ್ ಪರಿಣತಿ"), val: currentTherapist.yearsOfExperience ? `${currentTherapist.yearsOfExperience} Yrs Exp` : "10+ Yrs", icon: "🩺", color: "#8b5cf6", bg: "#f3e8ff" },
+              ].map((st, i) => (
                 <div
-                  key={alt.id || idx}
+                  key={i}
                   style={{
-                    background: isRed ? "#fef2f2" : "#fefce8",
-                    border: `1.5px solid ${isRed ? "#fca5a5" : "#fde047"}`,
-                    color: isRed ? "#991b1b" : "#854d0e",
+                    background: "white",
                     borderRadius: "16px",
-                    padding: "16px 22px",
+                    padding: "20px 24px",
+                    border: "1px solid #e2e8f0",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
                     display: "flex",
-                    justifyContent: "space-between",
                     alignItems: "center",
-                    flexWrap: "wrap",
-                    gap: "12px",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+                    justifyContent: "space-between",
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ fontSize: "1.6rem" }}>{isRed ? "🔴" : "⚠️"}</span>
-                    <div>
-                      <div style={{ fontWeight: "800", fontSize: "0.98rem" }}>{alt.title}</div>
-                      <div style={{ fontSize: "0.85rem", opacity: 0.9, marginTop: "2px" }}>
-                        {alt.description}
-                      </div>
+                  <div>
+                    <div style={{ fontSize: "0.82rem", color: "#64748b", fontWeight: "600", marginBottom: "4px" }}>
+                      {st.label}
                     </div>
+                    <div style={{ fontSize: "1.75rem", fontWeight: "800", color: "#0f172a" }}>{st.val}</div>
                   </div>
-
-                  <button
-                    onClick={() => {
-                      const matched = children.find((c) => c._id === alt.childId || c.name === alt.childName) || children[0];
-                      if (matched) handleOpenDetail(matched, "overview");
-                    }}
+                  <div
                     style={{
-                      padding: "8px 18px",
-                      borderRadius: "10px",
+                      width: 48,
+                      height: 48,
+                      borderRadius: "14px",
+                      background: st.bg,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "1.4rem",
+                    }}
+                  >
+                    {st.icon}
+                  </div>
+                </div>
+              ))}
+            </section>
+
+            {/* CHILDREN CARDS */}
+            <section>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
+                <h2 style={{ fontSize: "1.3rem", fontWeight: "800", color: "#0f172a", margin: 0 }}>
+                  👶 {t("Assigned Patient Cohort", "ನಿಯೋಜಿತ ರೋಗಿಗಳು")} ({displayedChildren.length})
+                </h2>
+                <span style={{ fontSize: "0.85rem", color: "#64748b" }}>
+                  {t("Clinically matched based on Age & Support Level", "ವಯಸ್ಸು ಮತ್ತು ಬೆಂಬಲ ಮಟ್ಟದ ಆಧಾರದ ಮೇಲೆ ನಿಯೋಜಿಸಲಾಗಿದೆ")}
+                </span>
+              </div>
+
+              {loading ? (
+                <div style={{ textAlign: "center", padding: "60px" }}>
+                  <span className="spinner" style={{ width: 40, height: 40 }} />
+                </div>
+              ) : displayedChildren.length === 0 ? (
+                <div
+                  style={{
+                    background: "white",
+                    borderRadius: "16px",
+                    padding: "60px",
+                    textAlign: "center",
+                    border: "1px solid #e2e8f0",
+                  }}
+                >
+                  <div style={{ fontSize: "3.5rem", marginBottom: "12px" }}>📋</div>
+                  <h3 style={{ fontWeight: "700", margin: "0 0 8px 0" }}>{t("No Children Matched Yet for This Specialist", "ಈ ತಜ್ಞರಿಗೆ ಮಕ್ಕಳು ಹೊಂದಿಕೆಯಾಗಿಲ್ಲ")}</h3>
+                  <p style={{ color: "#64748b", margin: "0 0 18px 0" }}>
+                    {t("Register a child matching this specialist's age group or view other specialists.", "ಈ ತಜ್ಞರ ವಯಸ್ಸಿನ ಗುಂಪಿಗೆ ಹೊಂದಿಕೆಯಾಗುವ ಮಗುವನ್ನು ನೋಂದಾಯಿಸಿ.")}
+                  </p>
+                  <button
+                    onClick={() => setShowAddModal(true)}
+                    style={{
+                      padding: "10px 22px",
+                      borderRadius: "12px",
                       border: "none",
-                      background: isRed ? "#dc2626" : "#ca8a04",
+                      background: "#4F6EF7",
                       color: "white",
                       fontWeight: "800",
-                      fontSize: "0.85rem",
                       cursor: "pointer",
                     }}
                   >
-                    {alt.actionText || t("Review Now", "ಪರಿಶೀಲಿಸಿ")} →
+                    ➕ {t("Register Patient", "ರೋಗಿ ನೋಂದಣಿ")}
                   </button>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              ) : (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(310px, 1fr))",
+                    gap: "20px",
+                  }}
+                >
+                  {displayedChildren.map((child) => {
+                    const lvl = LEVEL_BADGES[child.level] || LEVEL_BADGES[1];
+                    const status = STATUS_BADGES[child.progressStatus] || STATUS_BADGES.Stable;
+                    const stars = "⭐".repeat(child.starRating || 4);
 
-        {/* SECTION 4: QUICK STATS ROW */}
-        <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "18px",
-            marginBottom: "32px",
-          }}
-        >
-          {[
-            { label: t("Total Children Assigned", "ನಿಯೋಜಿತ ಒಟ್ಟು ಮಕ್ಕಳು"), val: totalChildren, icon: "👶", color: "#4F6EF7", bg: "#eef2ff" },
-            { label: t("Children Improving This Week", "ಈ ವಾರ ಸುಧಾರಿಸುತ್ತಿರುವವರು"), val: improvingCount, icon: "📈", color: "#16a34a", bg: "#dcfce7" },
-            { label: t("Children Needing Attention", "ಗಮನ ಅಗತ್ಯವಿರುವ ಮಕ್ಕಳು"), val: attentionCount, icon: "⚠️", color: "#dc2626", bg: "#fee2e2" },
-            { label: t("Feedback Sent This Week", "ಕಳುಹಿಸಿದ ಪ್ರತಿಕ್ರಿಯೆಗಳು"), val: feedbackSentCount, icon: "💬", color: "#8b5cf6", bg: "#f3e8ff" },
-          ].map((st, i) => (
-            <div
-              key={i}
-              style={{
-                background: "white",
-                borderRadius: "16px",
-                padding: "20px 24px",
-                border: "1px solid #e2e8f0",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <div>
-                <div style={{ fontSize: "0.82rem", color: "#64748b", fontWeight: "600", marginBottom: "4px" }}>
-                  {st.label}
-                </div>
-                <div style={{ fontSize: "2rem", fontWeight: "800", color: "#0f172a" }}>{st.val}</div>
-              </div>
-              <div
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: "14px",
-                  background: st.bg,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1.5rem",
-                }}
-              >
-                {st.icon}
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* SECTION 5: PENDING ACTIONS LIST */}
-        {attentionCount > 0 && (
-          <section
-            style={{
-              background: "white",
-              borderRadius: "16px",
-              padding: "20px 24px",
-              border: "1px solid #e2e8f0",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-              marginBottom: "32px",
-            }}
-          >
-            <h3 style={{ fontSize: "1.05rem", fontWeight: "800", color: "#0f172a", margin: "0 0 14px 0", display: "flex", alignItems: "center", gap: "8px" }}>
-              ⚡ {t("Pending Clinical Actions Required", "ಬಾಕಿ ಉಳಿದ ಕ್ಲಿನಿಕಲ್ ಕ್ರಮಗಳು")}
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {children
-                .filter((c) => c.progressStatus === "Regressing" || c.weeksStable >= 2)
-                .slice(0, 3)
-                .map((c) => (
-                  <div
-                    key={c._id}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "12px 16px",
-                      background: "#f8fafc",
-                      borderRadius: "12px",
-                      border: "1px solid #e2e8f0",
-                    }}
-                  >
-                    <div>
-                      <span style={{ fontWeight: "700", color: "#1e293b" }}>{c.name}</span>
-                      <span style={{ fontSize: "0.85rem", color: "#64748b", marginLeft: "10px" }}>
-                        {c.progressStatus === "Regressing" ? t("Regressing for 2 weeks — Needs activity adjustment", "2 ವಾರಗಳಿಂದ ಹಿಂದುಳಿಯುತ್ತಿದೆ") : t("Stable for 3 weeks — Consider level change", "3 ವಾರಗಳಿಂದ ಸ್ಥಿರವಾಗಿದೆ")}
-                      </span>
-                    </div>
-
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <button
-                        onClick={() => handleOpenDetail(c, "level")}
+                    return (
+                      <div
+                        key={child._id}
                         style={{
-                          padding: "6px 14px",
-                          borderRadius: "8px",
-                          border: "1px solid #cbd5e1",
                           background: "white",
-                          fontSize: "0.8rem",
-                          fontWeight: "700",
-                          cursor: "pointer",
+                          borderRadius: "16px",
+                          padding: "24px",
+                          border: "1px solid #e2e8f0",
+                          boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                          transition: "transform 0.15s ease",
                         }}
                       >
-                        ⚙️ {t("Level Change", "ಮಟ್ಟ ಬದಲಾವಣೆ")}
-                      </button>
-                      <button
-                        onClick={() => handleOpenDetail(c, "feedback")}
-                        style={{
-                          padding: "6px 14px",
-                          borderRadius: "8px",
-                          border: "none",
-                          background: "#4F6EF7",
-                          color: "white",
-                          fontSize: "0.8rem",
-                          fontWeight: "700",
-                          cursor: "pointer",
-                        }}
-                      >
-                        💬 {t("Send Guidance", "ಮಾರ್ಗದರ್ಶನ ಕಳುಹಿಸಿ")}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </section>
-        )}
-
-        {/* SECTION 3: CHILDREN OVERVIEW CARDS */}
-        <section>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
-            <h2 style={{ fontSize: "1.3rem", fontWeight: "800", color: "#0f172a", margin: 0 }}>
-              👶 {t("Assigned Children Overview", "ನಿಯೋಜಿತ ಮಕ್ಕಳ ಅವಲೋಕನ")} ({totalChildren})
-            </h2>
-          </div>
-
-          {loading ? (
-            <div style={{ textAlign: "center", padding: "60px" }}>
-              <span className="spinner" style={{ width: 40, height: 40 }} />
-            </div>
-          ) : children.length === 0 ? (
-            <div
-              style={{
-                background: "white",
-                borderRadius: "16px",
-                padding: "60px",
-                textAlign: "center",
-                border: "1px solid #e2e8f0",
-              }}
-            >
-              <div style={{ fontSize: "3.5rem", marginBottom: "12px" }}>📋</div>
-              <h3 style={{ fontWeight: "700", margin: "0 0 8px 0" }}>{t("No Patients Assigned Yet", "ಯಾವುದೇ ರೋಗಿಗಳು ನಿಯೋಜಿಸಿಲ್ಲ")}</h3>
-              <p style={{ color: "#64748b", margin: "0 0 18px 0" }}>
-                {t("Click Register Patient to generate a parent link code.", "ಪೋಷಕರ ಲಿಂಕ್ ಕೋಡ್ ಪಡೆಯಲು ಹೊಸ ರೋಗಿಯನ್ನು ನೋಂದಾಯಿಸಿ.")}
-              </p>
-              <button
-                onClick={() => setShowAddModal(true)}
-                style={{
-                  padding: "10px 22px",
-                  borderRadius: "12px",
-                  border: "none",
-                  background: "#4F6EF7",
-                  color: "white",
-                  fontWeight: "800",
-                  cursor: "pointer",
-                }}
-              >
-                ➕ {t("Register First Patient", "ಮೊದಲ ರೋಗಿ ನೋಂದಣಿ")}
-              </button>
-            </div>
-          ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-                gap: "20px",
-              }}
-            >
-              {children.map((child) => {
-                const lvl = LEVEL_BADGES[child.level] || LEVEL_BADGES[1];
-                const status = STATUS_BADGES[child.progressStatus] || STATUS_BADGES.Stable;
-                const stars = "⭐".repeat(child.starRating || 4);
-
-                return (
-                  <div
-                    key={child._id}
-                    style={{
-                      background: "white",
-                      borderRadius: "16px",
-                      padding: "24px",
-                      border: "1px solid #e2e8f0",
-                      boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                      transition: "transform 0.15s ease",
-                    }}
-                  >
-                    <div>
-                      {/* Top Header */}
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" }}>
                         <div>
-                          <h3 style={{ margin: "0 0 4px 0", fontSize: "1.2rem", fontWeight: "800", color: "#0f172a" }}>
-                            {child.name}
-                          </h3>
-                          <div style={{ fontSize: "0.85rem", color: "#64748b" }}>
-                            {t("Age", "ವಯಸ್ಸು")}: <strong>{child.age}</strong> ({child.gender || "male"})
+                          {/* Top Header */}
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                            <div>
+                              <h3 style={{ margin: "0 0 4px 0", fontSize: "1.2rem", fontWeight: "800", color: "#0f172a" }}>
+                                {child.name}
+                              </h3>
+                              <div style={{ fontSize: "0.85rem", color: "#64748b" }}>
+                                {t("Age", "ವಯಸ್ಸು")}: <strong>{child.age} yrs</strong> ({child.gender || "male"})
+                              </div>
+                            </div>
+
+                            {/* Level Badge */}
+                            <span
+                              style={{
+                                background: lvl.bg,
+                                color: lvl.color,
+                                padding: "4px 10px",
+                                borderRadius: "10px",
+                                fontWeight: "800",
+                                fontSize: "0.78rem",
+                              }}
+                            >
+                              {lvl.emoji} {lvl.label.split("—")[0]}
+                            </span>
+                          </div>
+
+                          {/* Progress Trajectory Badge */}
+                          <div style={{ marginBottom: "14px" }}>
+                            <div style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "700", textTransform: "uppercase", marginBottom: "4px" }}>
+                              {t("Weekly Progress Status", "ವಾರದ ಪ್ರಗತಿ ಸ್ಥಿತಿ")}:
+                            </div>
+                            <span
+                              style={{
+                                display: "inline-block",
+                                background: status.bg,
+                                color: status.color,
+                                border: `1px solid ${status.border}`,
+                                padding: "4px 12px",
+                                borderRadius: "12px",
+                                fontWeight: "800",
+                                fontSize: "0.85rem",
+                              }}
+                            >
+                              {lang === "kn" ? status.labelKn : status.label}
+                            </span>
+                          </div>
+
+                          {/* Metrics List */}
+                          <div
+                            style={{
+                              background: "#f8fafc",
+                              borderRadius: "12px",
+                              padding: "12px 14px",
+                              marginBottom: "18px",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "8px",
+                              fontSize: "0.84rem",
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <span style={{ color: "#64748b" }}>{t("Average Score", "ಸರಾಸರಿ ಅಂಕ")}:</span>
+                              <span>
+                                {child.hasProgressData ? `${stars} (${child.weeklyAvgScore}%)` : <em style={{ color: "#94a3b8" }}>{t("No sessions yet", "ಇನ್ನೂ ಸೆಷನ್‌ಗಳಿಲ್ಲ")}</em>}
+                              </span>
+                            </div>
+
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <span style={{ color: "#64748b" }}>{t("Daily Streak", "ದೈನಂದಿನ ಸ್ಟ್ರೀಕ್")}:</span>
+                              <strong style={{ color: (child.streak || 0) > 0 ? "#ea580c" : "#64748b" }}>
+                                🔥 {child.streak || 0} {t("Days", "ದಿನಗಳು")}
+                              </strong>
+                            </div>
+
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <span style={{ color: "#64748b" }}>{t("Dominant Emotion", "ಪ್ರಮುಖ ಭಾವನೆ")}:</span>
+                              <strong>{child.dominantEmotion || "Neutral 😐"}</strong>
+                            </div>
+
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <span style={{ color: "#64748b" }}>{t("Last Session", "ಕೊನೆಯ ಸೆಷನ್")}:</span>
+                              <span>{child.lastSessionDate ? new Date(child.lastSessionDate).toLocaleDateString() : t("No activity", "ಚಟುವಟಿಕೆ ಇಲ್ಲ")}</span>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Level Badge */}
-                        <span
-                          style={{
-                            background: lvl.bg,
-                            color: lvl.color,
-                            padding: "4px 10px",
-                            borderRadius: "10px",
-                            fontWeight: "800",
-                            fontSize: "0.78rem",
-                          }}
-                        >
-                          {lvl.emoji} {lvl.label.split("—")[0]}
-                        </span>
-                      </div>
+                        {/* Card Actions */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                          <button
+                            onClick={() => handleOpenDetail(child, "overview")}
+                            style={{
+                              padding: "10px",
+                              borderRadius: "10px",
+                              border: "1px solid #cbd5e1",
+                              background: "white",
+                              color: "#1e293b",
+                              fontWeight: "700",
+                              fontSize: "0.84rem",
+                              cursor: "pointer",
+                            }}
+                          >
+                            👁️ {t("View Details", "ವಿವರಗಳು")}
+                          </button>
 
-                      {/* Progress Trajectory Badge */}
-                      <div style={{ marginBottom: "16px" }}>
-                        <div style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "700", textTransform: "uppercase", marginBottom: "4px" }}>
-                          {t("Weekly Progress Status", "ವಾರದ ಪ್ರಗತಿ ಸ್ಥಿತಿ")}:
+                          <button
+                            onClick={() => handleOpenDetail(child, "feedback")}
+                            style={{
+                              padding: "10px",
+                              borderRadius: "10px",
+                              border: "none",
+                              background: "#4F6EF7",
+                              color: "white",
+                              fontWeight: "800",
+                              fontSize: "0.84rem",
+                              cursor: "pointer",
+                            }}
+                          >
+                            💬 {t("Send Feedback", "ಪ್ರತಿಕ್ರಿಯೆ")}
+                          </button>
                         </div>
-                        <span
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          </div>
+        )}
+
+        {/* TAB 3: 6 SPECIALIZED THERAPISTS DIRECTORY */}
+        {activeNav === "specialists" && (
+          <div>
+            <div style={{ marginBottom: "24px" }}>
+              <h2 style={{ fontSize: "1.4rem", fontWeight: "800", color: "#0f172a", margin: "0 0 6px 0" }}>
+                👨‍⚕️ {t("Clinical Autism Specialist Panel (6 Therapists)", "ಕ್ಲಿನಿಕಲ್ ಆಟಿಸಂ ತಜ್ಞರ ತಂಡ (6 ವೈದ್ಯರು)")}
+              </h2>
+              <p style={{ color: "#64748b", margin: 0, fontSize: "0.92rem" }}>
+                {t("Each specialist leads tailored age-group & support level interventions based on evidence-based protocols.", "ಪ್ರತಿಯೊಬ್ಬ ತಜ್ಞರು ನಿರ್ದಿಷ್ಟ ವಯೋಮಾನ ಮತ್ತು ಬೆಂಬಲ ಮಟ್ಟದ ಮಾರ್ಗದರ್ಶನ ನೀಡುತ್ತಾರೆ.")}
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "24px" }}>
+              {therapistsList.map((th) => {
+                const isCurrent = th._id === activeTherapistId;
+                const assignedKidsCount = children.filter((c) => String(c.therapistId) === String(th._id)).length;
+
+                return (
+                  <div
+                    key={th._id}
+                    style={{
+                      background: "white",
+                      borderRadius: "18px",
+                      border: `2px solid ${isCurrent ? "#4F6EF7" : "#e2e8f0"}`,
+                      boxShadow: isCurrent ? "0 8px 24px rgba(79, 110, 247, 0.15)" : "0 4px 16px rgba(0,0,0,0.04)",
+                      padding: "24px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div>
+                      {/* Top: Avatar and Doctor Name */}
+                      <div style={{ display: "flex", gap: "16px", alignItems: "center", marginBottom: "16px" }}>
+                        <img
+                          src={th.profilePhoto}
+                          alt={th.name}
                           style={{
-                            display: "inline-block",
-                            background: status.bg,
-                            color: status.color,
-                            border: `1px solid ${status.border}`,
-                            padding: "4px 12px",
-                            borderRadius: "12px",
-                            fontWeight: "800",
-                            fontSize: "0.85rem",
+                            width: 64,
+                            height: 64,
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "3px solid #4F6EF7",
+                            flexShrink: 0,
                           }}
-                        >
-                          {lang === "kn" ? status.labelKn : status.label}
-                        </span>
+                        />
+                        <div>
+                          <h3 style={{ margin: "0 0 4px 0", fontSize: "1.15rem", fontWeight: "800", color: "#0f172a" }}>
+                            {th.name}
+                          </h3>
+                          <div style={{ fontSize: "0.8rem", color: "#4F6EF7", fontWeight: "700" }}>
+                            {th.qualification || "Pediatric Specialist"}
+                          </div>
+                          <div style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                            {th.yearsOfExperience || 10} {t("Years Experience", "ವರ್ಷಗಳ ಅನುಭವ")}
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Metrics List */}
+                      {/* Specialization Badge */}
                       <div
                         style={{
-                          background: "#f8fafc",
-                          borderRadius: "12px",
-                          padding: "12px 14px",
-                          marginBottom: "18px",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "8px",
-                          fontSize: "0.84rem",
+                          background: "#eef2ff",
+                          border: "1px solid #c7d2fe",
+                          borderRadius: "10px",
+                          padding: "8px 12px",
+                          marginBottom: "14px",
                         }}
                       >
-                        <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ color: "#64748b" }}>{t("Average Score", "ಸರಾಸರಿ ಅಂಕ")}:</span>
-                          <span>
-                            {child.hasProgressData ? `${stars} (${child.weeklyAvgScore}%)` : <em style={{ color: "#94a3b8" }}>{t("No sessions yet", "ಇನ್ನೂ ಸೆಷನ್‌ಗಳಿಲ್ಲ")}</em>}
-                          </span>
+                        <div style={{ fontSize: "0.72rem", color: "#4338ca", fontWeight: "800", textTransform: "uppercase" }}>
+                          {t("Specialization", "ಪರಿಣತಿ")}
                         </div>
-
-                        <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ color: "#64748b" }}>{t("Daily Streak", "ದೈನಂದಿನ ಸ್ಟ್ರೀಕ್")}:</span>
-                          <strong style={{ color: (child.streak || 0) > 0 ? "#ea580c" : "#64748b" }}>
-                            🔥 {child.streak || 0} {t("Days", "ದಿನಗಳು")}
-                          </strong>
+                        <div style={{ fontSize: "0.86rem", fontWeight: "700", color: "#1e1b4b", marginTop: "2px" }}>
+                          {th.specialization}
                         </div>
+                      </div>
 
-                        <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ color: "#64748b" }}>{t("Dominant Emotion", "ಪ್ರಮುಖ ಭಾವನೆ")}:</span>
-                          <strong>{child.dominantEmotion || "Neutral 😐"}</strong>
+                      {/* Bio */}
+                      <p style={{ fontSize: "0.86rem", color: "#475569", lineHeight: "1.5", marginBottom: "16px" }}>
+                        {th.bio}
+                      </p>
+
+                      {/* Clinical Match Criteria */}
+                      <div style={{ background: "#f8fafc", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "16px", fontSize: "0.82rem" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                          <span style={{ color: "#64748b" }}>🎯 {t("Target Ages:", "ವಯಸ್ಸಿನ ಗುಂಪು:")}</span>
+                          <strong>{th.targetAgeMin}–{th.targetAgeMax} {t("Years", "ವರ್ಷಗಳು")}</strong>
                         </div>
-
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                          <span style={{ color: "#64748b" }}>🌱 {t("Support Levels:", "ಬೆಂಬಲ ಮಟ್ಟ:")}</span>
+                          <strong>Level {th.targetLevels?.join(" & Level ") || "1 & 2"}</strong>
+                        </div>
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ color: "#64748b" }}>{t("Last Session", "ಕೊನೆಯ ಸೆಷನ್")}:</span>
-                          <span>{child.lastSessionDate ? new Date(child.lastSessionDate).toLocaleDateString() : t("No activity", "ಚಟುವಟಿಕೆ ಇಲ್ಲ")}</span>
+                          <span style={{ color: "#64748b" }}>🏥 {t("Hospital / Clinic:", "ಆಸ್ಪತ್ರೆ:")}</span>
+                          <span style={{ fontWeight: "600", textAlign: "right" }}>{th.clinic?.split(",")[0] || "NIMHANS Hub"}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Card Actions */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                      <button
-                        onClick={() => handleOpenDetail(child, "overview")}
-                        style={{
-                          padding: "10px",
-                          borderRadius: "10px",
-                          border: "1px solid #cbd5e1",
-                          background: "white",
-                          color: "#1e293b",
-                          fontWeight: "700",
-                          fontSize: "0.84rem",
-                          cursor: "pointer",
-                        }}
-                      >
-                        👁️ {t("View Details", "ವಿವರಗಳು")}
-                      </button>
-
-                      <button
-                        onClick={() => handleOpenDetail(child, "feedback")}
-                        style={{
-                          padding: "10px",
-                          borderRadius: "10px",
-                          border: "none",
-                          background: "#4F6EF7",
-                          color: "white",
-                          fontWeight: "800",
-                          fontSize: "0.84rem",
-                          cursor: "pointer",
-                        }}
-                      >
-                        💬 {t("Send Feedback", "ಪ್ರತಿಕ್ರಿಯೆ")}
-                      </button>
-                    </div>
+                    {/* Switch / View Cohort Action Button */}
+                    <button
+                      onClick={() => {
+                        setActiveTherapistId(th._id);
+                        setActiveNav("children");
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        borderRadius: "12px",
+                        border: isCurrent ? "2px solid #4F6EF7" : "none",
+                        background: isCurrent ? "#ffffff" : "#4F6EF7",
+                        color: isCurrent ? "#4F6EF7" : "#ffffff",
+                        fontWeight: "800",
+                        fontSize: "0.9rem",
+                        cursor: "pointer",
+                        boxShadow: isCurrent ? "none" : "0 4px 12px rgba(79, 110, 247, 0.25)",
+                      }}
+                    >
+                      {isCurrent ? `✅ ${t("Active Specialist View", "ಪ್ರಸ್ತುತ ಸಕ್ರಿಯ ತಜ್ಞರು")} (${assignedKidsCount} ${t("Kids", "ಮಕ್ಕಳು")})` : `👁️ ${t("View Assigned Children", "ನಿಯೋಜಿತ ಮಕ್ಕಳನ್ನು ನೋಡಿ")} (${assignedKidsCount})`}
+                    </button>
                   </div>
                 );
               })}
             </div>
-          )}
-        </section>
+          </div>
+        )}
 
         {/* ── Detail Modal ─────────────────────────────────────────────────── */}
         {selectedChild && (
@@ -756,7 +892,7 @@ export default function TherapistDashboard({ user, onNavigate }) {
               {createdLinkCode ? (
                 <div style={{ textAlign: "center", padding: "20px 0" }}>
                   <div style={{ fontSize: "3rem", marginBottom: "12px" }}>🎉</div>
-                  <h3 style={{ fontWeight: "800", margin: "0 0 8px 0" }}>{t("Patient Profile Created!", "ರೋಗಿಯ ಪ್ರೊಫೈಲ್ ರಚಿಸಲಾಗಿದೆ!")}</h3>
+                  <h3 style={{ fontWeight: "800", margin: "0 0 8px 0" }}>{t("Patient Profile Created & Clinically Matched!", "ರೋಗಿಯ ಪ್ರೊಫೈಲ್ ರಚಿಸಲಾಗಿದೆ ಮತ್ತು ಹೊಂದಿಸಲಾಗಿದೆ!")}</h3>
                   <p style={{ color: "#64748b", fontSize: "0.9rem", marginBottom: "20px" }}>
                     {t("Share this 6-digit Link Code with the child's parent to link their app:", "ಪೋಷಕರೊಂದಿಗೆ ಈ ಲಿಂಕ್ ಕೋಡ್ ಹಂಚಿಕೊಳ್ಳಿ:")}
                   </p>
@@ -871,7 +1007,7 @@ export default function TherapistDashboard({ user, onNavigate }) {
                       disabled={addLoading}
                       style={{ padding: "10px 24px", borderRadius: "10px", border: "none", background: "#4F6EF7", color: "white", fontWeight: "800", cursor: addLoading ? "not-allowed" : "pointer" }}
                     >
-                      {addLoading ? t("Registering...", "ನೋಂದಾಯಿಸಲಾಗುತ್ತಿದೆ...") : t("Create & Generate Code", "ರಚಿಸಿ")}
+                      {addLoading ? t("Registering...", "ನೋಂದಾಯಿಸಲಾಗುತ್ತಿದೆ...") : t("Create & Auto-Match Specialist", "ರಚಿಸಿ")}
                     </button>
                   </div>
                 </form>
