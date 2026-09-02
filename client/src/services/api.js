@@ -1625,30 +1625,14 @@ export const changeChildLevel = async (childId, newLevel, reason) => {
   }
 };
 
-export const getAlerts = async () => {
+export const getAlerts = async (therapistId) => {
   try {
-    return await req("GET", "/api/therapist/alerts");
+    const user = JSON.parse(localStorage.getItem("auth_user") || "{}");
+    const tId = therapistId || user._id || user.id;
+    const url = tId ? `/api/therapist/alerts?therapistId=${tId}` : "/api/therapist/alerts";
+    return await req("GET", url);
   } catch (err) {
-    return [
-      {
-        id: "demo_alert_1",
-        type: "urgent",
-        severity: "red",
-        childName: "Rahul Nair",
-        title: "🔴 URGENT: Rahul Nair has been regressing for 2 weeks.",
-        description: "Immediate review recommended for behavioral changes and sensory adjustments.",
-        actionText: "Review Now",
-      },
-      {
-        id: "demo_alert_2",
-        type: "warning",
-        severity: "yellow",
-        childName: "Priya Sharma",
-        title: "⚠️ Priya Sharma has been stable for 3 weeks.",
-        description: "Consider activity change to encourage higher engagement.",
-        actionText: "Review",
-      },
-    ];
+    return [];
   }
 };
 
