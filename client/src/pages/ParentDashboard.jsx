@@ -658,40 +658,52 @@ const ParentDashboard = ({ user, onNavigate }) => {
                     No active tasks assigned yet. Assign new activities from the section below!
                   </p>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {sc.assignedActivities.map((act) => (
-                      <div
-                        key={act._id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '14px',
-                          padding: '14px 18px',
-                          border: '1px solid var(--border)',
-                          borderRadius: '12px',
-                          background: 'white',
-                        }}
-                      >
-                        <span style={{ fontSize: '1.4rem' }}>
-                          {act.category === 'Communication'
-                            ? '💬'
-                            : act.category === 'Motor Skills'
-                            ? '🖐️'
-                            : act.category === 'Social'
-                            ? '👫'
-                            : act.category === 'Sensory'
-                            ? '👁️'
-                            : '📋'}
-                        </span>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: '700', fontSize: '0.98rem' }}>{act.title}</div>
-                          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                            {act.category} · {act.duration} · Level {act.level}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
+                    {sc.assignedActivities.map((act) => {
+                      const cardColor = act.color || "#6366f1";
+                      return (
+                        <div
+                          key={act._id}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            padding: '16px',
+                            border: '1.5px solid #e0e7ff',
+                            borderRadius: '16px',
+                            background: 'white',
+                            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                              <span style={{ fontSize: '1.8rem' }}>{act.icon || '🫧'}</span>
+                              <span style={{ background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: '800' }}>
+                                +{act.xp || 40} XP
+                              </span>
+                            </div>
+                            <div style={{ fontWeight: '800', fontSize: '0.98rem', color: '#1e1b4b', marginBottom: '2px' }}>
+                              {act.title}
+                            </div>
+                            {act.titleKn && (
+                              <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '700', marginBottom: '6px' }}>
+                                {act.titleKn}
+                              </div>
+                            )}
+                            <div style={{ fontSize: '0.75rem', color: cardColor, fontWeight: '700', marginBottom: '12px' }}>
+                              {act.category} · ⏱ {act.duration}
+                            </div>
                           </div>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => handleStartTherapy(sc._id)}
+                            style={{ width: '100%', padding: '8px', fontSize: '0.85rem', fontWeight: '800', borderRadius: '10px' }}
+                          >
+                            ▶ Play Now! 🎮
+                          </button>
                         </div>
-                        <span className={`badge badge-${act.difficulty?.toLowerCase()}`}>{act.difficulty}</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -699,37 +711,55 @@ const ParentDashboard = ({ user, onNavigate }) => {
               {/* Assign More Activities */}
               {availableToAssign.length > 0 && (
                 <div className="card">
-                  <h3 style={{ fontWeight: '700', marginBottom: '16px' }}>➕ Assign Recommended Activities for Level {sc.level}</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {availableToAssign.map((act) => (
-                      <div
-                        key={act._id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '14px',
-                          padding: '14px 18px',
-                          border: '1px solid var(--border)',
-                          borderRadius: '12px',
-                          background: 'white',
-                        }}
-                      >
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: '700' }}>{act.title}</div>
-                          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                            {act.category} · {act.duration}
-                          </div>
-                        </div>
-                        <button
-                          className="btn btn-primary"
-                          style={{ padding: '8px 16px', fontSize: '0.85rem' }}
-                          onClick={() => handleAssign(sc._id, act._id)}
-                          disabled={assigning === act._id}
+                  <h3 style={{ fontWeight: '800', marginBottom: '16px', color: '#1e1b4b' }}>
+                    ➕ Recommended {LEVEL_LABEL[sc.level] || `Level ${sc.level}`} Evidence-Based Activities
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
+                    {availableToAssign.map((act) => {
+                      const cardColor = act.color || "#6366f1";
+                      return (
+                        <div
+                          key={act._id}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            padding: '16px',
+                            border: '1.5px solid #e2e8f0',
+                            borderRadius: '16px',
+                            background: '#f8fafc',
+                          }}
                         >
-                          {assigning === act._id ? 'Assigning...' : '+ Assign Task'}
-                        </button>
-                      </div>
-                    ))}
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                              <span style={{ fontSize: '1.8rem' }}>{act.icon || '🧩'}</span>
+                              <span style={{ background: '#e0e7ff', color: '#4338ca', padding: '2px 8px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: '800' }}>
+                                +{act.xp || 45} XP
+                              </span>
+                            </div>
+                            <div style={{ fontWeight: '800', fontSize: '0.98rem', color: '#0f172a', marginBottom: '2px' }}>
+                              {act.title}
+                            </div>
+                            {act.titleKn && (
+                              <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '700', marginBottom: '6px' }}>
+                                {act.titleKn}
+                              </div>
+                            )}
+                            <div style={{ fontSize: '0.75rem', color: cardColor, fontWeight: '700', marginBottom: '12px' }}>
+                              {act.category} · ⏱ {act.duration}
+                            </div>
+                          </div>
+                          <button
+                            className="btn btn-primary"
+                            style={{ width: '100%', padding: '8px', fontSize: '0.85rem', fontWeight: '800', borderRadius: '10px' }}
+                            onClick={() => handleAssign(sc._id, act._id)}
+                            disabled={assigning === act._id}
+                          >
+                            {assigning === act._id ? 'Assigning...' : '+ Assign Activity'}
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

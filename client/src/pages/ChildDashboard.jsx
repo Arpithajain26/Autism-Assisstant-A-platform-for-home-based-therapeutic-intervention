@@ -517,76 +517,166 @@ const ChildDashboard = ({ user, childId, onNavigate }) => {
           </div>
         ) : (
           <div className="grid-3">
-            {assigned.map((act) => (
-              <div
-                key={act._id}
-                className="card"
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  borderRadius: '20px',
-                  padding: '24px',
-                  border: '1.5px solid #e0e7ff',
-                  boxShadow: '0 4px 16px rgba(99, 102, 241, 0.06)',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '2.4rem' }}>
-                    {CATEGORY_ICON[act.category] || '🎮'}
-                  </span>
-                  <span style={{ background: '#fdf4ff', color: '#c026d3', border: '1px solid #f5d0fe', padding: '3px 10px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: '800' }}>
-                    ✨ Animated Game
-                  </span>
-                </div>
+            {assigned.map((act) => {
+              const cardColor = act.color || "#6366f1";
+              const cardBg = act.bg || "#eef2ff";
+              const starCount = act.stars || 3;
+              const xpAmount = act.xp || 45;
 
-                <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
-                  <span className={`badge badge-${act.difficulty?.toLowerCase() || 'easy'}`}>{act.difficulty || `Level ${act.level || 1}`}</span>
-                  <span className="badge badge-category">{act.category}</span>
-                </div>
-
-                <h3 style={{ fontWeight: '800', fontSize: '1.15rem', marginBottom: '8px', color: '#1e1b4b' }}>
-                  {act.title}
-                </h3>
-                <p
+              return (
+                <div
+                  key={act._id}
                   style={{
-                    color: '#64748b',
-                    fontSize: '0.88rem',
-                    lineHeight: '1.5',
-                    flex: 1,
-                    marginBottom: '16px',
+                    background: "#ffffff",
+                    borderRadius: "24px",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                    border: "2px solid #e0e7ff",
+                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-4px)";
+                    e.currentTarget.style.boxShadow = `0 16px 32px ${cardColor}28`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.07)";
                   }}
                 >
-                  {act.description?.substring(0, 100)}...
-                </p>
-                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '700', marginBottom: '16px' }}>
-                  ⏱ {act.duration} · ⭐ +50 XP
+                  {/* Card Top Color Banner */}
+                  <div
+                    style={{
+                      background: `linear-gradient(135deg, ${cardColor}, ${cardColor}dd)`,
+                      padding: "20px 20px 36px",
+                      position: "relative",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {/* Decorative circles */}
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          position: "absolute",
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "50%",
+                          border: "2px solid rgba(255,255,255,0.18)",
+                          top: `${-10 + i * 18}%`,
+                          right: `${-5 + i * 12}%`,
+                        }}
+                      />
+                    ))}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", zIndex: 1 }}>
+                      <span style={{ fontSize: "2.8rem", display: "inline-block" }}>
+                        {act.icon || CATEGORY_ICON[act.category] || "🫧"}
+                      </span>
+                      <div
+                        style={{
+                          background: "rgba(255,255,255,0.25)",
+                          backdropFilter: "blur(4px)",
+                          color: "#ffffff",
+                          border: "1px solid rgba(255,255,255,0.4)",
+                          padding: "4px 12px",
+                          borderRadius: "20px",
+                          fontWeight: "900",
+                          fontSize: "0.82rem",
+                        }}
+                      >
+                        +{xpAmount} XP
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Body */}
+                  <div style={{ padding: "0 20px 20px", marginTop: "-18px", flex: 1, display: "flex", flexDirection: "column", position: "relative", zIndex: 2 }}>
+                    {/* Category & Therapy Principle pill row */}
+                    <div style={{ marginBottom: "12px", display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center" }}>
+                      <span
+                        style={{
+                          backgroundColor: cardBg,
+                          color: cardColor,
+                          padding: "4px 12px",
+                          borderRadius: "20px",
+                          fontWeight: "800",
+                          fontSize: "0.75rem",
+                          display: "inline-block",
+                        }}
+                      >
+                        {act.category || "Therapy"}
+                      </span>
+                      {act.therapyPrinciple && (
+                        <span
+                          style={{
+                            backgroundColor: "#f1f5f9",
+                            color: "#475569",
+                            padding: "3px 10px",
+                            borderRadius: "12px",
+                            fontSize: "0.72rem",
+                            fontWeight: "700",
+                            display: "inline-block",
+                            border: "1px solid #e2e8f0",
+                          }}
+                        >
+                          🧠 {act.therapyPrinciple}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Title & Kannada Title */}
+                    <h3 style={{ fontSize: "1.2rem", fontWeight: "900", margin: "0 0 4px 0", color: "#111827", lineHeight: 1.25 }}>
+                      {act.title}
+                    </h3>
+                    {act.titleKn && (
+                      <div style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "10px", fontWeight: "700" }}>
+                        {act.titleKn}
+                      </div>
+                    )}
+
+                    {/* Description */}
+                    <p style={{ fontSize: "0.88rem", color: "#4b5563", lineHeight: "1.5", margin: "0 0 16px 0", flex: 1 }}>
+                      {act.description?.substring(0, 110)}...
+                    </p>
+
+                    {/* Stars & Duration row */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                      <div style={{ fontSize: "1.05rem", letterSpacing: "1px" }}>
+                        {"⭐".repeat(starCount)}
+                        {"☆".repeat(Math.max(0, 5 - starCount))}
+                      </div>
+                      <div style={{ fontSize: "0.8rem", color: "#6b7280", fontWeight: "700" }}>
+                        ⏱ {act.duration || "10 mins"}
+                      </div>
+                    </div>
+
+                    {/* Play Now Button */}
+                    <button
+                      onClick={() => {
+                        setActiveTask(act);
+                        setTaskViewMode("game");
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        borderRadius: "16px",
+                        border: "none",
+                        background: `linear-gradient(135deg, ${cardColor}, ${cardColor}dd)`,
+                        color: "#ffffff",
+                        fontWeight: "900",
+                        fontSize: "0.95rem",
+                        cursor: "pointer",
+                        boxShadow: `0 4px 14px ${cardColor}44`,
+                        transition: "transform 0.15s ease",
+                      }}
+                    >
+                      ▶ Play Now! 🎮
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => {
-                    setActiveTask(act);
-                    setTaskViewMode('game');
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                    color: 'white',
-                    fontWeight: '800',
-                    fontSize: '0.92rem',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(79, 70, 229, 0.3)',
-                    transition: 'transform 0.1s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                >
-                  🎮 Play Animated Game →
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
