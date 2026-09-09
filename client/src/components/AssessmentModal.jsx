@@ -428,7 +428,7 @@ const AssessmentModal = ({ childName, onComplete, onSkip }) => {
               width: i === current ? 24 : 8,
               height: 8,
               borderRadius: "4px",
-              background: answers[QUESTIONS[i].id]
+              background: answers[QUESTIONS[i].id] !== undefined && answers[QUESTIONS[i].id] !== null
                 ? "#7c3aed"
                 : i === current
                   ? "#a78bfa"

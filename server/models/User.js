@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema(
     targetLevels: [{ type: Number }],
     children: [{ type: mongoose.Schema.Types.ObjectId, ref: "Child" }],
     assignedChildren: [{ type: mongoose.Schema.Types.ObjectId, ref: "Child" }],
+    isVerified: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

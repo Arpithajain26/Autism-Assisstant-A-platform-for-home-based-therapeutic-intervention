@@ -35,13 +35,16 @@ const req = async (method, path, body) => {
     }
   }
 
-  if (!BASE || bases.length === 0) {
-    FALLBACK_PORTS.forEach((port) => bases.push(`http://127.0.0.1:${port}`));
-  }
+  FALLBACK_PORTS.forEach((port) => {
+    bases.push(`http://127.0.0.1:${port}`);
+    bases.push(`http://localhost:${port}`);
+  });
+
+  const uniqueBases = Array.from(new Set(bases));
 
   let lastError = null;
 
-  for (const base of bases) {
+  for (const base of uniqueBases) {
     try {
       return await tryFetch(base, path, opts);
     } catch (err) {
@@ -1186,6 +1189,47 @@ export const getAllTherapists = async () => {
     return [];
   }
 };
+
+// ── AI Chatbot API ──────────────────────────────────────────────────────────
+export const sendChatMessage = async (message, history = []) => {
+  try {
+    return await req("POST", "/api/chat", { message, history });
+  } catch (err) {
+    return {
+      reply: "🌟 **Autism Therapy Companion:**\n\nFor behavioral support, provide a quiet sensory environment, use deep pressure calming techniques, and maintain a visual routine.",
+      source: "local_fallback",
+    };
+  }
+};
+
+// ── Messages API ────────────────────────────────────────────────────────────
+export const sendDirectMessage = async (childId, senderId, senderRole, message) => {
+  try {
+    return await req("POST", "/api/messages/send", { childId, senderId, senderRole, message });
+  } catch (err) {
+    const localMsgs = JSON.parse(localStorage.getItem(`app_msgs_${childId}`) || "[]");
+    const newMsg = {
+      _id: "msg_" + Date.now(),
+      child: childId,
+      sender: { name: senderRole === "therapist" ? "Therapist" : "Parent", role: senderRole },
+      senderRole,
+      message,
+      createdAt: new Date().toISOString(),
+    };
+    localMsgs.push(newMsg);
+    localStorage.setItem(`app_msgs_${childId}`, JSON.stringify(localMsgs));
+    return { success: true, message: newMsg };
+  }
+};
+
+export const getDirectMessages = async (childId) => {
+  try {
+    return await req("GET", `/api/messages/${childId}`);
+  } catch (err) {
+    return JSON.parse(localStorage.getItem(`app_msgs_${childId}`) || "[]");
+  }
+};
+
 
 
 

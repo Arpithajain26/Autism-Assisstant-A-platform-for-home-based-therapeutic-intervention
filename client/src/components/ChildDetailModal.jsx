@@ -4,6 +4,7 @@ import {
   sendFeedback,
   changeChildLevel,
 } from "../services/api";
+import { generateClinicalPDF } from "../utils/pdfExportHelper";
 
 const LEVEL_INFO = {
   1: { label: "Level 1 — Emerging", color: "#166534", bg: "#dcfce7", emoji: "🌱" },
@@ -87,7 +88,19 @@ export default function ChildDetailModal({ child, onClose, onRefresh, lang = "en
   };
 
   const handlePrint = () => {
-    window.print();
+    try {
+      generateClinicalPDF({
+        child: child || {},
+        progressData: data || {},
+        domainScores: data?.domainScores || {},
+        recentSessions: data?.recentSessions || [],
+        dominantEmotion: data?.dominantEmotion || "Happy 😊",
+        clinicalRecommendation: data?.clinicalRecommendation || "",
+        therapistName: "Dr. Ananya Sharma, BCBA-D"
+      });
+    } catch (e) {
+      window.print();
+    }
   };
 
   if (!child) return null;

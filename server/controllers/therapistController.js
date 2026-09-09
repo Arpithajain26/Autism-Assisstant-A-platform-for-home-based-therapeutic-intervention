@@ -4,6 +4,7 @@ const ActivityLog = require("../models/ActivityLog");
 const Activity = require("../models/Activity");
 const Feedback = require("../models/Feedback");
 const User = require("../models/User");
+const mongoose = require("mongoose");
 const {
   getWeekNumber,
   calculateStreakAndMonthlyActivity,
@@ -11,6 +12,20 @@ const {
   calculateDomainScores,
   calculateEmotionData,
 } = require("../utils/progressHelpers");
+
+/**
+ * Resolves a childId that may be either:
+ *  - A valid MongoDB ObjectId string (24-char hex)  → findById
+ *  - A custom string childId (e.g. "child_1788342883269") → find by childId field
+ * Returns the Child document or null.
+ */
+async function resolveChild(id) {
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    return Child.findById(id);
+  }
+  return Child.findOne({ childId: id });
+}
+
 
 // ═════════════════════════════════════════════════════════════════════════════
 // CONTROLLER HANDLERS
@@ -79,25 +94,28 @@ exports.getTherapistChildren = async (req, res) => {
 exports.getChildProgressDetail = async (req, res) => {
   try {
     const { childId } = req.params;
-    const child = await Child.findById(childId).lean();
+    const child = await resolveChild(childId);
     if (!child) return res.status(404).json({ error: "Child not found" });
 
-    const progress = await calculateProgressStatus(childId);
-    const domainScores = await calculateDomainScores(childId);
-    const emotionData = await calculateEmotionData(childId);
-    const streakData = await calculateStreakAndMonthlyActivity(childId);
+    const oid = child._id; // always a valid ObjectId
+
+    const progress = await calculateProgressStatus(oid);
+    const domainScores = await calculateDomainScores(oid);
+    const emotionData = await calculateEmotionData(oid);
+    const streakData = await calculateStreakAndMonthlyActivity(oid);
 
     // Fetch recent sessions
-    const sessions = await Session.find({ child: childId })
+    const sessions = await Session.find({ child: oid })
       .populate("activity")
       .sort({ completedAt: -1 })
       .limit(20)
       .lean();
 
-    const logs = await ActivityLog.find({ child: childId })
+    const logs = await ActivityLog.find({ child: oid })
       .sort({ completedAt: -1 })
       .limit(20)
       .lean();
+
 
     const recentSessions = [
       ...sessions.map((s) => ({
@@ -166,11 +184,11 @@ exports.sendFeedback = async (req, res) => {
       return res.status(400).json({ error: "childId and message are required." });
     }
 
-    const child = await Child.findById(childId);
+    const child = await resolveChild(childId);
     if (!child) return res.status(404).json({ error: "Child not found" });
 
     const feedback = await Feedback.create({
-      child: childId,
+      child: child._id,
       therapist: therapistId || req.user?._id || child.therapistId,
       parent: child.parentId,
       message: message.trim(),
@@ -190,7 +208,12 @@ exports.sendFeedback = async (req, res) => {
 exports.getFeedbackByChild = async (req, res) => {
   try {
     const { childId } = req.params;
-    const feedbacks = await Feedback.find({ child: childId })
+
+    // Resolve custom string childId → real ObjectId
+    const child = await resolveChild(childId);
+    if (!child) return res.status(404).json({ error: "Child not found" });
+
+    const feedbacks = await Feedback.find({ child: child._id })
       .populate("therapist", "name specialization email")
       .sort({ createdAt: -1 });
 
@@ -212,7 +235,7 @@ exports.updateChildLevel = async (req, res) => {
       return res.status(400).json({ error: "newLevel must be 1, 2, or 3" });
     }
 
-    const child = await Child.findById(childId);
+    const child = await resolveChild(childId);
     if (!child) return res.status(404).json({ error: "Child not found" });
 
     const previousLevel = child.level || 1;
@@ -222,7 +245,7 @@ exports.updateChildLevel = async (req, res) => {
 
     // Log feedback message to parent about level change
     await Feedback.create({
-      child: childId,
+      child: child._id,
       therapist: therapistId || req.user?._id || child.therapistId,
       parent: child.parentId,
       type: "level_change",

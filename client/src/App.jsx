@@ -7,11 +7,13 @@ import ChildDashboard from "./pages/ChildDashboard";
 import TherapistDashboard from "./pages/TherapistDashboard";
 import Activities from "./pages/Activities";
 import Games from "./pages/Games";
+import TherapeuticGames from "./pages/TherapeuticGames";
 import AboutAutism from "./pages/AboutAutism";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import ProgressView from "./pages/ProgressView";
+import Chatbot from "./components/Chatbot";
 
 // ─────────────────────────────────────────────────────────────
 // Simple SPA Router
@@ -322,6 +324,9 @@ function App() {
           © 2026 Autism Assistant · Empowering every journey 🌟
         </footer>
       )}
+
+      {/* Global AI Clinical Autism Chatbot */}
+      <Chatbot />
     </div>
   );
 }

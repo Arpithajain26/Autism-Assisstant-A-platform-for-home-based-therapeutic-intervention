@@ -3,6 +3,15 @@ import { logSession } from "../services/api";
 import { getAgeLevelConfig } from "../utils/ageLevelMapping";
 import CertificateModal from "../components/CertificateModal";
 import ActivityRatingModal from "../components/ActivityRatingModal";
+import {
+  speakInstruction,
+  speakCelebration,
+  speakGentleGuidance,
+  speakEncouragement,
+  speakGameSummary,
+  setVoiceMuted,
+  getVoiceMuted
+} from "../utils/speechHelper";
 
 function navigate(path) {
   window.history.pushState({}, "", path);
@@ -10,9 +19,9 @@ function navigate(path) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Web Audio API sound generator
+   Web Audio API sound generator + Voice Feedback
    ───────────────────────────────────────────────────────────── */
-const playSound = (type) => {
+const playSound = (type, lang = "en") => {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
@@ -27,12 +36,16 @@ const playSound = (type) => {
       gain.gain.setValueAtTime(0.08, ctx.currentTime);
       osc.start();
       osc.stop(ctx.currentTime + 0.25);
+      // 3. On correct answer — audio celebrates!
+      speakCelebration(lang);
     } else if (type === "error") {
       osc.type = "sawtooth";
       osc.frequency.setValueAtTime(160, ctx.currentTime);
       gain.gain.setValueAtTime(0.08, ctx.currentTime);
       osc.start();
       osc.stop(ctx.currentTime + 0.3);
+      // 4. On wrong answer — audio guides gently!
+      speakGentleGuidance(lang);
     } else if (type === "pop") {
       osc.type = "sine";
       osc.frequency.setValueAtTime(800, ctx.currentTime);
@@ -1910,16 +1923,26 @@ export default function Games({ user }) {
   const [gameLanguage, setGameLanguage] = useState("en");
   const [showCert, setShowCert] = useState(false);
   const [showGameRating, setShowGameRating] = useState(false);
-  const startTimeRef = useRef(null);
+  const [voiceMutedState, setVoiceMutedState] = useState(getVoiceMuted());
 
   useEffect(() => {
     if (activeGameId) {
       document.body.style.overflow = "hidden";
       startTimeRef.current = Date.now();
+
+      // 1. Audio automatically plays instructions on start
+      const targetGame = GAMES_LIST.find(g => g.id === activeGameId);
+      if (targetGame) {
+        const title = gameLanguage === "en" ? targetGame.title : targetGame.titleKn;
+        const welcome = gameLanguage === "en"
+          ? `Welcome to ${title}! Let's play together!`
+          : `${title} ಗೆ ಸ್ವಾಗತ! ಒಟ್ಟಿಗೆ ಆಡೋಣ!`;
+        speakInstruction(welcome, gameLanguage);
+      }
     } else {
       document.body.style.overflow = "auto";
     }
-  }, [activeGameId]);
+  }, [activeGameId, gameLanguage]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1937,6 +1960,10 @@ export default function Games({ user }) {
     const durationMin = Number((durationSec / 60).toFixed(2));
     setGameResult({ score, emotion, duration: durationMin });
     setGameState("summary");
+
+    // 5. Game ends — audio summarizes and praises!
+    const currentGame = GAMES_LIST.find(g => g.id === activeGameId);
+    speakGameSummary(score, currentGame ? `You earned ${score} stars in ${currentGame.title}!` : "", gameLanguage);
 
     try {
       await logSession({
@@ -2219,6 +2246,30 @@ export default function Games({ user }) {
             </div>
 
             <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+              {/* Voice Guide Mute / Unmute Toggle */}
+              <button
+                onClick={() => {
+                  const nextMuted = !voiceMutedState;
+                  setVoiceMutedState(nextMuted);
+                  setVoiceMuted(nextMuted);
+                }}
+                style={{
+                  background: voiceMutedState ? "#334155" : "linear-gradient(135deg, #10b981, #059669)",
+                  border: "1px solid #475569",
+                  color: "white",
+                  padding: "6px 12px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontSize: "0.85rem",
+                  fontWeight: "bold",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px"
+                }}
+              >
+                {voiceMutedState ? "🔇 Voice: OFF" : "🔊 Voice: ON"}
+              </button>
+
               {/* Language toggle */}
               <button
                 onClick={() => { playSound("click"); setGameLanguage(prev => prev === "en" ? "kn" : "en"); }}

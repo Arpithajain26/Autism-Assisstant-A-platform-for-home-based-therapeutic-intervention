@@ -18,9 +18,10 @@ const isValidId = (id) =>
 
 // Connect to MongoDB
 connectDB().then(() => {
-  const seedTherapists = require("./seed/seedTherapists");
+  const { seedTherapists } = require("./seed/seedTherapists");
   seedTherapists();
 });
+
 
 const app = express();
 const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 5000;
@@ -447,12 +448,16 @@ app.post("/api/children/link-by-code", async (req, res) => {
   }
 });
 
-// GET /api/child/:childId/tasks  (Child therapy view)
+// GET /api/child/:childId/tasks  (Child therapy view — supports both ObjectId and custom string childId)
 app.get("/api/child/:childId/tasks", async (req, res) => {
   try {
-    if (!isValidId(req.params.childId))
-      return res.status(400).json({ error: "Invalid child ID format." });
-    const child = await Child.findById(req.params.childId);
+    const { childId } = req.params;
+    let child;
+    if (mongoose.Types.ObjectId.isValid(childId)) {
+      child = await Child.findById(childId);
+    } else {
+      child = await Child.findOne({ childId });
+    }
     if (!child)
       return res.status(404).json({ error: "Child profile not found." });
 
@@ -490,9 +495,12 @@ app.get("/api/child/:childId/tasks", async (req, res) => {
 app.post("/api/children/assign-task", async (req, res) => {
   try {
     const { childId, activityId } = req.body;
-    if (!isValidId(childId))
-      return res.status(400).json({ error: "Invalid child ID format." });
-    const child = await Child.findById(childId);
+    let child;
+    if (mongoose.Types.ObjectId.isValid(childId)) {
+      child = await Child.findById(childId);
+    } else {
+      child = await Child.findOne({ childId });
+    }
     if (!child) return res.status(404).json({ error: "Child not found." });
 
     if (!child.assignedTasks.includes(activityId)) {
@@ -510,9 +518,12 @@ app.post("/api/children/assign-task", async (req, res) => {
 app.post("/api/children/complete-task", async (req, res) => {
   try {
     const { childId, activityId, score = 4, emotion = "Happy" } = req.body;
-    if (!isValidId(childId))
-      return res.status(400).json({ error: "Invalid child ID format." });
-    const child = await Child.findById(childId);
+    let child;
+    if (mongoose.Types.ObjectId.isValid(childId)) {
+      child = await Child.findById(childId);
+    } else {
+      child = await Child.findOne({ childId });
+    }
     if (!child) return res.status(404).json({ error: "Child not found." });
 
     child.assignedTasks = child.assignedTasks.filter((id) => id !== activityId);
@@ -607,6 +618,46 @@ app.get("/api/activities/:id", async (req, res) => {
   }
 });
 
+// GET /api/children/child/:childId  (Single child by ObjectId OR custom childId string)
+app.get("/api/children/child/:childId", async (req, res) => {
+  try {
+    const { childId } = req.params;
+    let child;
+    if (mongoose.Types.ObjectId.isValid(childId)) {
+      child = await Child.findById(childId);
+    } else {
+      child = await Child.findOne({ childId });
+    }
+    if (!child) return res.status(404).json({ error: "Child not found." });
+    res.json(child);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch child." });
+  }
+});
+
+// GET /api/sessions/child/:childId  (Sessions for a child — used by ChildDashboard progress view)
+app.get("/api/sessions/child/:childId", async (req, res) => {
+  try {
+    const { childId } = req.params;
+    let oid;
+    if (mongoose.Types.ObjectId.isValid(childId)) {
+      oid = childId;
+    } else {
+      const child = await Child.findOne({ childId });
+      oid = child ? child._id : null;
+    }
+    if (!oid) return res.status(404).json({ error: "Child not found." });
+
+    const sessions = await Session.find({ child: oid })
+      .sort({ completedAt: -1 })
+      .limit(50)
+      .lean();
+    res.json(sessions);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch sessions." });
+  }
+});
+
 // POST /api/sessions/log
 const { logSession } = require("./controllers/activityController");
 app.post("/api/sessions/log", logSession);
@@ -617,6 +668,15 @@ app.use("/api/progress", require("./routes/progressRoutes"));
 
 // ── Therapist Endpoints ──────────────────────────────────────────────────────
 app.use("/api/therapist", require("./routes/therapistRoutes"));
+
+// ── AI Chatbot Endpoint ───────────────────────────────────────────────────────
+const { handleChat } = require("./controllers/chatController");
+app.post("/api/chat", handleChat);
+
+// ── Messages Endpoints ────────────────────────────────────────────────────────
+const messageController = require("./controllers/messageController");
+app.post("/api/messages/send", messageController.sendMessage);
+app.get("/api/messages/:childId", messageController.getMessages);
 
 // ── Direct Level & Feedback Route Aliases ─────────────────────────────────────
 const therapistController = require("./controllers/therapistController");

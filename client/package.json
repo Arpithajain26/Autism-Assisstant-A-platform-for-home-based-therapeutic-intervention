@@ -13,6 +13,8 @@
     "face-api.js": "^0.22.2",
     "firebase": "^12.17.1",
     "framer-motion": "^12.43.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
     "lucide-react": "^1.28.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

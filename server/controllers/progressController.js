@@ -1,7 +1,19 @@
 const axios = require("axios");
+const mongoose = require("mongoose");
 const Session = require("../models/Session");
 const Child = require("../models/Child");
 const ActivityLog = require("../models/ActivityLog");
+
+/**
+ * Resolve either a MongoDB ObjectId string or a custom childId string → real _id.
+ */
+async function resolveChildId(id) {
+  if (mongoose.Types.ObjectId.isValid(id)) return id;
+  const child = await Child.findOne({ childId: id }).lean();
+  return child ? child._id : null;
+}
+
+
 
 // @desc    Log activity completion with score and engagement
 // @route   POST /api/progress/log
@@ -18,10 +30,16 @@ exports.logActivityCompletion = async (req, res) => {
       return res.status(400).json({ error: "performanceScore must be a number between 0 and 100." });
     }
 
+    // Resolve custom string childId → real ObjectId
+    const resolvedId = await resolveChildId(childId);
+    if (!resolvedId) {
+      return res.status(404).json({ error: "Child not found." });
+    }
+
     const validEngagement = ["Low", "Medium", "High"].includes(engagement) ? engagement : "Medium";
 
     const log = await ActivityLog.create({
-      child: childId,
+      child: resolvedId,
       activity: String(activityId),
       performanceScore: score,
       engagement: validEngagement,
@@ -106,13 +124,20 @@ exports.getWeeklyTrend = async (req, res) => {
     if (!childId) {
       return res.status(400).json({ error: 'childId param required' });
     }
+
+    // Resolve custom string childId → real ObjectId
+    const resolvedId = await resolveChildId(childId);
+    if (!resolvedId) {
+      return res.status(404).json({ error: 'Child not found' });
+    }
+
     const now = new Date();
     const startTwoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
     const startLastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     // Fetch logs from the last two weeks
     const logs = await ActivityLog.find({
-      child: childId,
+      child: resolvedId,
       completedAt: { $gte: startTwoWeeksAgo },
     }).lean();
 

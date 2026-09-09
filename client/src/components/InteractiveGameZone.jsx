@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import FlashcardGame from "./FlashcardGame";
+import {
+  speakInstruction,
+  speakCelebration,
+  speakGentleGuidance,
+  speakEncouragement,
+  speakGameSummary,
+  setVoiceMuted,
+  getVoiceMuted
+} from "../utils/speechHelper";
 
 // Web Audio API Synthesizer for self-contained sound effects
-const playSynthSound = (type) => {
+const playSynthSound = (type, lang = "en") => {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
@@ -36,6 +45,7 @@ const playSynthSound = (type) => {
         osc.start(ctx.currentTime + idx * 0.1);
         osc.stop(ctx.currentTime + idx * 0.1 + 0.22);
       });
+      speakCelebration(lang);
     } else if (type === "wrong") {
       // Low buzz
       const osc = ctx.createOscillator();
@@ -49,6 +59,7 @@ const playSynthSound = (type) => {
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.26);
+      speakGentleGuidance(lang);
     } else if (type === "synth_bell") {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -337,50 +348,92 @@ function NameThatSoundGame({ language, onComplete }) {
 }
 
 // 4. BUBBLE POPPING
-function BubblePoppingGame({ onComplete }) {
-  const [bubbles, setBubbles] = useState([]);
+function BubblePoppingGame({ language = "en", onComplete }) {
+  // Pre-spawn 6 colorful bubbles immediately so screen is never blank!
+  const [bubbles, setBubbles] = useState(() => {
+    return Array.from({ length: 6 }).map((_, i) => ({
+      id: "b_init_" + i + "_" + Math.random(),
+      size: 55 + Math.random() * 35,
+      left: 10 + (i * 14) + (Math.random() * 5),
+      top: 40 + Math.random() * 140,
+      speed: 1.0 + Math.random() * 1.5,
+      emoji: ["⭐", "🫧", "🎈", "🌸", "✨", "🐠", "🦄", "🌈"][i % 8],
+      color: `hsl(${(i * 55) % 360}, 85%, 82%)`
+    }));
+  });
   const [popped, setPopped] = useState(0);
   const containerRef = useRef(null);
 
+  // 1. Audio automatically plays instructions on start
   useEffect(() => {
-    // Generate bubbles over time
+    const prompt = language === "kn"
+      ? "ಗುಳ್ಳೆಗಳನ್ನು ಮುಟ್ಟಿ ಒಡೆಯಿರಿ! 12 ಗುಳ್ಳೆಗಳನ್ನು ಒಡೆದು ಆಟ ಮುಗಿಸಿ!"
+      : "Tap the floating bubbles to pop them! Pop 12 bubbles to win!";
+    speakInstruction(prompt, language);
+  }, [language]);
+
+  // Spawner interval — continuously adds fresh bubbles from bottom
+  useEffect(() => {
     const interval = setInterval(() => {
-      if (bubbles.length >= 8) return;
-      const size = 60 + Math.random() * 40;
-      const left = Math.random() * 80;
-      const newBubble = {
-        id: Math.random().toString(),
-        size,
-        left,
-        top: 250,
-        speed: 1.5 + Math.random() * 2,
-        color: `hsl(${Math.random() * 360}, 85%, 80%)`
-      };
-      setBubbles(prev => [...prev, newBubble]);
-    }, 800);
+      setBubbles(prev => {
+        if (prev.length >= 10) return prev;
+        const size = 55 + Math.random() * 35;
+        const left = 5 + Math.random() * 80;
+        const newBubble = {
+          id: "b_" + Date.now() + "_" + Math.random(),
+          size,
+          left,
+          top: 250,
+          speed: 1.2 + Math.random() * 1.6,
+          emoji: ["⭐", "🫧", "🎈", "🌸", "✨", "🐠", "🦄", "🌈"][Math.floor(Math.random() * 8)],
+          color: `hsl(${Math.random() * 360}, 85%, 82%)`
+        };
+        return [...prev, newBubble];
+      });
+    }, 700);
 
     return () => clearInterval(interval);
-  }, [bubbles]);
+  }, []);
 
-  // Frame tick animation
+  // Frame tick animation loop
   useEffect(() => {
-    const handle = requestAnimationFrame(function animate() {
-      setBubbles(prev => 
+    let animId;
+    const animate = () => {
+      setBubbles(prev =>
         prev
-          .map(b => ({ ...b, top: b.top - b.speed }))
-          .filter(b => b.top > -b.size) // keep bubbles on screen
+          .map(b => {
+            const nextTop = b.top - b.speed;
+            // If floated off the top, recycle to the bottom
+            if (nextTop < -b.size) {
+              return {
+                ...b,
+                top: 260,
+                left: 5 + Math.random() * 80,
+                speed: 1.0 + Math.random() * 1.5,
+                color: `hsl(${Math.random() * 360}, 85%, 82%)`
+              };
+            }
+            return { ...b, top: nextTop };
+          })
       );
-      requestAnimationFrame(animate);
-    });
-    return () => cancelAnimationFrame(handle);
+      animId = requestAnimationFrame(animate);
+    };
+    animId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animId);
   }, []);
 
   const handlePop = (id) => {
-    playSynthSound("pop");
+    playSynthSound("pop", language);
     setBubbles(prev => prev.filter(b => b.id !== id));
     setPopped(p => {
       const next = p + 1;
+      // 2. Mid-game encouragement
+      if (next === 4 || next === 8) {
+        speakEncouragement(language);
+      }
+      // 5. Game summary praise on completion
       if (next >= 12) {
+        speakGameSummary(5, language === "kn" ? "ನೀವು ಎಲ್ಲಾ 12 ಗುಳ್ಳೆಗಳನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಒಡೆದಿದ್ದೀರಿ!" : "You popped all 12 bubbles! Great focus!", language);
         onComplete && onComplete(5);
       }
       return next;
@@ -389,19 +442,23 @@ function BubblePoppingGame({ onComplete }) {
 
   return (
     <div style={{ textAlign: "center", padding: "16px", userSelect: "none" }}>
-      <div style={{ fontSize: "1.1rem", fontWeight: "900", color: "#3b82f6", marginBottom: "8px" }}>
-        🫧 Pop 12 Bubbles! ({popped}/12 popped)
+      <div style={{ fontSize: "1.15rem", fontWeight: "900", color: "#0284c7", marginBottom: "10px", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
+        <span>🫧 Pop 12 Bubbles!</span>
+        <span style={{ background: "#e0f2fe", color: "#0369a1", padding: "2px 10px", borderRadius: "12px", fontSize: "0.9rem" }}>
+          {popped} / 12 popped
+        </span>
       </div>
 
       <div
         ref={containerRef}
         style={{
-          height: "260px",
-          background: "linear-gradient(180deg,#e0f2fe,#bae6fd)",
-          border: "3px solid #7dd3fc",
+          height: "270px",
+          background: "linear-gradient(180deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)",
+          border: "3px solid #38bdf8",
           borderRadius: "24px",
           position: "relative",
-          overflow: "hidden"
+          overflow: "hidden",
+          boxShadow: "inset 0 4px 12px rgba(0,0,0,0.06), 0 8px 24px rgba(56, 189, 248, 0.2)"
         }}
       >
         {bubbles.map(b => (
@@ -416,22 +473,26 @@ function BubblePoppingGame({ onComplete }) {
               top: `${b.top}px`,
               backgroundColor: b.color,
               borderRadius: "50%",
-              border: "3px solid rgba(255,255,255,0.7)",
-              boxShadow: "inset -5px -5px 15px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.1)",
+              border: "3px solid rgba(255,255,255,0.85)",
+              boxShadow: "inset -6px -6px 14px rgba(0,0,0,0.12), inset 6px 6px 14px rgba(255,255,255,0.7), 0 6px 16px rgba(0,0,0,0.12)",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "1.4rem",
-              transition: "transform 0.1s"
+              fontSize: `${b.size * 0.4}px`,
+              transition: "transform 0.1s, opacity 0.1s",
+              animation: "float 2s ease-in-out infinite",
+              zIndex: 10
             }}
+            onMouseEnter={e => e.currentTarget.style.transform = "scale(1.15)"}
+            onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
           >
-            ⭐
+            {b.emoji}
           </div>
         ))}
       </div>
-      <p style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "10px" }}>
-        ✨ Click or tap the rising bubbles to pop them!
+      <p style={{ fontSize: "0.82rem", color: "#0369a1", fontWeight: "700", marginTop: "12px" }}>
+        ✨ {language === "kn" ? "ಗುಳ್ಳೆಗಳನ್ನು ಒಡೆಯಲು ಮುಟ್ಟಿ!" : "Click or tap the rising bubbles to pop them!"}
       </p>
     </div>
   );
@@ -2052,7 +2113,7 @@ export default function InteractiveGameZone({ activity, language = "en", current
       return <ZonesRegulationGame language={language} onComplete={onComplete} />;
     }
     if (title.includes("bubble") || title.includes("pop")) {
-      return <BubblePoppingGame onComplete={onComplete} />;
+      return <BubblePoppingGame language={language} onComplete={onComplete} />;
     }
     if (title.includes("mirror") || title.includes("mimic") || title.includes("face")) {
       return <MirrorPlayGame language={language} currentEmotion={currentEmotion} confidence={emotionConfidence} onComplete={onComplete} />;

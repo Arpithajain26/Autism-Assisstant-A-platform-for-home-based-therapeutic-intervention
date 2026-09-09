@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getWeeklyTrend, getChild, getChildSessions } from "../services/api";
+import { generateClinicalPDF } from "../utils/pdfExportHelper";
 
 const LEVEL_LABELS = {
   1: { label: "Level 1 — Emerging", color: "#166534", bg: "#dcfce7", emoji: "🌱" },
@@ -158,7 +159,7 @@ export default function ProgressView({ childId, user, onNavigate }) {
           </div>
         </div>
 
-        <div style={{ textAlign: "right" }}>
+        <div style={{ textAlign: "right", display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-end" }}>
           <div
             style={{
               display: "inline-block",
@@ -173,6 +174,34 @@ export default function ProgressView({ childId, user, onNavigate }) {
           >
             {trendBadge.label}
           </div>
+
+          <button
+            onClick={() => {
+              generateClinicalPDF({
+                child: child || {},
+                progressData: trendData || {},
+                domainScores: {},
+                recentSessions: sessions || [],
+                clinicalRecommendation: "Child is demonstrating continuous engagement. Recommended to maintain daily structured TEACCH play intervals."
+              });
+            }}
+            style={{
+              background: "linear-gradient(135deg, #4F6EF7, #3b82f6)",
+              color: "white",
+              border: "none",
+              padding: "8px 14px",
+              borderRadius: "10px",
+              fontWeight: "800",
+              fontSize: "0.85rem",
+              cursor: "pointer",
+              boxShadow: "0 4px 12px rgba(79, 110, 247, 0.3)",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            📄 Export Clinical PDF Report
+          </button>
         </div>
       </div>
 

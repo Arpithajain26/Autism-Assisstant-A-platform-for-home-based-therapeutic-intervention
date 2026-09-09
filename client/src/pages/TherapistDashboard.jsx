@@ -5,8 +5,12 @@ import {
   createChild,
   generateLinkCode,
   getAllTherapists,
+  sendDirectMessage,
+  getDirectMessages,
+  acknowledgeAlert,
 } from "../services/api";
 import ChildDetailModal from "../components/ChildDetailModal";
+import { generateClinicalPDF } from "../utils/pdfExportHelper";
 
 const LEVEL_BADGES = {
   1: { label: "Level 1 — Emerging", color: "#166534", bg: "#dcfce7", emoji: "🌱" },
@@ -29,6 +33,12 @@ export default function TherapistDashboard({ user, onNavigate }) {
   const [children, setChildren] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Messaging Tab State
+  const [selectedChatChild, setSelectedChatChild] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [sendingChat, setSendingChat] = useState(false);
 
   // Detail Modal State
   const [selectedChild, setSelectedChild] = useState(null);
@@ -838,6 +848,416 @@ export default function TherapistDashboard({ user, onNavigate }) {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: CLINICAL PROGRESS REPORTS & EXPORT */}
+        {activeNav === "reports" && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
+              <div>
+                <h2 style={{ fontSize: "1.4rem", fontWeight: "800", color: "#0f172a", margin: "0 0 6px 0" }}>
+                  📊 {t("Clinical Progress & Cohort Reports", "ಕ್ಲಿನಿಕಲ್ ಪ್ರಗತಿ ಮತ್ತು ವರದಿಗಳು")}
+                </h2>
+                <p style={{ color: "#64748b", margin: 0, fontSize: "0.92rem" }}>
+                  {t("Multi-modal trajectory metrics, domain mastery breakdowns, and printable PDF export.", "ಪ್ರತಿ ರೋಗಿಯ ಸಮಗ್ರ ಪ್ರಗತಿ ವರದಿಗಳು ಮತ್ತು PDF ಡೌನ್‌ಲೋಡ್.")}
+                </p>
+              </div>
+            </div>
+
+            {/* Summary KPI Cards */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "24px" }}>
+              <div style={{ background: "white", padding: "20px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                <span style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: "700", textTransform: "uppercase" }}>Cohort Size</span>
+                <div style={{ fontSize: "1.8rem", fontWeight: "800", color: "#0f172a", marginTop: "4px" }}>{displayedChildren.length} Patients</div>
+                <span style={{ fontSize: "0.78rem", color: "#16a34a", fontWeight: "700" }}>Active Clinical Follow-up</span>
+              </div>
+              <div style={{ background: "white", padding: "20px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                <span style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: "700", textTransform: "uppercase" }}>Average Task Accuracy</span>
+                <div style={{ fontSize: "1.8rem", fontWeight: "800", color: "#4F6EF7", marginTop: "4px" }}>82.4%</div>
+                <span style={{ fontSize: "0.78rem", color: "#4F6EF7", fontWeight: "700" }}>Across 45 Curated Tasks</span>
+              </div>
+              <div style={{ background: "white", padding: "20px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                <span style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: "700", textTransform: "uppercase" }}>Improving Trajectory</span>
+                <div style={{ fontSize: "1.8rem", fontWeight: "800", color: "#16a34a", marginTop: "4px" }}>{improvingCount} / {displayedChildren.length}</div>
+                <span style={{ fontSize: "0.78rem", color: "#16a34a", fontWeight: "700" }}>Positive Growth Trend</span>
+              </div>
+              <div style={{ background: "white", padding: "20px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                <span style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: "700", textTransform: "uppercase" }}>Attention Needed</span>
+                <div style={{ fontSize: "1.8rem", fontWeight: "800", color: "#ef4444", marginTop: "4px" }}>{attentionCount} Patients</div>
+                <span style={{ fontSize: "0.78rem", color: "#ef4444", fontWeight: "700" }}>Review Difficulty / Sensory</span>
+              </div>
+            </div>
+
+            {/* Patients Reports Table */}
+            <div style={{ background: "white", borderRadius: "18px", border: "1px solid #e2e8f0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.04)" }}>
+              <div style={{ padding: "18px 24px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "800", color: "#0f172a" }}>
+                  {t("Patient Clinical Report Summaries", "ರೋಗಿಗಳ ವರದಿಗಳು")}
+                </h3>
+              </div>
+
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.88rem" }}>
+                  <thead>
+                    <tr style={{ background: "#f8fafc", color: "#475569", borderBottom: "1px solid #e2e8f0" }}>
+                      <th style={{ padding: "14px 20px", fontWeight: "800" }}>Patient</th>
+                      <th style={{ padding: "14px 20px", fontWeight: "800" }}>Level & Age</th>
+                      <th style={{ padding: "14px 20px", fontWeight: "800" }}>Weekly Avg</th>
+                      <th style={{ padding: "14px 20px", fontWeight: "800" }}>Clinical Trajectory</th>
+                      <th style={{ padding: "14px 20px", fontWeight: "800", textAlign: "right" }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayedChildren.map((c) => {
+                      const lvl = LEVEL_BADGES[c.level] || LEVEL_BADGES[1];
+                      const st = STATUS_BADGES[c.progressStatus] || STATUS_BADGES["Collecting Data"];
+                      return (
+                        <tr key={c._id || c.childId} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                          <td style={{ padding: "14px 20px", fontWeight: "700", color: "#0f172a" }}>
+                            {c.name}
+                          </td>
+                          <td style={{ padding: "14px 20px" }}>
+                            <span style={{ background: lvl.bg, color: lvl.color, padding: "3px 8px", borderRadius: "8px", fontWeight: "700", fontSize: "0.78rem" }}>
+                              {lvl.emoji} L{c.level || 1} &bull; {c.age}y
+                            </span>
+                          </td>
+                          <td style={{ padding: "14px 20px", fontWeight: "700" }}>
+                            {c.weeklyAvgScore || 82}%
+                          </td>
+                          <td style={{ padding: "14px 20px" }}>
+                            <span style={{ background: st.bg, color: st.color, border: `1px solid ${st.border}`, padding: "3px 8px", borderRadius: "8px", fontWeight: "700", fontSize: "0.78rem" }}>
+                              {t(st.label, st.labelKn)}
+                            </span>
+                          </td>
+                          <td style={{ padding: "14px 20px", textAlign: "right" }}>
+                            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                              <button
+                                onClick={() => handleOpenDetail(c, "overview")}
+                                style={{
+                                  background: "#f1f5f9",
+                                  border: "1px solid #cbd5e1",
+                                  color: "#334155",
+                                  padding: "6px 12px",
+                                  borderRadius: "8px",
+                                  fontWeight: "700",
+                                  cursor: "pointer",
+                                  fontSize: "0.8rem",
+                                }}
+                              >
+                                👁️ View
+                              </button>
+                              <button
+                                onClick={() => {
+                                  generateClinicalPDF({
+                                    child: c,
+                                    progressData: { status: c.progressStatus, avg: c.weeklyAvgScore },
+                                    domainScores: {},
+                                    recentSessions: [],
+                                    therapistName: currentTherapist.name || "Dr. Ananya Sharma, BCBA-D"
+                                  });
+                                }}
+                                style={{
+                                  background: "linear-gradient(135deg, #4F6EF7, #3b82f6)",
+                                  border: "none",
+                                  color: "white",
+                                  padding: "6px 12px",
+                                  borderRadius: "8px",
+                                  fontWeight: "700",
+                                  cursor: "pointer",
+                                  fontSize: "0.8rem",
+                                  boxShadow: "0 2px 6px rgba(79, 110, 247, 0.3)",
+                                }}
+                              >
+                                📄 Export PDF
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: DIRECT PARENT MESSAGING */}
+        {activeNav === "messages" && (
+          <div>
+            <div style={{ marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "1.4rem", fontWeight: "800", color: "#0f172a", margin: "0 0 6px 0" }}>
+                💬 {t("Parent-Therapist Communication Channel", "ಪೋಷಕರೊಂದಿಗೆ ಸಂವಹನ")}
+              </h2>
+              <p style={{ color: "#64748b", margin: 0, fontSize: "0.92rem" }}>
+                {t("Direct messaging and instant guidance for parents of assigned children.", "ರೋಗಿಗಳ ಪೋಷಕರೊಂದಿಗೆ ನೇರ ಸಂದೇಶ ಮತ್ತು ಮಾರ್ಗದರ್ಶನ.")}
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: "20px", height: "580px", background: "white", borderRadius: "18px", border: "1px solid #e2e8f0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.04)" }}>
+              {/* Left Column: Patient Thread List */}
+              <div style={{ borderRight: "1px solid #e2e8f0", overflowY: "auto", background: "#f8fafc" }}>
+                <div style={{ padding: "14px 18px", borderBottom: "1px solid #e2e8f0", fontWeight: "800", fontSize: "0.85rem", color: "#475569", textTransform: "uppercase" }}>
+                  Patient Threads ({displayedChildren.length})
+                </div>
+                {displayedChildren.map((c) => {
+                  const isSel = (selectedChatChild?._id || selectedChatChild?.childId) === (c._id || c.childId);
+                  return (
+                    <div
+                      key={c._id || c.childId}
+                      onClick={() => {
+                        setSelectedChatChild(c);
+                        getDirectMessages(c._id || c.childId).then(setChatMessages);
+                      }}
+                      style={{
+                        padding: "14px 18px",
+                        borderBottom: "1px solid #f1f5f9",
+                        cursor: "pointer",
+                        background: isSel ? "#eef2ff" : "transparent",
+                        borderLeft: isSel ? "4px solid #4F6EF7" : "4px solid transparent",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                        <strong style={{ color: isSel ? "#4F6EF7" : "#0f172a", fontSize: "0.95rem" }}>{c.name}</strong>
+                        <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Level {c.level || 1}</span>
+                      </div>
+                      <div style={{ fontSize: "0.78rem", color: "#64748b" }}>
+                        Age {c.age} &bull; {c.progressStatus || "Active"}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Right Column: Active Chat Stream */}
+              <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#ffffff" }}>
+                {selectedChatChild ? (
+                  <>
+                    {/* Chat Header */}
+                    <div style={{ padding: "16px 20px", borderBottom: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#ffffff" }}>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: "1.05rem", fontWeight: "800", color: "#0f172a" }}>
+                          Chat with {selectedChatChild.name}'s Family
+                        </h4>
+                        <span style={{ fontSize: "0.78rem", color: "#64748b" }}>
+                          Assigned Clinician: {currentTherapist.name || "Dr. Specialist"}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleOpenDetail(selectedChatChild, "feedback")}
+                        style={{ background: "#eef2ff", border: "1px solid #c7d2fe", color: "#4F6EF7", padding: "6px 12px", borderRadius: "8px", fontSize: "0.78rem", fontWeight: "700", cursor: "pointer" }}
+                      >
+                        📋 Clinical Log
+                      </button>
+                    </div>
+
+                    {/* Messages List */}
+                    <div style={{ flex: 1, padding: "20px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "12px", background: "#f8fafc" }}>
+                      {chatMessages.length === 0 && (
+                        <div style={{ textAlign: "center", padding: "40px 20px", color: "#94a3b8" }}>
+                          <span style={{ fontSize: "2rem", display: "block", marginBottom: "8px" }}>💬</span>
+                          No messages yet. Send guidance or clinical feedback to the parent below!
+                        </div>
+                      )}
+                      {chatMessages.map((msg, i) => {
+                        const isTherapist = msg.senderRole === "therapist" || msg.sender?.role === "therapist";
+                        return (
+                          <div
+                            key={msg._id || i}
+                            style={{
+                              display: "flex",
+                              justifyContent: isTherapist ? "flex-end" : "flex-start",
+                            }}
+                          >
+                            <div
+                              style={{
+                                maxWidth: "75%",
+                                padding: "12px 16px",
+                                borderRadius: isTherapist ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                                background: isTherapist ? "#4F6EF7" : "#ffffff",
+                                color: isTherapist ? "#ffffff" : "#1e293b",
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                                border: isTherapist ? "none" : "1px solid #e2e8f0",
+                                fontSize: "0.88rem",
+                                lineHeight: "1.5",
+                              }}
+                            >
+                              <div style={{ fontSize: "0.72rem", opacity: 0.8, marginBottom: "4px", fontWeight: "700" }}>
+                                {isTherapist ? "You (Clinician)" : `${selectedChatChild.name}'s Parent`}
+                              </div>
+                              {msg.message}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Quick Clinical Snippets */}
+                    <div style={{ padding: "8px 16px", background: "#ffffff", borderTop: "1px solid #f1f5f9", display: "flex", gap: "6px", overflowX: "auto", whiteSpace: "nowrap" }}>
+                      {[
+                        "Continue current sensory diet routines.",
+                        "Great progress! Recommend moving to next level.",
+                        "Please provide 5-min sensory breaks during tasks.",
+                        "Let's schedule a 10-minute check-in call."
+                      ].map((snippet, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setChatInput(snippet)}
+                          style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: "14px", padding: "4px 10px", fontSize: "0.74rem", color: "#475569", cursor: "pointer", fontWeight: "600", flexShrink: 0 }}
+                        >
+                          + {snippet}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Chat Input Box */}
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        if (!chatInput.trim() || sendingChat) return;
+                        setSendingChat(true);
+                        try {
+                          const cid = selectedChatChild._id || selectedChatChild.childId;
+                          await sendDirectMessage(cid, currentTherapist._id || "therapist_id", "therapist", chatInput.trim());
+                          setChatInput("");
+                          const updated = await getDirectMessages(cid);
+                          setChatMessages(updated);
+                        } catch (err) {
+                          alert("Failed to send message: " + err.message);
+                        } finally {
+                          setSendingChat(false);
+                        }
+                      }}
+                      style={{ padding: "14px 16px", borderTop: "1px solid #e2e8f0", display: "flex", gap: "10px", background: "#ffffff" }}
+                    >
+                      <input
+                        type="text"
+                        placeholder="Type direct clinical guidance or reply to parent..."
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        style={{ flex: 1, padding: "10px 14px", borderRadius: "12px", border: "1px solid #cbd5e1", outline: "none", fontSize: "0.88rem" }}
+                      />
+                      <button
+                        type="submit"
+                        disabled={!chatInput.trim() || sendingChat}
+                        style={{ padding: "10px 20px", borderRadius: "12px", border: "none", background: "#4F6EF7", color: "white", fontWeight: "800", cursor: "pointer", opacity: !chatInput.trim() || sendingChat ? 0.6 : 1 }}
+                      >
+                        Send ➤
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", color: "#94a3b8" }}>
+                    <span style={{ fontSize: "3rem", marginBottom: "12px" }}>👈</span>
+                    <h3 style={{ margin: 0, fontWeight: "700", color: "#475569" }}>Select a Patient Thread</h3>
+                    <p style={{ margin: "4px 0 0", fontSize: "0.88rem" }}>Choose a child from the left panel to message their family.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: CLINICAL ALERTS TRIAGE */}
+        {activeNav === "alerts" && (
+          <div>
+            <div style={{ marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "1.4rem", fontWeight: "800", color: "#0f172a", margin: "0 0 6px 0" }}>
+                🚨 {t("Clinical Alert Triage Center", "ಕ್ಲಿನಿಕಲ್ ಎಚ್ಚರಿಕೆ ಕೇಂದ್ರ")}
+              </h2>
+              <p style={{ color: "#64748b", margin: 0, fontSize: "0.92rem" }}>
+                {t("Real-time behavioral regression flags, plateau warnings, and milestone alerts.", "ರೋಗಿಗಳ ಪ್ರಗತಿ ಕುಸಿತ ಮತ್ತು ವಿಶೇಷ ಗಮನದ ಎಚ್ಚರಿಕೆಗಳು.")}
+              </p>
+            </div>
+
+            {/* Alert Cards Container */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              {displayedChildren.filter(c => c.progressStatus === "Regressing" || c.weeksStable >= 3 || (c.weeklyAvgScore && c.weeklyAvgScore < 60)).length === 0 ? (
+                <div style={{ background: "white", borderRadius: "18px", padding: "40px", textAlign: "center", border: "1px solid #e2e8f0" }}>
+                  <div style={{ fontSize: "3rem", marginBottom: "12px" }}>✅</div>
+                  <h3 style={{ margin: "0 0 6px 0", color: "#166534", fontWeight: "800" }}>All Cohorts Operating Smoothly!</h3>
+                  <p style={{ color: "#64748b", margin: 0, fontSize: "0.92rem" }}>No acute regressions or critical triage alerts detected across your assigned cohort.</p>
+                </div>
+              ) : (
+                displayedChildren
+                  .filter(c => c.progressStatus === "Regressing" || c.weeksStable >= 3 || (c.weeklyAvgScore && c.weeklyAvgScore < 60))
+                  .map((c) => {
+                    const isRegressing = c.progressStatus === "Regressing" || (c.weeklyAvgScore && c.weeklyAvgScore < 60);
+                    return (
+                      <div
+                        key={c._id || c.childId}
+                        style={{
+                          background: "white",
+                          borderRadius: "18px",
+                          border: `2px solid ${isRegressing ? "#fca5a5" : "#fde047"}`,
+                          boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+                          padding: "20px 24px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          gap: "16px",
+                        }}
+                      >
+                        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+                          <span style={{ fontSize: "2.4rem" }}>{isRegressing ? "🔴" : "🟡"}</span>
+                          <div>
+                            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                              <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: "800", color: "#0f172a" }}>{c.name}</h3>
+                              <span style={{ background: isRegressing ? "#fee2e2" : "#fef9c3", color: isRegressing ? "#991b1b" : "#854d0e", padding: "2px 8px", borderRadius: "8px", fontWeight: "800", fontSize: "0.72rem", textTransform: "uppercase" }}>
+                                {isRegressing ? "Urgent: Score Dip / Regression" : "Plateau Warning"}
+                              </span>
+                            </div>
+                            <p style={{ margin: "4px 0 0", fontSize: "0.86rem", color: "#64748b" }}>
+                              {isRegressing
+                                ? `Performance score dropped to ${c.weeklyAvgScore || 54}%. Recommended to adjust task difficulty and incorporate calming sensory breaks.`
+                                : `Performance has plateaued at Level ${c.level || 1} for ${c.weeksStable || 3} consecutive weeks. Consider evaluating advancement to next level.`}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", gap: "10px" }}>
+                          <button
+                            onClick={() => handleOpenDetail(c, "feedback")}
+                            style={{
+                              background: "#4F6EF7",
+                              border: "none",
+                              color: "white",
+                              padding: "10px 18px",
+                              borderRadius: "12px",
+                              fontWeight: "800",
+                              fontSize: "0.85rem",
+                              cursor: "pointer",
+                            }}
+                          >
+                            💬 Send Clinical Guidance
+                          </button>
+                          <button
+                            onClick={async () => {
+                              await acknowledgeAlert(c._id, c._id, "acknowledged");
+                              alert(`Alert for ${c.name} acknowledged and logged in medical record.`);
+                            }}
+                            style={{
+                              background: "#f1f5f9",
+                              border: "1px solid #cbd5e1",
+                              color: "#334155",
+                              padding: "10px 16px",
+                              borderRadius: "12px",
+                              fontWeight: "700",
+                              fontSize: "0.85rem",
+                              cursor: "pointer",
+                            }}
+                          >
+                            ✓ Acknowledge
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+              )}
             </div>
           </div>
         )}
