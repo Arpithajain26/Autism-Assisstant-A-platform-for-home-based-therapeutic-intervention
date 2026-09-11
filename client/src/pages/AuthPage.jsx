@@ -1001,93 +1001,10 @@ export default function AuthPage({ onLogin }) {
                 {googleLoading ? "Connecting…" : "Continue with Google"}
               </button>
 
-              {/* ── 1-Click Demo Section ─────────────────────────────────── */}
-              <div
-                style={{
-                  marginTop: "16px",
-                  padding: "14px",
-                  background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
-                  border: "1px dashed #cbd5e1",
-                  borderRadius: "14px",
-                  textAlign: "center",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "0.78rem",
-                    fontWeight: "700",
-                    color: "#475569",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.06em",
-                    marginBottom: "10px",
-                  }}
-                >
-                  ⚡ Instant 1-Click Demo Access
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemoLogin("parent")}
-                    disabled={loading}
-                    style={{
-                      padding: "9px 12px",
-                      background: "white",
-                      border: "1.5px solid #7c3aed",
-                      color: "#7c3aed",
-                      borderRadius: "10px",
-                      fontSize: "0.82rem",
-                      fontWeight: "700",
-                      cursor: "pointer",
-                      fontFamily: "inherit",
-                      boxShadow: "0 2px 6px rgba(124, 58, 237, 0.08)",
-                      transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#7c3aed";
-                      e.currentTarget.style.color = "white";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "white";
-                      e.currentTarget.style.color = "#7c3aed";
-                    }}
-                  >
-                    👨‍👩‍👧 Parent Demo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemoLogin("therapist")}
-                    disabled={loading}
-                    style={{
-                      padding: "9px 12px",
-                      background: "white",
-                      border: "1.5px solid #0891b2",
-                      color: "#0891b2",
-                      borderRadius: "10px",
-                      fontSize: "0.82rem",
-                      fontWeight: "700",
-                      cursor: "pointer",
-                      fontFamily: "inherit",
-                      boxShadow: "0 2px 6px rgba(8, 145, 178, 0.08)",
-                      transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#0891b2";
-                      e.currentTarget.style.color = "white";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "white";
-                      e.currentTarget.style.color = "#0891b2";
-                    }}
-                  >
-                    🩺 Therapist Demo
-                  </button>
-                </div>
-              </div>
-
               <p
                 style={{
                   textAlign: "center",
-                  marginTop: "16px",
+                  marginTop: "20px",
                   fontSize: "0.85rem",
                   color: "#9ca3af",
                 }}
