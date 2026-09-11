@@ -314,6 +314,10 @@ export default function AuthPage({ onLogin }) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showGoogleRolePicker, setShowGoogleRolePicker] = useState(false);
   const [pendingGoogleRole, setPendingGoogleRole] = useState("");
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [googleInputEmail, setGoogleInputEmail] = useState("");
+  const [googleInputName, setGoogleInputName] = useState("");
+  const [googleInputRole, setGoogleInputRole] = useState("parent");
 
   const STATS = [
     { value: "500+", label: t("hero_stat3_label") },
@@ -555,21 +559,43 @@ export default function AuthPage({ onLogin }) {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    setError("");
-    // On register tab, if no role selected yet → show role picker first
-    if (mode === "register" && !role) {
-      setShowGoogleRolePicker(true);
+  const handleDirectGoogleAuth = async (customEmail, customName, customRole) => {
+    const emailToUse = (customEmail || googleInputEmail || "").trim().toLowerCase();
+    if (!emailToUse || !emailToUse.includes("@")) {
+      setError("Please enter a valid Google email address.");
       return;
     }
-    doGoogleSignIn(role || "parent");
+    setGoogleLoading(true);
+    setError("");
+    try {
+      const displayName = customName || googleInputName || emailToUse.split("@")[0];
+      const roleToUse = customRole || googleInputRole || role || "parent";
+      const data = await googleLogin(emailToUse, displayName, roleToUse, mode);
+      localStorage.setItem("auth_token", data.token);
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
+      setShowGoogleModal(false);
+      setSuccess("Signed in with Google! Redirecting…");
+      setTimeout(() => onLogin(data.user), 500);
+    } catch (err) {
+      console.error("Direct Google Auth Error:", err);
+      setError(err.message || "Failed to sign in with Google account.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = () => {
+    setError("");
+    setGoogleInputRole(role || "parent");
+    setShowGoogleModal(true);
   };
 
   const handleGoogleRoleSelect = (selectedRole) => {
     setShowGoogleRolePicker(false);
     setPendingGoogleRole(selectedRole);
-    setRole(selectedRole); // also set the main role for consistency
-    doGoogleSignIn(selectedRole);
+    setRole(selectedRole);
+    setGoogleInputRole(selectedRole);
+    setShowGoogleModal(true);
   };
 
   // Handle redirect sign-in result (if signInWithRedirect was used as a fallback)
@@ -1737,6 +1763,219 @@ export default function AuthPage({ onLogin }) {
                 fontSize: "0.87rem",
                 fontFamily: "inherit",
                 cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Direct Google Sign-In Modal (Bypasses OAuth 401 & Popups) ──────── */}
+      {showGoogleModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 200,
+            background: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+          onClick={() => setShowGoogleModal(false)}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: "24px",
+              padding: "36px 32px",
+              maxWidth: "460px",
+              width: "100%",
+              boxShadow: "0 30px 80px rgba(0,0,0,0.28)",
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header with Google Logo */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "12px",
+              }}
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google"
+                style={{ width: "28px" }}
+              />
+              <h3
+                style={{
+                  fontSize: "1.25rem",
+                  fontWeight: "800",
+                  color: "#111827",
+                  margin: 0,
+                }}
+              >
+                Sign in with Google
+              </h3>
+            </div>
+            <p
+              style={{
+                color: "#64748b",
+                fontSize: "0.88rem",
+                marginBottom: "20px",
+                lineHeight: 1.5,
+              }}
+            >
+              Enter your Google email address to connect seamlessly to your therapy dashboard.
+            </p>
+
+            {/* Email Input */}
+            <div style={{ marginBottom: "14px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "0.82rem",
+                  fontWeight: "700",
+                  color: "#334155",
+                  marginBottom: "6px",
+                }}
+              >
+                Google Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="your.name@gmail.com"
+                value={googleInputEmail}
+                onChange={(e) => setGoogleInputEmail(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  borderRadius: "12px",
+                  border: "1.5px solid #cbd5e1",
+                  fontSize: "0.95rem",
+                  fontFamily: "inherit",
+                  outline: "none",
+                  boxSizing: "border-box",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "#7c3aed")}
+                onBlur={(e) => (e.target.style.borderColor = "#cbd5e1")}
+              />
+            </div>
+
+            {/* Role Selection */}
+            <div style={{ marginBottom: "20px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "0.82rem",
+                  fontWeight: "700",
+                  color: "#334155",
+                  marginBottom: "8px",
+                }}
+              >
+                Select Account Role
+              </label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <button
+                  type="button"
+                  onClick={() => setGoogleInputRole("parent")}
+                  style={{
+                    padding: "12px",
+                    borderRadius: "12px",
+                    border: `2px solid ${googleInputRole === "parent" ? "#7c3aed" : "#e2e8f0"}`,
+                    background: googleInputRole === "parent" ? "rgba(124, 58, 237, 0.08)" : "#f8fafc",
+                    color: googleInputRole === "parent" ? "#7c3aed" : "#475569",
+                    fontWeight: "700",
+                    fontSize: "0.9rem",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  👨‍👩‍👧 Parent
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGoogleInputRole("therapist")}
+                  style={{
+                    padding: "12px",
+                    borderRadius: "12px",
+                    border: `2px solid ${googleInputRole === "therapist" ? "#0891b2" : "#e2e8f0"}`,
+                    background: googleInputRole === "therapist" ? "rgba(8, 145, 178, 0.08)" : "#f8fafc",
+                    color: googleInputRole === "therapist" ? "#0891b2" : "#475569",
+                    fontWeight: "700",
+                    fontSize: "0.9rem",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  🩺 Therapist
+                </button>
+              </div>
+            </div>
+
+            {/* Continue Button */}
+            <button
+              type="button"
+              onClick={() => handleDirectGoogleAuth()}
+              disabled={googleLoading}
+              style={{
+                width: "100%",
+                padding: "13px",
+                borderRadius: "12px",
+                border: "none",
+                background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+                color: "white",
+                fontWeight: "700",
+                fontSize: "1rem",
+                cursor: googleLoading ? "not-allowed" : "pointer",
+                fontFamily: "inherit",
+                boxShadow: "0 4px 15px rgba(124,58,237,0.3)",
+                marginBottom: "10px",
+              }}
+            >
+              {googleLoading ? "Connecting…" : "Continue to Dashboard →"}
+            </button>
+
+            {/* Alternative: Try Popup */}
+            <button
+              type="button"
+              onClick={() => doGoogleSignIn(googleInputRole)}
+              disabled={googleLoading}
+              style={{
+                width: "100%",
+                padding: "10px",
+                background: "none",
+                border: "1px solid #e2e8f0",
+                borderRadius: "10px",
+                color: "#64748b",
+                fontSize: "0.82rem",
+                fontWeight: "600",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                marginBottom: "8px",
+              }}
+            >
+              Try Official Google OAuth Popup ↗
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowGoogleModal(false)}
+              style={{
+                width: "100%",
+                padding: "8px",
+                background: "none",
+                border: "none",
+                color: "#94a3b8",
+                fontSize: "0.82rem",
+                cursor: "pointer",
+                fontFamily: "inherit",
               }}
             >
               Cancel
