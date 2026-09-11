@@ -470,14 +470,37 @@ export default function AuthPage({ onLogin }) {
     }
   };
 
+  /* ── 1-Click Demo Login ─────────────────────────────────────────────── */
+  const handleQuickDemoLogin = async (demoRole) => {
+    setLoading(true);
+    setError("");
+    try {
+      const email =
+        demoRole === "therapist"
+          ? "ananya.sharma@autismassistant.com"
+          : "parent@test.com";
+      const password = "password123";
+      const data = await loginUser(email, password);
+      localStorage.setItem("auth_token", data.token);
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
+      setSuccess(
+        `Signed in as Demo ${demoRole === "therapist" ? "Therapist" : "Parent"}! Redirecting…`
+      );
+      setTimeout(() => onLogin(data.user), 500);
+    } catch (err) {
+      setError(err.message || "Demo login failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /* ── Google Sign In ─────────────────────────────────────────────────────── */
   const doGoogleSignIn = async (selectedRole) => {
     setGoogleLoading(true);
     setError("");
     try {
       const provider = new GoogleAuthProvider();
-      provider.addScope("email");
-      provider.addScope("profile");
+      provider.setCustomParameters({ prompt: "select_account" });
       const result = await signInWithPopup(auth, provider);
       const email = result.user.email;
       const displayName = result.user.displayName || email.split("@")[0];
@@ -490,31 +513,26 @@ export default function AuthPage({ onLogin }) {
       setSuccess("Signed in with Google! Redirecting…");
       setTimeout(() => onLogin(data.user), 600);
     } catch (err) {
+      console.warn("Google sign in catch:", err);
       // Firebase popup errors — provide helpful fallbacks
       if (
         err &&
         (err.code === "auth/popup-closed-by-user" ||
           err.code === "auth/cancelled-popup-request")
       ) {
-        setError("Google sign-in was cancelled. Please try again.");
+        setError("Google sign-in popup was closed. You can also use Email/Password or 1-Click Demo below.");
       } else if (err && err.code === "auth/popup-blocked") {
-        // Popup blocked: try redirect flow as a fallback
-        setError("Popup was blocked. Falling back to redirect sign-in.");
-        try {
-          setGoogleLoading(true);
-          const provider = new GoogleAuthProvider();
-          provider.addScope("email");
-          provider.addScope("profile");
-          await signInWithRedirect(auth, provider);
-          return; // redirecting away
-        } catch (redirErr) {
-          console.warn("Redirect fallback failed:", redirErr);
-          setError(redirErr.message || "Redirect to Google failed.");
-        }
+        setError("Popup was blocked by your browser. Please allow popups or use Email/Password / 1-Click Demo.");
       } else if (err && err.code === "auth/network-request-failed") {
-        setError(
-          "Network error. Please check your internet connection and try again.",
-        );
+        setError("Network error. Please check your connection or use 1-Click Demo.");
+      } else if (
+        err?.code === "auth/operation-not-allowed" ||
+        err?.code === "auth/unauthorized-domain" ||
+        err?.message?.includes("401") ||
+        err?.message?.includes("malformed") ||
+        err?.message?.includes("bad request")
+      ) {
+        setError("Google OAuth is currently not activated in Firebase Console. Please use Email/Password or 1-Click Demo below.");
       } else {
         const msg = err?.message || "";
         const isAlreadyRegistered =
@@ -529,7 +547,7 @@ export default function AuthPage({ onLogin }) {
           setSuccess("");
           setError("Account with this email id exists, please login.");
         } else {
-          setError(msg || "Google sign-in failed. Please try again.");
+          setError(msg || "Google sign-in encountered an issue. Please use Email/Password or 1-Click Demo.");
         }
       }
     } finally {
@@ -957,10 +975,93 @@ export default function AuthPage({ onLogin }) {
                 {googleLoading ? "Connecting…" : "Continue with Google"}
               </button>
 
+              {/* ── 1-Click Demo Section ─────────────────────────────────── */}
+              <div
+                style={{
+                  marginTop: "16px",
+                  padding: "14px",
+                  background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+                  border: "1px dashed #cbd5e1",
+                  borderRadius: "14px",
+                  textAlign: "center",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.78rem",
+                    fontWeight: "700",
+                    color: "#475569",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    marginBottom: "10px",
+                  }}
+                >
+                  ⚡ Instant 1-Click Demo Access
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickDemoLogin("parent")}
+                    disabled={loading}
+                    style={{
+                      padding: "9px 12px",
+                      background: "white",
+                      border: "1.5px solid #7c3aed",
+                      color: "#7c3aed",
+                      borderRadius: "10px",
+                      fontSize: "0.82rem",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      boxShadow: "0 2px 6px rgba(124, 58, 237, 0.08)",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#7c3aed";
+                      e.currentTarget.style.color = "white";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "white";
+                      e.currentTarget.style.color = "#7c3aed";
+                    }}
+                  >
+                    👨‍👩‍👧 Parent Demo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickDemoLogin("therapist")}
+                    disabled={loading}
+                    style={{
+                      padding: "9px 12px",
+                      background: "white",
+                      border: "1.5px solid #0891b2",
+                      color: "#0891b2",
+                      borderRadius: "10px",
+                      fontSize: "0.82rem",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      boxShadow: "0 2px 6px rgba(8, 145, 178, 0.08)",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#0891b2";
+                      e.currentTarget.style.color = "white";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "white";
+                      e.currentTarget.style.color = "#0891b2";
+                    }}
+                  >
+                    🩺 Therapist Demo
+                  </button>
+                </div>
+              </div>
+
               <p
                 style={{
                   textAlign: "center",
-                  marginTop: "20px",
+                  marginTop: "16px",
                   fontSize: "0.85rem",
                   color: "#9ca3af",
                 }}
