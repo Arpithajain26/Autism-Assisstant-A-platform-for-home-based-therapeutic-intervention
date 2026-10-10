@@ -1,115 +1,233 @@
 const axios = require("axios");
+const mongoose = require("mongoose");
 const Session = require("../models/Session");
 const Child = require("../models/Child");
+const ActivityLog = require("../models/ActivityLog");
 
-// @desc    Predict or calculate child weekly progress trend
+/**
+ * Resolve either a MongoDB ObjectId string or a custom childId string → real _id.
+ */
+async function resolveChildId(id) {
+  if (mongoose.Types.ObjectId.isValid(id)) return id;
+  const child = await Child.findOne({ childId: id }).lean();
+  return child ? child._id : null;
+}
+
+
+
+// @desc    Log activity completion with score and engagement
+// @route   POST /api/progress/log
+exports.logActivityCompletion = async (req, res) => {
+  try {
+    const { childId, activityId, performanceScore, engagement, notes } = req.body;
+
+    if (!childId || !activityId || performanceScore === undefined || performanceScore === null) {
+      return res.status(400).json({ error: "childId, activityId, and performanceScore are required." });
+    }
+
+    const score = Number(performanceScore);
+    if (isNaN(score) || score < 0 || score > 100) {
+      return res.status(400).json({ error: "performanceScore must be a number between 0 and 100." });
+    }
+
+    // Resolve custom string childId → real ObjectId
+    const resolvedId = await resolveChildId(childId);
+    if (!resolvedId) {
+      return res.status(404).json({ error: "Child not found." });
+    }
+
+    const validEngagement = ["Low", "Medium", "High"].includes(engagement) ? engagement : "Medium";
+
+    const log = await ActivityLog.create({
+      child: resolvedId,
+      activity: String(activityId),
+      performanceScore: score,
+      engagement: validEngagement,
+      notes: notes || "",
+      completedAt: new Date(),
+    });
+
+    res.status(201).json({ success: true, log });
+  } catch (error) {
+    console.error("Error logging activity completion:", error);
+    res.status(500).json({ error: error.message || "Failed to log activity completion." });
+  }
+};
+
+// @desc    Predict child weekly progress trend via ML model
 // @route   POST /api/progress/trend
 exports.getProgressTrend = async (req, res) => {
   try {
-    const { childId, avg_performance_score, prior_week_avg_score, session_count, avg_engagement, level } = req.body;
+    const { childId, avg_performance_score, score_delta, session_count, avg_engagement, level } = req.body;
 
-    let childLevel = level || 1;
-    let avgScore = typeof avg_performance_score === 'number' ? avg_performance_score : 50.0;
-    let priorAvg = typeof prior_week_avg_score === 'number' ? prior_week_avg_score : 50.0;
-    let sessCount = typeof session_count === 'number' ? session_count : 3;
-    let avgEng = typeof avg_engagement === 'number' ? avg_engagement : 2.0;
-
-    // If childId is provided, attempt to fetch recent sessions from MongoDB to calculate real metrics
-    if (childId) {
-      try {
-        const child = await Child.findById(childId);
-        if (child && child.level) childLevel = child.level;
-
-        const sessions = await Session.find({ child: childId }).sort({ createdAt: -1 }).limit(10);
-        if (sessions && sessions.length > 0) {
-          sessCount = sessions.length;
-          // Calculate score based on rating (1-5 mapped to 20-100 scale)
-          const scores = sessions.map(s => (s.score ? s.score * 20 : 50));
-          avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
-
-          // Split into current week vs prior week if enough sessions exist
-          if (sessions.length >= 4) {
-            const half = Math.floor(sessions.length / 2);
-            const recent = sessions.slice(0, half).map(s => s.score * 20);
-            const previous = sessions.slice(half).map(s => s.score * 20);
-            avgScore = recent.reduce((a, b) => a + b, 0) / recent.length;
-            priorAvg = previous.reduce((a, b) => a + b, 0) / previous.length;
-          }
-        }
-      } catch (dbErr) {
-        console.warn("DB session fetch fallback to body params", dbErr.message);
-      }
-    }
-
-    const scoreDelta = Number((avgScore - priorAvg).toFixed(2));
-
-    const payload = {
-      avg_performance_score: Number(avgScore.toFixed(2)),
-      score_delta: scoreDelta,
-      session_count: sessCount,
-      avg_engagement: avgEng,
-      level: childLevel
+    let payload = {
+      avg_performance_score: Number(avg_performance_score) || 50,
+      score_delta: Number(score_delta) || 0,
+      session_count: Number(session_count) || 3,
+      avg_engagement: Number(avg_engagement) || 2,
+      level: Number(level) || 1
     };
 
-    // 1. Try calling the Flask ML model endpoint
     try {
-      const mlRes = await axios.post("http://localhost:5001/predict-trend", payload, { timeout: 3000 });
-      return res.status(200).json({
-        success: true,
-        trend: mlRes.data.trend,
-        confidence: mlRes.data.confidence,
-        score_delta: mlRes.data.score_delta,
-        avg_performance_score: mlRes.data.avg_performance_score,
-        trend_info: mlRes.data.trend_info,
-        isFallback: false
-      });
+      const mlRes = await axios.post("http://localhost:5001/predict-trend", payload, { timeout: 4000 });
+      return res.json(mlRes.data);
     } catch (mlErr) {
-      console.log("⚠️ Flask Trend ML API unreachable, using rule-based fallback logic.");
-
-      // 2. Fallback to rule-based weekly average comparison (-5 to +5 band)
+      console.log("ML API predict-trend unavailable, using rule-based scoring");
+      const delta = payload.score_delta;
       let trend = "Stable";
-      if (scoreDelta > 5.0) {
-        trend = "Improving";
-      } else if (scoreDelta < -5.0) {
-        trend = "Regressing";
-      }
+      if (delta > 5.0) trend = "Improving";
+      else if (delta < -5.0) trend = "Regressing";
 
-      const trend_info = {
-        Improving: {
+      const trendMap = {
+        'Improving': {
           label: 'Improving 📈',
-          desc: 'Child is showing positive progress and score growth across therapy sessions.',
+          desc: 'Child is showing strong positive weekly growth in therapy engagement and scores.',
           color: '#166534',
           bg: '#dcfce7',
           emoji: '📈'
         },
-        Stable: {
+        'Stable': {
           label: 'Stable ➖',
-          desc: 'Child performance is steady and maintaining expected baseline levels.',
+          desc: 'Child is maintaining steady performance within expected baseline ranges.',
           color: '#854d0e',
           bg: '#fef9c3',
           emoji: '➖'
         },
-        Regressing: {
+        'Regressing': {
           label: 'Needs Focus 📉',
-          desc: 'Recent performance scores have dipped. Review session difficulty and focus areas.',
+          desc: 'Recent decrease in weekly performance scores. Consider adjusting therapy intensity or focus area.',
           color: '#991b1b',
           bg: '#fee2e2',
           emoji: '📉'
         }
       };
 
-      return res.status(200).json({
-        success: true,
+      return res.json({
         trend,
         confidence: 85.0,
-        score_delta: scoreDelta,
-        avg_performance_score: Number(avgScore.toFixed(2)),
-        trend_info: trend_info[trend],
-        isFallback: true
+        score_delta: delta,
+        avg_performance_score: payload.avg_performance_score,
+        trend_info: trendMap[trend]
       });
     }
   } catch (error) {
     console.error("Progress trend error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message || "Failed to calculate progress trend" });
   }
 };
+
+// @desc    Get weekly trend for a child based on ActivityLog
+// @route   GET /api/progress/weekly-trend/:childId
+exports.getWeeklyTrend = async (req, res) => {
+  try {
+    const { childId } = req.params;
+    if (!childId) {
+      return res.status(400).json({ error: 'childId param required' });
+    }
+
+    // Resolve custom string childId → real ObjectId
+    const resolvedId = await resolveChildId(childId);
+    if (!resolvedId) {
+      return res.status(404).json({ error: 'Child not found' });
+    }
+
+    const now = new Date();
+    const startTwoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+    const startLastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    // Fetch logs from the last two weeks
+    const logs = await ActivityLog.find({
+      child: resolvedId,
+      completedAt: { $gte: startTwoWeeksAgo },
+    }).lean();
+
+    const thisWeekLogs = logs.filter(l => new Date(l.completedAt) >= startLastWeek);
+    const lastWeekLogs = logs.filter(l => new Date(l.completedAt) < startLastWeek);
+
+    const avg = arr => arr.length ? arr.reduce((s, x) => s + x.performanceScore, 0) / arr.length : null;
+    const thisWeekAvg = avg(thisWeekLogs);
+    const lastWeekAvg = avg(lastWeekLogs);
+
+    if (thisWeekAvg === null || lastWeekAvg === null) {
+      return res.json({
+        trend: 'Not enough data',
+        thisWeekAvg: thisWeekAvg !== null ? Number(thisWeekAvg.toFixed(2)) : 0,
+        lastWeekAvg: lastWeekAvg !== null ? Number(lastWeekAvg.toFixed(2)) : 0,
+        delta: 0,
+        sessionsThisWeek: thisWeekLogs.length
+      });
+    }
+
+    const delta = thisWeekAvg - lastWeekAvg;
+    let trend = 'Stable';
+    if (delta >= 5.0) trend = 'Improving';
+    else if (delta <= -5.0) trend = 'Regressing';
+
+    return res.json({
+      trend,
+      thisWeekAvg: Number(thisWeekAvg.toFixed(2)),
+      lastWeekAvg: Number(lastWeekAvg.toFixed(2)),
+      delta: Number(delta.toFixed(2)),
+      sessionsThisWeek: thisWeekLogs.length,
+    });
+  } catch (err) {
+    console.error('Weekly trend error:', err);
+    res.status(500).json({ error: err.message || 'Failed to compute weekly trend' });
+  }
+};
+
+// @desc    Get friendly community leaderboard & child ranking
+// @route   GET /api/progress/leaderboard
+exports.getLeaderboard = async (req, res) => {
+  try {
+    const { childId } = req.query;
+    const children = await Child.find().select('name age level streak completedActivities profilePhoto').lean();
+
+    // Compute XP and stats for each child
+    const scoredKids = children.map(c => {
+      const activitiesDone = (c.completedActivities?.length || 0);
+      const streakDays = c.streak || 0;
+      // XP formula: base 100 for enrollment + 50 per completed activity + 30 per streak day
+      const xp = 100 + (activitiesDone * 50) + (streakDays * 30);
+      return {
+        _id: c._id,
+        name: c.name || "Student",
+        age: c.age || 5,
+        level: c.level || 1,
+        activitiesDone,
+        streak: streakDays,
+        xp,
+        profilePhoto: c.profilePhoto || null,
+        badgeTitle: xp >= 500 ? "Super Champion 🏆" : xp >= 300 ? "Star Explorer 🌟" : xp >= 150 ? "Rising Star 🚀" : "Enrolled Hero 🌱"
+      };
+    });
+
+    // Sort descending by XP
+    scoredKids.sort((a, b) => b.xp - a.xp);
+
+    // Assign rank
+    const leaderboard = scoredKids.map((k, idx) => ({
+      ...k,
+      rank: idx + 1
+    }));
+
+    // Find current child's rank if provided
+    let currentChildRank = null;
+    if (childId) {
+      const found = leaderboard.find(k => String(k._id) === String(childId));
+      if (found) {
+        currentChildRank = found;
+      }
+    }
+
+    res.json({
+      leaderboard: leaderboard.slice(0, 20),
+      totalParticipants: leaderboard.length,
+      currentChildRank: currentChildRank || (leaderboard.length > 0 ? leaderboard[0] : null)
+    });
+  } catch (err) {
+    console.error("Leaderboard error:", err);
+    res.status(500).json({ error: "Failed to load leaderboard" });
+  }
+};
+

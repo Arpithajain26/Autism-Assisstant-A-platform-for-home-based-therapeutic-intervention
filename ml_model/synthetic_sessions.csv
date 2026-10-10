@@ -1,0 +1,2131 @@
+child_id,session_date,week_number,level,focus_area,performance_score,engagement,duration_min,prior_week_avg_score
+child_01,2026-01-08,1,3,Social Skills,43,Medium,30,43.0
+child_01,2026-01-10,1,3,Social Skills,54,Medium,10,43.0
+child_01,2026-01-11,1,3,Social Skills,48,Medium,10,43.0
+child_01,2026-01-09,1,3,Social Skills,45,High,20,43.0
+child_01,2026-01-10,1,3,Social Skills,36,Medium,25,43.0
+child_01,2026-01-17,2,3,Sensory and Motor,47,High,30,45.2
+child_01,2026-01-17,2,3,Social Skills,39,Low,20,45.2
+child_01,2026-01-13,2,3,Communication,42,Medium,25,45.2
+child_01,2026-01-20,3,3,Communication,45,Medium,30,42.67
+child_01,2026-01-22,3,3,Cognitive,45,Medium,30,42.67
+child_01,2026-01-31,4,3,Sensory and Motor,52,High,20,45.0
+child_01,2026-01-26,4,3,Social Skills,47,Medium,25,45.0
+child_01,2026-02-06,5,3,Social Skills,56,Low,20,49.5
+child_01,2026-02-03,5,3,Communication,51,Medium,15,49.5
+child_01,2026-02-06,5,3,Social Skills,55,Medium,20,49.5
+child_01,2026-02-02,5,3,Communication,56,Low,30,49.5
+child_01,2026-02-15,6,3,Cognitive,63,Low,15,54.5
+child_01,2026-02-13,6,3,Cognitive,60,Low,20,54.5
+child_01,2026-02-10,6,3,Sensory and Motor,63,High,15,54.5
+child_01,2026-02-12,6,3,Cognitive,54,High,20,54.5
+child_01,2026-02-13,6,3,Communication,54,Low,20,54.5
+child_01,2026-02-20,7,3,Communication,61,Low,10,58.8
+child_01,2026-02-21,7,3,Communication,58,Low,20,58.8
+child_01,2026-02-20,7,3,Cognitive,58,Low,20,58.8
+child_01,2026-02-28,8,3,Cognitive,67,Medium,15,59.0
+child_01,2026-03-01,8,3,Communication,60,Medium,15,59.0
+child_01,2026-02-23,8,3,Communication,60,Medium,25,59.0
+child_01,2026-03-02,9,3,Communication,62,Medium,20,62.33
+child_01,2026-03-03,9,3,Social Skills,67,Low,25,62.33
+child_01,2026-03-15,10,3,Communication,72,Medium,25,64.5
+child_01,2026-03-09,10,3,Social Skills,65,Low,10,64.5
+child_01,2026-03-10,10,3,Cognitive,64,Medium,25,64.5
+child_01,2026-03-16,11,3,Cognitive,70,High,20,67.0
+child_01,2026-03-18,11,3,Cognitive,70,High,30,67.0
+child_01,2026-03-17,11,3,Communication,71,Medium,30,67.0
+child_01,2026-03-21,11,3,Communication,72,High,10,67.0
+child_01,2026-03-20,11,3,Communication,61,High,15,67.0
+child_01,2026-03-29,12,3,Communication,75,Medium,10,68.8
+child_01,2026-03-28,12,3,Communication,76,High,15,68.8
+child_02,2026-01-10,1,1,Sensory and Motor,62,High,30,63.0
+child_02,2026-01-07,1,1,Cognitive,67,Low,20,63.0
+child_02,2026-01-06,1,1,Cognitive,72,High,20,63.0
+child_02,2026-01-07,1,1,Communication,74,Medium,25,63.0
+child_02,2026-01-05,1,1,Sensory and Motor,62,High,15,63.0
+child_02,2026-01-12,2,1,Sensory and Motor,70,Medium,25,67.4
+child_02,2026-01-16,2,1,Communication,65,High,30,67.4
+child_02,2026-01-17,2,1,Social Skills,69,High,10,67.4
+child_02,2026-01-14,2,1,Social Skills,64,Low,10,67.4
+child_02,2026-01-24,3,1,Cognitive,66,Medium,30,67.0
+child_02,2026-01-21,3,1,Cognitive,75,Medium,10,67.0
+child_02,2026-01-25,3,1,Social Skills,70,Medium,20,67.0
+child_02,2026-01-30,4,1,Communication,73,Medium,10,70.33
+child_02,2026-01-31,4,1,Social Skills,77,High,30,70.33
+child_02,2026-01-29,4,1,Sensory and Motor,70,Medium,10,70.33
+child_02,2026-01-28,4,1,Social Skills,79,Medium,20,70.33
+child_02,2026-01-31,4,1,Sensory and Motor,69,Low,10,70.33
+child_02,2026-02-06,5,1,Social Skills,76,Medium,15,73.6
+child_02,2026-02-05,5,1,Sensory and Motor,67,Low,15,73.6
+child_02,2026-02-08,5,1,Sensory and Motor,83,High,15,73.6
+child_02,2026-02-03,5,1,Cognitive,73,High,10,73.6
+child_02,2026-02-08,5,1,Sensory and Motor,81,Medium,25,73.6
+child_02,2026-02-10,6,1,Cognitive,80,Medium,15,76.0
+child_02,2026-02-11,6,1,Cognitive,78,High,20,76.0
+child_02,2026-02-14,6,1,Communication,80,High,20,76.0
+child_02,2026-02-17,7,1,Cognitive,70,Medium,10,79.33
+child_02,2026-02-18,7,1,Cognitive,75,High,20,79.33
+child_02,2026-02-20,7,1,Sensory and Motor,82,High,15,79.33
+child_02,2026-02-16,7,1,Communication,80,High,25,79.33
+child_02,2026-02-25,8,1,Sensory and Motor,74,High,30,76.75
+child_02,2026-02-28,8,1,Sensory and Motor,87,Medium,20,76.75
+child_02,2026-02-28,8,1,Social Skills,80,High,30,76.75
+child_02,2026-03-07,9,1,Sensory and Motor,87,High,15,80.33
+child_02,2026-03-05,9,1,Cognitive,85,High,15,80.33
+child_02,2026-03-08,9,1,Sensory and Motor,85,High,30,80.33
+child_02,2026-03-05,9,1,Social Skills,80,High,25,80.33
+child_02,2026-03-07,9,1,Sensory and Motor,87,Medium,20,80.33
+child_02,2026-03-14,10,1,Communication,84,Medium,10,84.8
+child_02,2026-03-10,10,1,Communication,94,High,30,84.8
+child_02,2026-03-12,10,1,Cognitive,82,Medium,25,84.8
+child_02,2026-03-21,11,1,Communication,92,High,10,86.67
+child_02,2026-03-22,11,1,Cognitive,87,High,30,86.67
+child_02,2026-03-16,11,1,Communication,91,High,15,86.67
+child_02,2026-03-28,12,1,Cognitive,87,High,25,90.0
+child_02,2026-03-29,12,1,Social Skills,91,High,25,90.0
+child_02,2026-03-28,12,1,Cognitive,95,Medium,20,90.0
+child_02,2026-03-28,12,1,Cognitive,89,Medium,20,90.0
+child_02,2026-03-23,12,1,Communication,91,High,20,90.0
+child_03,2026-01-08,1,2,Social Skills,45,High,15,47.0
+child_03,2026-01-05,1,2,Communication,45,Medium,25,47.0
+child_03,2026-01-06,1,2,Communication,50,Medium,25,47.0
+child_03,2026-01-15,2,2,Social Skills,56,Medium,25,46.67
+child_03,2026-01-15,2,2,Cognitive,52,Low,20,46.67
+child_03,2026-01-15,2,2,Social Skills,56,High,25,46.67
+child_03,2026-01-18,2,2,Communication,53,Medium,15,46.67
+child_03,2026-01-15,2,2,Social Skills,47,Low,25,46.67
+child_03,2026-01-19,3,2,Sensory and Motor,52,Medium,25,52.8
+child_03,2026-01-20,3,2,Cognitive,52,Medium,20,52.8
+child_03,2026-01-21,3,2,Communication,57,Low,25,52.8
+child_03,2026-01-28,4,2,Communication,59,High,10,53.67
+child_03,2026-01-27,4,2,Social Skills,61,Low,10,53.67
+child_03,2026-02-07,5,2,Sensory and Motor,68,Medium,20,60.0
+child_03,2026-02-03,5,2,Communication,68,High,30,60.0
+child_03,2026-02-08,5,2,Communication,65,Low,30,60.0
+child_03,2026-02-04,5,2,Cognitive,52,High,25,60.0
+child_03,2026-02-07,5,2,Communication,63,High,15,60.0
+child_03,2026-02-15,6,2,Communication,69,High,30,63.2
+child_03,2026-02-15,6,2,Cognitive,71,High,30,63.2
+child_03,2026-02-14,6,2,Sensory and Motor,64,Medium,10,63.2
+child_03,2026-02-09,6,2,Sensory and Motor,69,Low,25,63.2
+child_03,2026-02-21,7,2,Social Skills,61,Low,25,68.25
+child_03,2026-02-21,7,2,Cognitive,62,High,30,68.25
+child_03,2026-02-19,7,2,Sensory and Motor,67,Medium,30,68.25
+child_03,2026-02-18,7,2,Cognitive,72,Medium,20,68.25
+child_03,2026-02-17,7,2,Cognitive,61,Medium,30,68.25
+child_03,2026-03-01,8,2,Sensory and Motor,68,Medium,20,64.6
+child_03,2026-02-25,8,2,Communication,74,High,20,64.6
+child_03,2026-02-27,8,2,Cognitive,71,High,25,64.6
+child_03,2026-02-27,8,2,Cognitive,69,Low,25,64.6
+child_03,2026-02-26,8,2,Social Skills,70,Medium,25,64.6
+child_03,2026-03-05,9,2,Sensory and Motor,70,High,30,70.4
+child_03,2026-03-05,9,2,Sensory and Motor,77,High,25,70.4
+child_03,2026-03-04,9,2,Communication,72,High,15,70.4
+child_03,2026-03-07,9,2,Social Skills,73,High,15,70.4
+child_03,2026-03-11,10,2,Sensory and Motor,76,High,30,73.0
+child_03,2026-03-09,10,2,Sensory and Motor,76,High,15,73.0
+child_03,2026-03-09,10,2,Social Skills,71,High,30,73.0
+child_03,2026-03-11,10,2,Cognitive,75,High,15,73.0
+child_03,2026-03-09,10,2,Sensory and Motor,74,Medium,30,73.0
+child_03,2026-03-18,11,2,Communication,77,High,10,74.4
+child_03,2026-03-19,11,2,Communication,78,High,10,74.4
+child_03,2026-03-17,11,2,Social Skills,80,High,10,74.4
+child_03,2026-03-16,11,2,Social Skills,81,High,25,74.4
+child_03,2026-03-22,11,2,Cognitive,72,High,20,74.4
+child_03,2026-03-27,12,2,Social Skills,78,High,10,77.6
+child_03,2026-03-28,12,2,Social Skills,80,Medium,15,77.6
+child_04,2026-01-05,1,1,Cognitive,52,Medium,25,44.0
+child_04,2026-01-07,1,1,Communication,50,Medium,25,44.0
+child_04,2026-01-10,1,1,Social Skills,47,Low,20,44.0
+child_04,2026-01-17,2,1,Communication,51,Low,10,49.67
+child_04,2026-01-13,2,1,Sensory and Motor,51,Medium,30,49.67
+child_04,2026-01-15,2,1,Sensory and Motor,53,High,25,49.67
+child_04,2026-01-22,3,1,Communication,56,Low,30,51.67
+child_04,2026-01-22,3,1,Social Skills,51,Low,10,51.67
+child_04,2026-01-24,3,1,Communication,46,High,30,51.67
+child_04,2026-01-25,3,1,Cognitive,50,Low,15,51.67
+child_04,2026-01-23,3,1,Sensory and Motor,49,High,25,51.67
+child_04,2026-01-31,4,1,Cognitive,58,Medium,20,50.4
+child_04,2026-01-28,4,1,Social Skills,44,Low,10,50.4
+child_04,2026-01-28,4,1,Communication,50,High,25,50.4
+child_04,2026-01-29,4,1,Sensory and Motor,56,Low,20,50.4
+child_04,2026-01-28,4,1,Cognitive,59,High,10,50.4
+child_04,2026-02-06,5,1,Cognitive,61,Medium,30,53.4
+child_04,2026-02-07,5,1,Social Skills,55,Medium,30,53.4
+child_04,2026-02-04,5,1,Communication,57,Medium,25,53.4
+child_04,2026-02-14,6,1,Communication,61,High,25,57.67
+child_04,2026-02-10,6,1,Communication,62,Low,25,57.67
+child_04,2026-02-14,6,1,Sensory and Motor,60,High,20,57.67
+child_04,2026-02-19,7,1,Social Skills,56,Low,25,61.0
+child_04,2026-02-19,7,1,Communication,62,High,15,61.0
+child_04,2026-02-18,7,1,Sensory and Motor,65,Medium,20,61.0
+child_04,2026-02-22,7,1,Cognitive,67,High,30,61.0
+child_04,2026-02-22,7,1,Cognitive,60,Low,25,61.0
+child_04,2026-02-26,8,1,Cognitive,70,High,15,62.0
+child_04,2026-02-24,8,1,Sensory and Motor,59,Medium,10,62.0
+child_04,2026-02-28,8,1,Social Skills,54,Medium,25,62.0
+child_04,2026-02-26,8,1,Sensory and Motor,64,Low,15,62.0
+child_04,2026-03-01,8,1,Cognitive,69,Low,30,62.0
+child_04,2026-03-05,9,1,Communication,69,High,15,63.2
+child_04,2026-03-05,9,1,Communication,65,High,25,63.2
+child_04,2026-03-08,9,1,Cognitive,61,Medium,30,63.2
+child_04,2026-03-15,10,1,Social Skills,63,Low,20,65.0
+child_04,2026-03-14,10,1,Communication,67,Low,25,65.0
+child_04,2026-03-15,10,1,Sensory and Motor,63,Medium,15,65.0
+child_04,2026-03-09,10,1,Communication,62,Low,20,65.0
+child_04,2026-03-11,10,1,Cognitive,65,Low,30,65.0
+child_04,2026-03-17,11,1,Cognitive,74,Medium,10,64.0
+child_04,2026-03-20,11,1,Social Skills,69,High,15,64.0
+child_04,2026-03-19,11,1,Cognitive,67,High,20,64.0
+child_04,2026-03-29,12,1,Communication,70,High,15,70.0
+child_04,2026-03-26,12,1,Sensory and Motor,74,High,30,70.0
+child_05,2026-01-10,1,3,Cognitive,46,Low,25,43.0
+child_05,2026-01-05,1,3,Sensory and Motor,53,Low,25,43.0
+child_05,2026-01-09,1,3,Sensory and Motor,44,Low,25,43.0
+child_05,2026-01-05,1,3,Cognitive,52,High,10,43.0
+child_05,2026-01-11,1,3,Sensory and Motor,48,Low,30,43.0
+child_05,2026-01-16,2,3,Communication,46,Medium,15,48.6
+child_05,2026-01-17,2,3,Sensory and Motor,46,Medium,10,48.6
+child_05,2026-01-17,2,3,Sensory and Motor,45,Low,10,48.6
+child_05,2026-01-20,3,3,Sensory and Motor,52,Medium,30,45.67
+child_05,2026-01-25,3,3,Cognitive,57,Low,20,45.67
+child_05,2026-01-25,3,3,Communication,48,Low,25,45.67
+child_05,2026-01-20,3,3,Sensory and Motor,58,Low,25,45.67
+child_05,2026-01-19,3,3,Cognitive,50,High,10,45.67
+child_05,2026-01-30,4,3,Communication,52,Medium,20,53.0
+child_05,2026-01-31,4,3,Social Skills,52,High,20,53.0
+child_05,2026-01-31,4,3,Sensory and Motor,53,Low,25,53.0
+child_05,2026-01-31,4,3,Cognitive,51,Low,20,53.0
+child_05,2026-02-06,5,3,Cognitive,55,Low,25,52.0
+child_05,2026-02-04,5,3,Social Skills,51,High,25,52.0
+child_05,2026-02-05,5,3,Cognitive,48,High,10,52.0
+child_05,2026-02-09,6,3,Sensory and Motor,56,Medium,15,51.33
+child_05,2026-02-09,6,3,Sensory and Motor,55,High,20,51.33
+child_05,2026-02-09,6,3,Communication,55,Low,25,51.33
+child_05,2026-02-14,6,3,Communication,59,Low,30,51.33
+child_05,2026-02-17,7,3,Social Skills,66,Low,10,56.25
+child_05,2026-02-20,7,3,Sensory and Motor,58,Low,15,56.25
+child_05,2026-02-22,7,3,Social Skills,64,Low,20,56.25
+child_05,2026-02-17,7,3,Social Skills,66,High,20,56.25
+child_05,2026-02-24,8,3,Sensory and Motor,68,Low,30,63.5
+child_05,2026-02-23,8,3,Communication,61,Low,20,63.5
+child_05,2026-03-06,9,3,Communication,64,Medium,20,64.5
+child_05,2026-03-05,9,3,Communication,63,High,15,64.5
+child_05,2026-03-07,9,3,Cognitive,64,High,20,64.5
+child_05,2026-03-07,9,3,Cognitive,55,Low,10,64.5
+child_05,2026-03-08,9,3,Communication,57,Medium,25,64.5
+child_05,2026-03-13,10,3,Social Skills,70,Medium,10,60.6
+child_05,2026-03-11,10,3,Cognitive,62,High,20,60.6
+child_05,2026-03-13,10,3,Cognitive,62,High,20,60.6
+child_05,2026-03-13,10,3,Social Skills,65,High,10,60.6
+child_05,2026-03-19,11,3,Cognitive,68,Medium,25,64.75
+child_05,2026-03-19,11,3,Sensory and Motor,68,Medium,20,64.75
+child_05,2026-03-17,11,3,Communication,65,High,25,64.75
+child_05,2026-03-23,12,3,Communication,64,Medium,15,67.0
+child_05,2026-03-27,12,3,Sensory and Motor,73,High,30,67.0
+child_06,2026-01-07,1,3,Sensory and Motor,72,High,10,63.0
+child_06,2026-01-09,1,3,Communication,59,Medium,20,63.0
+child_06,2026-01-09,1,3,Communication,63,Medium,15,63.0
+child_06,2026-01-07,1,3,Communication,66,High,20,63.0
+child_06,2026-01-11,1,3,Communication,65,Medium,30,63.0
+child_06,2026-01-12,2,3,Sensory and Motor,72,Medium,20,65.0
+child_06,2026-01-14,2,3,Cognitive,67,Low,30,65.0
+child_06,2026-01-12,2,3,Communication,71,Medium,10,65.0
+child_06,2026-01-17,2,3,Social Skills,65,Medium,20,65.0
+child_06,2026-01-25,3,3,Communication,70,High,30,68.75
+child_06,2026-01-19,3,3,Sensory and Motor,75,Medium,10,68.75
+child_06,2026-01-22,3,3,Cognitive,77,High,25,68.75
+child_06,2026-01-23,3,3,Sensory and Motor,68,High,10,68.75
+child_06,2026-01-31,4,3,Cognitive,75,High,30,72.5
+child_06,2026-01-30,4,3,Communication,73,High,30,72.5
+child_06,2026-01-26,4,3,Social Skills,73,Medium,20,72.5
+child_06,2026-02-01,4,3,Communication,76,High,10,72.5
+child_06,2026-02-03,5,3,Social Skills,79,Medium,25,74.25
+child_06,2026-02-06,5,3,Cognitive,71,High,10,74.25
+child_06,2026-02-08,5,3,Cognitive,74,High,10,74.25
+child_06,2026-02-02,5,3,Cognitive,75,High,30,74.25
+child_06,2026-02-06,5,3,Sensory and Motor,77,High,25,74.25
+child_06,2026-02-11,6,3,Communication,83,High,20,75.2
+child_06,2026-02-12,6,3,Cognitive,87,Medium,15,75.2
+child_06,2026-02-19,7,3,Social Skills,86,Medium,20,85.0
+child_06,2026-02-16,7,3,Social Skills,76,High,10,85.0
+child_06,2026-02-25,8,3,Communication,84,Medium,15,81.0
+child_06,2026-02-24,8,3,Social Skills,78,High,15,81.0
+child_06,2026-02-27,8,3,Cognitive,89,Medium,15,81.0
+child_06,2026-02-26,8,3,Cognitive,90,High,30,81.0
+child_06,2026-03-08,9,3,Cognitive,92,High,10,85.25
+child_06,2026-03-05,9,3,Sensory and Motor,88,High,20,85.25
+child_06,2026-03-06,9,3,Cognitive,93,High,25,85.25
+child_06,2026-03-02,9,3,Sensory and Motor,90,Medium,20,85.25
+child_06,2026-03-13,10,3,Communication,87,High,30,90.75
+child_06,2026-03-12,10,3,Sensory and Motor,88,High,15,90.75
+child_06,2026-03-16,11,3,Social Skills,86,High,10,87.5
+child_06,2026-03-16,11,3,Cognitive,95,Medium,25,87.5
+child_06,2026-03-20,11,3,Cognitive,91,High,20,87.5
+child_06,2026-03-28,12,3,Sensory and Motor,95,High,10,90.67
+child_06,2026-03-23,12,3,Sensory and Motor,93,High,20,90.67
+child_06,2026-03-28,12,3,Social Skills,100,High,30,90.67
+child_06,2026-03-25,12,3,Cognitive,100,High,20,90.67
+child_07,2026-01-07,1,3,Sensory and Motor,46,High,25,42.0
+child_07,2026-01-11,1,3,Communication,48,High,30,42.0
+child_07,2026-01-16,2,3,Sensory and Motor,51,Medium,10,47.0
+child_07,2026-01-14,2,3,Social Skills,48,Medium,15,47.0
+child_07,2026-01-13,2,3,Sensory and Motor,49,Low,10,47.0
+child_07,2026-01-18,2,3,Communication,48,High,30,47.0
+child_07,2026-01-17,2,3,Social Skills,42,Low,30,47.0
+child_07,2026-01-20,3,3,Cognitive,52,High,15,47.6
+child_07,2026-01-19,3,3,Social Skills,55,Medium,20,47.6
+child_07,2026-01-22,3,3,Social Skills,44,Low,15,47.6
+child_07,2026-02-01,4,3,Cognitive,47,Low,20,50.33
+child_07,2026-01-29,4,3,Cognitive,53,High,30,50.33
+child_07,2026-01-27,4,3,Social Skills,45,Low,30,50.33
+child_07,2026-02-01,4,3,Communication,52,Medium,30,50.33
+child_07,2026-01-31,4,3,Sensory and Motor,57,High,10,50.33
+child_07,2026-02-04,5,3,Social Skills,49,Medium,10,50.8
+child_07,2026-02-08,5,3,Communication,55,Medium,20,50.8
+child_07,2026-02-05,5,3,Communication,58,Low,25,50.8
+child_07,2026-02-11,6,3,Social Skills,57,Low,20,54.0
+child_07,2026-02-10,6,3,Cognitive,65,Medium,15,54.0
+child_07,2026-02-16,7,3,Social Skills,61,Low,20,61.0
+child_07,2026-02-22,7,3,Cognitive,64,High,30,61.0
+child_07,2026-02-24,8,3,Communication,68,Medium,10,62.5
+child_07,2026-02-24,8,3,Communication,54,Medium,10,62.5
+child_07,2026-03-01,8,3,Communication,64,Medium,30,62.5
+child_07,2026-02-28,8,3,Cognitive,57,Low,20,62.5
+child_07,2026-03-03,9,3,Social Skills,61,High,25,60.75
+child_07,2026-03-07,9,3,Communication,59,Medium,10,60.75
+child_07,2026-03-05,9,3,Cognitive,58,Medium,10,60.75
+child_07,2026-03-04,9,3,Social Skills,62,Low,20,60.75
+child_07,2026-03-15,10,3,Social Skills,66,High,20,60.0
+child_07,2026-03-09,10,3,Cognitive,63,High,15,60.0
+child_07,2026-03-21,11,3,Communication,72,Medium,15,64.5
+child_07,2026-03-21,11,3,Communication,70,High,15,64.5
+child_07,2026-03-22,11,3,Sensory and Motor,65,Low,10,64.5
+child_07,2026-03-18,11,3,Sensory and Motor,57,High,25,64.5
+child_07,2026-03-16,11,3,Sensory and Motor,68,High,15,64.5
+child_07,2026-03-29,12,3,Cognitive,70,High,25,66.4
+child_07,2026-03-28,12,3,Sensory and Motor,69,Medium,25,66.4
+child_08,2026-01-10,1,3,Communication,47,High,20,53.0
+child_08,2026-01-10,1,3,Cognitive,57,Medium,10,53.0
+child_08,2026-01-09,1,3,Communication,59,Medium,20,53.0
+child_08,2026-01-05,1,3,Sensory and Motor,56,Medium,20,53.0
+child_08,2026-01-08,1,3,Sensory and Motor,53,High,25,53.0
+child_08,2026-01-16,2,3,Communication,57,Medium,20,54.4
+child_08,2026-01-12,2,3,Communication,57,High,15,54.4
+child_08,2026-01-13,2,3,Communication,55,High,25,54.4
+child_08,2026-01-13,2,3,Cognitive,65,Medium,20,54.4
+child_08,2026-01-23,3,3,Sensory and Motor,66,Low,25,58.5
+child_08,2026-01-21,3,3,Sensory and Motor,61,Low,30,58.5
+child_08,2026-01-27,4,3,Social Skills,66,Low,10,63.5
+child_08,2026-01-29,4,3,Sensory and Motor,57,Low,20,63.5
+child_08,2026-01-31,4,3,Sensory and Motor,64,Medium,15,63.5
+child_08,2026-01-31,4,3,Communication,69,Low,15,63.5
+child_08,2026-02-02,5,3,Sensory and Motor,66,High,20,64.0
+child_08,2026-02-07,5,3,Social Skills,73,High,15,64.0
+child_08,2026-02-08,5,3,Social Skills,70,High,30,64.0
+child_08,2026-02-02,5,3,Communication,75,Medium,25,64.0
+child_08,2026-02-04,5,3,Sensory and Motor,67,High,30,64.0
+child_08,2026-02-13,6,3,Cognitive,72,High,25,70.2
+child_08,2026-02-15,6,3,Communication,70,High,30,70.2
+child_08,2026-02-10,6,3,Sensory and Motor,76,High,25,70.2
+child_08,2026-02-22,7,3,Communication,72,Medium,25,72.67
+child_08,2026-02-22,7,3,Sensory and Motor,74,Medium,15,72.67
+child_08,2026-02-21,7,3,Sensory and Motor,74,Medium,20,72.67
+child_08,2026-02-24,8,3,Communication,73,Medium,20,73.33
+child_08,2026-02-27,8,3,Social Skills,72,High,15,73.33
+child_08,2026-02-24,8,3,Communication,73,High,20,73.33
+child_08,2026-03-01,8,3,Communication,71,Medium,10,73.33
+child_08,2026-03-07,9,3,Cognitive,81,High,10,72.25
+child_08,2026-03-07,9,3,Sensory and Motor,85,High,20,72.25
+child_08,2026-03-05,9,3,Cognitive,80,High,20,72.25
+child_08,2026-03-02,9,3,Social Skills,87,High,10,72.25
+child_08,2026-03-12,10,3,Sensory and Motor,84,High,20,83.25
+child_08,2026-03-12,10,3,Communication,88,Medium,20,83.25
+child_08,2026-03-11,10,3,Social Skills,83,High,15,83.25
+child_08,2026-03-09,10,3,Cognitive,85,Medium,20,83.25
+child_08,2026-03-15,10,3,Sensory and Motor,80,Medium,20,83.25
+child_08,2026-03-19,11,3,Cognitive,83,High,25,84.0
+child_08,2026-03-18,11,3,Cognitive,83,High,30,84.0
+child_08,2026-03-17,11,3,Sensory and Motor,85,Medium,30,84.0
+child_08,2026-03-26,12,3,Sensory and Motor,80,High,25,83.67
+child_08,2026-03-27,12,3,Cognitive,82,Medium,10,83.67
+child_08,2026-03-24,12,3,Communication,91,High,20,83.67
+child_08,2026-03-26,12,3,Social Skills,82,Medium,30,83.67
+child_09,2026-01-05,1,1,Communication,39,Medium,20,40.0
+child_09,2026-01-06,1,1,Sensory and Motor,45,Low,25,40.0
+child_09,2026-01-11,1,1,Social Skills,47,Medium,15,40.0
+child_09,2026-01-09,1,1,Communication,41,Medium,25,40.0
+child_09,2026-01-17,2,1,Social Skills,41,Low,15,43.0
+child_09,2026-01-14,2,1,Social Skills,47,High,20,43.0
+child_09,2026-01-15,2,1,Sensory and Motor,50,Medium,30,43.0
+child_09,2026-01-24,3,1,Cognitive,46,High,20,46.0
+child_09,2026-01-25,3,1,Sensory and Motor,50,Low,25,46.0
+child_09,2026-01-25,3,1,Cognitive,47,High,10,46.0
+child_09,2026-01-21,3,1,Social Skills,53,High,30,46.0
+child_09,2026-01-24,3,1,Cognitive,45,Low,30,46.0
+child_09,2026-01-27,4,1,Social Skills,50,High,10,48.2
+child_09,2026-01-26,4,1,Cognitive,46,Medium,20,48.2
+child_09,2026-01-27,4,1,Cognitive,46,High,30,48.2
+child_09,2026-02-01,4,1,Social Skills,50,High,10,48.2
+child_09,2026-01-30,4,1,Cognitive,49,High,25,48.2
+child_09,2026-02-05,5,1,Sensory and Motor,54,High,20,48.2
+child_09,2026-02-07,5,1,Cognitive,51,High,20,48.2
+child_09,2026-02-03,5,1,Sensory and Motor,44,Low,20,48.2
+child_09,2026-02-15,6,1,Sensory and Motor,52,High,25,49.67
+child_09,2026-02-12,6,1,Sensory and Motor,55,Medium,30,49.67
+child_09,2026-02-11,6,1,Sensory and Motor,57,Medium,25,49.67
+child_09,2026-02-15,6,1,Communication,57,Low,20,49.67
+child_09,2026-02-18,7,1,Social Skills,60,High,25,55.25
+child_09,2026-02-17,7,1,Sensory and Motor,52,High,20,55.25
+child_09,2026-02-24,8,1,Communication,65,Low,15,56.0
+child_09,2026-02-23,8,1,Cognitive,59,Medium,20,56.0
+child_09,2026-02-23,8,1,Cognitive,56,High,15,56.0
+child_09,2026-03-05,9,1,Sensory and Motor,58,High,15,60.0
+child_09,2026-03-04,9,1,Social Skills,59,Low,30,60.0
+child_09,2026-03-06,9,1,Social Skills,61,High,10,60.0
+child_09,2026-03-05,9,1,Cognitive,62,Low,25,60.0
+child_09,2026-03-03,9,1,Communication,58,High,20,60.0
+child_09,2026-03-11,10,1,Cognitive,59,High,30,59.6
+child_09,2026-03-10,10,1,Sensory and Motor,73,High,25,59.6
+child_09,2026-03-18,11,1,Communication,66,Medium,15,66.0
+child_09,2026-03-21,11,1,Social Skills,67,Medium,20,66.0
+child_09,2026-03-29,12,1,Social Skills,62,Medium,10,66.5
+child_09,2026-03-24,12,1,Social Skills,67,Medium,20,66.5
+child_09,2026-03-23,12,1,Sensory and Motor,65,Medium,20,66.5
+child_09,2026-03-27,12,1,Communication,68,High,30,66.5
+child_09,2026-03-25,12,1,Cognitive,62,Low,10,66.5
+child_10,2026-01-10,1,1,Communication,43,Medium,20,46.0
+child_10,2026-01-10,1,1,Social Skills,51,High,15,46.0
+child_10,2026-01-06,1,1,Cognitive,46,Medium,15,46.0
+child_10,2026-01-10,1,1,Cognitive,52,High,30,46.0
+child_10,2026-01-11,1,1,Social Skills,47,High,15,46.0
+child_10,2026-01-16,2,1,Communication,45,Low,30,47.8
+child_10,2026-01-12,2,1,Social Skills,53,High,30,47.8
+child_10,2026-01-20,3,1,Cognitive,52,Low,15,49.0
+child_10,2026-01-19,3,1,Communication,58,High,25,49.0
+child_10,2026-01-22,3,1,Cognitive,57,High,10,49.0
+child_10,2026-01-31,4,1,Sensory and Motor,60,Low,25,55.67
+child_10,2026-02-01,4,1,Cognitive,60,Low,10,55.67
+child_10,2026-01-28,4,1,Communication,57,High,10,55.67
+child_10,2026-01-26,4,1,Social Skills,62,Medium,25,55.67
+child_10,2026-02-04,5,1,Cognitive,60,Medium,25,59.75
+child_10,2026-02-05,5,1,Sensory and Motor,70,High,15,59.75
+child_10,2026-02-02,5,1,Cognitive,65,Low,30,59.75
+child_10,2026-02-06,5,1,Sensory and Motor,68,Low,10,59.75
+child_10,2026-02-05,5,1,Cognitive,68,High,30,59.75
+child_10,2026-02-10,6,1,Communication,61,Low,10,66.2
+child_10,2026-02-15,6,1,Communication,64,High,25,66.2
+child_10,2026-02-10,6,1,Communication,64,Low,25,66.2
+child_10,2026-02-19,7,1,Social Skills,67,Medium,15,63.0
+child_10,2026-02-22,7,1,Social Skills,66,High,20,63.0
+child_10,2026-02-27,8,1,Social Skills,68,High,20,66.5
+child_10,2026-02-25,8,1,Cognitive,77,High,15,66.5
+child_10,2026-02-25,8,1,Social Skills,61,Medium,10,66.5
+child_10,2026-02-28,8,1,Cognitive,67,Low,20,66.5
+child_10,2026-03-07,9,1,Social Skills,68,Medium,25,68.25
+child_10,2026-03-04,9,1,Social Skills,68,Medium,15,68.25
+child_10,2026-03-04,9,1,Cognitive,77,High,15,68.25
+child_10,2026-03-02,9,1,Social Skills,63,High,30,68.25
+child_10,2026-03-10,10,1,Cognitive,71,High,10,69.0
+child_10,2026-03-15,10,1,Sensory and Motor,72,Medium,10,69.0
+child_10,2026-03-12,10,1,Communication,79,High,30,69.0
+child_10,2026-03-15,10,1,Social Skills,81,High,30,69.0
+child_10,2026-03-18,11,1,Social Skills,81,Medium,15,75.75
+child_10,2026-03-21,11,1,Social Skills,89,High,15,75.75
+child_10,2026-03-19,11,1,Sensory and Motor,88,Medium,30,75.75
+child_10,2026-03-22,11,1,Sensory and Motor,77,High,20,75.75
+child_10,2026-03-26,12,1,Sensory and Motor,84,Medium,25,83.75
+child_10,2026-03-24,12,1,Social Skills,77,High,15,83.75
+child_10,2026-03-23,12,1,Cognitive,83,High,30,83.75
+child_10,2026-03-25,12,1,Social Skills,82,High,30,83.75
+child_10,2026-03-26,12,1,Sensory and Motor,83,High,20,83.75
+child_11,2026-01-10,1,1,Social Skills,56,Low,20,56.0
+child_11,2026-01-06,1,1,Cognitive,55,High,30,56.0
+child_11,2026-01-06,1,1,Communication,63,High,10,56.0
+child_11,2026-01-11,1,1,Communication,56,Low,10,56.0
+child_11,2026-01-08,1,1,Communication,63,Low,15,56.0
+child_11,2026-01-14,2,1,Cognitive,65,Low,30,58.6
+child_11,2026-01-17,2,1,Communication,60,High,25,58.6
+child_11,2026-01-12,2,1,Sensory and Motor,61,High,20,58.6
+child_11,2026-01-12,2,1,Communication,55,Medium,15,58.6
+child_11,2026-01-12,2,1,Social Skills,61,High,15,58.6
+child_11,2026-01-25,3,1,Cognitive,59,Low,20,60.4
+child_11,2026-01-22,3,1,Social Skills,69,High,15,60.4
+child_11,2026-01-21,3,1,Communication,60,High,10,60.4
+child_11,2026-01-22,3,1,Cognitive,56,Medium,25,60.4
+child_11,2026-01-31,4,1,Communication,67,Medium,20,61.0
+child_11,2026-01-30,4,1,Social Skills,69,Low,15,61.0
+child_11,2026-02-04,5,1,Communication,70,High,30,68.0
+child_11,2026-02-03,5,1,Social Skills,69,Medium,10,68.0
+child_11,2026-02-06,5,1,Sensory and Motor,73,High,10,68.0
+child_11,2026-02-03,5,1,Cognitive,74,High,15,68.0
+child_11,2026-02-07,5,1,Communication,71,High,15,68.0
+child_11,2026-02-09,6,1,Social Skills,69,Low,25,71.4
+child_11,2026-02-15,6,1,Cognitive,76,High,30,71.4
+child_11,2026-02-15,6,1,Sensory and Motor,74,High,10,71.4
+child_11,2026-02-15,6,1,Cognitive,76,High,30,71.4
+child_11,2026-02-16,7,1,Social Skills,73,High,20,73.75
+child_11,2026-02-21,7,1,Cognitive,76,High,15,73.75
+child_11,2026-02-18,7,1,Communication,75,High,10,73.75
+child_11,2026-02-16,7,1,Social Skills,78,High,10,73.75
+child_11,2026-02-16,7,1,Cognitive,72,Medium,25,73.75
+child_11,2026-02-23,8,1,Sensory and Motor,80,Medium,30,74.8
+child_11,2026-03-01,8,1,Sensory and Motor,77,High,10,74.8
+child_11,2026-02-26,8,1,Social Skills,75,High,15,74.8
+child_11,2026-02-28,8,1,Social Skills,78,High,15,74.8
+child_11,2026-02-25,8,1,Cognitive,75,Medium,15,74.8
+child_11,2026-03-05,9,1,Sensory and Motor,83,Medium,20,77.0
+child_11,2026-03-03,9,1,Cognitive,78,High,15,77.0
+child_11,2026-03-02,9,1,Communication,74,Medium,20,77.0
+child_11,2026-03-05,9,1,Sensory and Motor,76,High,25,77.0
+child_11,2026-03-11,10,1,Social Skills,86,High,30,77.75
+child_11,2026-03-12,10,1,Cognitive,77,High,20,77.75
+child_11,2026-03-13,10,1,Cognitive,91,Medium,20,77.75
+child_11,2026-03-18,11,1,Social Skills,87,High,30,84.67
+child_11,2026-03-21,11,1,Cognitive,87,High,10,84.67
+child_11,2026-03-21,11,1,Cognitive,85,High,10,84.67
+child_11,2026-03-21,11,1,Sensory and Motor,90,High,15,84.67
+child_11,2026-03-17,11,1,Communication,83,High,25,84.67
+child_11,2026-03-27,12,1,Cognitive,88,High,30,86.4
+child_11,2026-03-27,12,1,Communication,96,High,30,86.4
+child_11,2026-03-23,12,1,Social Skills,89,Medium,20,86.4
+child_11,2026-03-28,12,1,Sensory and Motor,82,High,25,86.4
+child_11,2026-03-29,12,1,Communication,83,High,10,86.4
+child_12,2026-01-09,1,3,Social Skills,41,Medium,30,40.0
+child_12,2026-01-08,1,3,Cognitive,36,Low,25,40.0
+child_12,2026-01-11,1,3,Communication,39,Low,20,40.0
+child_12,2026-01-15,2,3,Social Skills,38,Low,10,38.67
+child_12,2026-01-14,2,3,Cognitive,42,Low,30,38.67
+child_12,2026-01-14,2,3,Cognitive,48,Medium,10,38.67
+child_12,2026-01-17,2,3,Communication,43,Low,10,38.67
+child_12,2026-01-24,3,3,Social Skills,42,Low,15,42.75
+child_12,2026-01-23,3,3,Cognitive,47,High,25,42.75
+child_12,2026-01-20,3,3,Social Skills,48,Medium,15,42.75
+child_12,2026-01-24,3,3,Social Skills,43,Medium,30,42.75
+child_12,2026-01-29,4,3,Social Skills,45,Low,15,45.0
+child_12,2026-01-28,4,3,Communication,48,Low,30,45.0
+child_12,2026-02-01,4,3,Sensory and Motor,41,Medium,15,45.0
+child_12,2026-01-28,4,3,Sensory and Motor,49,High,25,45.0
+child_12,2026-01-30,4,3,Cognitive,50,Medium,30,45.0
+child_12,2026-02-04,5,3,Communication,54,High,20,46.6
+child_12,2026-02-07,5,3,Communication,47,Low,20,46.6
+child_12,2026-02-03,5,3,Cognitive,50,High,15,46.6
+child_12,2026-02-05,5,3,Cognitive,53,High,15,46.6
+child_12,2026-02-14,6,3,Social Skills,45,Low,30,51.0
+child_12,2026-02-12,6,3,Social Skills,52,Medium,15,51.0
+child_12,2026-02-11,6,3,Cognitive,57,Medium,10,51.0
+child_12,2026-02-10,6,3,Cognitive,49,Low,25,51.0
+child_12,2026-02-12,6,3,Social Skills,52,Medium,25,51.0
+child_12,2026-02-22,7,3,Communication,52,Low,20,51.0
+child_12,2026-02-18,7,3,Cognitive,56,Medium,30,51.0
+child_12,2026-02-27,8,3,Sensory and Motor,62,Low,20,54.0
+child_12,2026-02-27,8,3,Social Skills,59,High,25,54.0
+child_12,2026-03-07,9,3,Sensory and Motor,61,High,15,60.5
+child_12,2026-03-08,9,3,Cognitive,67,Medium,10,60.5
+child_12,2026-03-15,10,3,Sensory and Motor,66,Low,15,64.0
+child_12,2026-03-15,10,3,Social Skills,64,Low,30,64.0
+child_12,2026-03-22,11,3,Sensory and Motor,64,Low,30,65.0
+child_12,2026-03-20,11,3,Sensory and Motor,68,Medium,20,65.0
+child_12,2026-03-20,11,3,Communication,74,High,30,65.0
+child_12,2026-03-23,12,3,Social Skills,79,Medium,15,68.67
+child_12,2026-03-24,12,3,Social Skills,71,High,20,68.67
+child_12,2026-03-29,12,3,Sensory and Motor,73,Medium,30,68.67
+child_12,2026-03-28,12,3,Cognitive,68,Medium,25,68.67
+child_12,2026-03-23,12,3,Sensory and Motor,66,Low,25,68.67
+child_13,2026-01-08,1,3,Communication,43,Low,20,46.0
+child_13,2026-01-11,1,3,Sensory and Motor,50,High,25,46.0
+child_13,2026-01-11,1,3,Cognitive,42,Low,30,46.0
+child_13,2026-01-06,1,3,Sensory and Motor,56,Medium,20,46.0
+child_13,2026-01-16,2,3,Cognitive,51,High,15,47.75
+child_13,2026-01-18,2,3,Communication,49,Low,10,47.75
+child_13,2026-01-17,2,3,Communication,57,Medium,10,47.75
+child_13,2026-01-18,2,3,Social Skills,55,Medium,15,47.75
+child_13,2026-01-20,3,3,Sensory and Motor,60,Medium,10,53.0
+child_13,2026-01-21,3,3,Communication,61,High,15,53.0
+child_13,2026-01-22,3,3,Social Skills,59,High,20,53.0
+child_13,2026-01-22,3,3,Cognitive,53,Low,15,53.0
+child_13,2026-01-30,4,3,Communication,53,High,25,58.25
+child_13,2026-01-26,4,3,Cognitive,55,Medium,15,58.25
+child_13,2026-01-26,4,3,Communication,51,Low,25,58.25
+child_13,2026-02-02,5,3,Social Skills,58,Low,25,53.0
+child_13,2026-02-07,5,3,Communication,69,High,15,53.0
+child_13,2026-02-13,6,3,Social Skills,61,High,15,63.5
+child_13,2026-02-12,6,3,Social Skills,60,High,25,63.5
+child_13,2026-02-17,7,3,Cognitive,66,Medium,20,60.5
+child_13,2026-02-18,7,3,Sensory and Motor,60,Low,15,60.5
+child_13,2026-02-27,8,3,Sensory and Motor,64,Medium,10,63.0
+child_13,2026-02-24,8,3,Social Skills,65,High,30,63.0
+child_13,2026-02-28,8,3,Cognitive,64,Low,25,63.0
+child_13,2026-03-07,9,3,Communication,74,High,10,64.33
+child_13,2026-03-04,9,3,Sensory and Motor,72,High,25,64.33
+child_13,2026-03-06,9,3,Cognitive,70,High,15,64.33
+child_13,2026-03-08,9,3,Social Skills,75,Medium,20,64.33
+child_13,2026-03-02,9,3,Sensory and Motor,73,Medium,25,64.33
+child_13,2026-03-12,10,3,Social Skills,73,High,30,72.8
+child_13,2026-03-11,10,3,Communication,72,Medium,20,72.8
+child_13,2026-03-13,10,3,Sensory and Motor,83,Medium,30,72.8
+child_13,2026-03-12,10,3,Sensory and Motor,68,High,10,72.8
+child_13,2026-03-14,10,3,Social Skills,64,Low,10,72.8
+child_13,2026-03-16,11,3,Communication,79,High,30,72.0
+child_13,2026-03-18,11,3,Communication,72,Medium,10,72.0
+child_13,2026-03-21,11,3,Social Skills,70,Medium,10,72.0
+child_13,2026-03-19,11,3,Social Skills,80,High,20,72.0
+child_13,2026-03-18,11,3,Communication,74,Medium,20,72.0
+child_13,2026-03-25,12,3,Communication,80,Medium,20,75.0
+child_13,2026-03-26,12,3,Sensory and Motor,76,High,30,75.0
+child_14,2026-01-07,1,3,Social Skills,65,High,10,60.0
+child_14,2026-01-10,1,3,Communication,67,High,10,60.0
+child_14,2026-01-11,1,3,Cognitive,63,Medium,20,60.0
+child_14,2026-01-18,2,3,Cognitive,63,Low,30,65.0
+child_14,2026-01-13,2,3,Sensory and Motor,63,High,20,65.0
+child_14,2026-01-18,2,3,Sensory and Motor,69,Low,30,65.0
+child_14,2026-01-20,3,3,Communication,68,Low,25,65.0
+child_14,2026-01-22,3,3,Sensory and Motor,71,High,20,65.0
+child_14,2026-01-26,4,3,Social Skills,66,Medium,30,69.5
+child_14,2026-01-29,4,3,Cognitive,71,High,30,69.5
+child_14,2026-02-01,4,3,Social Skills,70,High,15,69.5
+child_14,2026-01-26,4,3,Social Skills,62,Medium,10,69.5
+child_14,2026-01-30,4,3,Communication,64,Low,20,69.5
+child_14,2026-02-08,5,3,Communication,78,High,20,66.6
+child_14,2026-02-03,5,3,Social Skills,69,Medium,10,66.6
+child_14,2026-02-07,5,3,Communication,71,High,10,66.6
+child_14,2026-02-03,5,3,Cognitive,76,High,20,66.6
+child_14,2026-02-07,5,3,Communication,69,Low,30,66.6
+child_14,2026-02-09,6,3,Social Skills,73,High,15,72.6
+child_14,2026-02-11,6,3,Cognitive,74,High,20,72.6
+child_14,2026-02-14,6,3,Social Skills,76,High,20,72.6
+child_14,2026-02-09,6,3,Communication,72,Medium,15,72.6
+child_14,2026-02-10,6,3,Communication,78,High,25,72.6
+child_14,2026-02-19,7,3,Sensory and Motor,80,High,25,74.6
+child_14,2026-02-22,7,3,Communication,79,High,20,74.6
+child_14,2026-02-17,7,3,Communication,79,High,15,74.6
+child_14,2026-02-26,8,3,Communication,75,High,15,79.33
+child_14,2026-02-26,8,3,Social Skills,80,High,30,79.33
+child_14,2026-02-23,8,3,Communication,74,Medium,10,79.33
+child_14,2026-02-23,8,3,Social Skills,82,Medium,15,79.33
+child_14,2026-03-07,9,3,Sensory and Motor,80,High,30,77.75
+child_14,2026-03-08,9,3,Communication,80,Medium,10,77.75
+child_14,2026-03-03,9,3,Sensory and Motor,88,Medium,10,77.75
+child_14,2026-03-02,9,3,Communication,82,Medium,25,77.75
+child_14,2026-03-15,10,3,Social Skills,85,High,25,82.5
+child_14,2026-03-11,10,3,Sensory and Motor,82,Medium,15,82.5
+child_14,2026-03-11,10,3,Social Skills,84,High,30,82.5
+child_14,2026-03-14,10,3,Cognitive,87,High,25,82.5
+child_14,2026-03-13,10,3,Cognitive,85,High,15,82.5
+child_14,2026-03-21,11,3,Cognitive,88,High,10,84.6
+child_14,2026-03-22,11,3,Sensory and Motor,87,High,20,84.6
+child_14,2026-03-19,11,3,Communication,84,High,15,84.6
+child_14,2026-03-23,12,3,Sensory and Motor,96,Medium,25,86.33
+child_14,2026-03-29,12,3,Social Skills,86,High,15,86.33
+child_14,2026-03-23,12,3,Social Skills,91,High,10,86.33
+child_15,2026-01-07,1,3,Social Skills,62,Low,15,57.0
+child_15,2026-01-09,1,3,Communication,57,Medium,30,57.0
+child_15,2026-01-10,1,3,Social Skills,65,High,20,57.0
+child_15,2026-01-09,1,3,Sensory and Motor,67,Medium,30,57.0
+child_15,2026-01-06,1,3,Communication,57,Medium,10,57.0
+child_15,2026-01-12,2,3,Social Skills,61,High,15,61.6
+child_15,2026-01-14,2,3,Sensory and Motor,61,High,15,61.6
+child_15,2026-01-12,2,3,Sensory and Motor,66,Low,10,61.6
+child_15,2026-01-24,3,3,Communication,66,High,25,62.67
+child_15,2026-01-21,3,3,Cognitive,64,Low,25,62.67
+child_15,2026-01-24,3,3,Sensory and Motor,67,Medium,15,62.67
+child_15,2026-01-20,3,3,Sensory and Motor,61,Medium,20,62.67
+child_15,2026-01-31,4,3,Communication,60,High,25,64.5
+child_15,2026-01-27,4,3,Communication,60,High,15,64.5
+child_15,2026-02-04,5,3,Social Skills,65,High,10,60.0
+child_15,2026-02-04,5,3,Cognitive,73,Medium,20,60.0
+child_15,2026-02-02,5,3,Social Skills,70,High,15,60.0
+child_15,2026-02-11,6,3,Cognitive,75,Medium,25,69.33
+child_15,2026-02-14,6,3,Cognitive,68,Medium,15,69.33
+child_15,2026-02-12,6,3,Cognitive,77,High,10,69.33
+child_15,2026-02-15,6,3,Social Skills,71,High,15,69.33
+child_15,2026-02-18,7,3,Sensory and Motor,80,Medium,10,72.75
+child_15,2026-02-17,7,3,Communication,77,High,15,72.75
+child_15,2026-02-25,8,3,Cognitive,75,High,10,78.5
+child_15,2026-02-28,8,3,Cognitive,76,Medium,30,78.5
+child_15,2026-03-04,9,3,Sensory and Motor,82,High,30,75.5
+child_15,2026-03-07,9,3,Social Skills,84,High,20,75.5
+child_15,2026-03-13,10,3,Communication,79,Medium,20,83.0
+child_15,2026-03-12,10,3,Cognitive,82,Medium,20,83.0
+child_15,2026-03-10,10,3,Communication,85,High,20,83.0
+child_15,2026-03-12,10,3,Cognitive,85,Medium,20,83.0
+child_15,2026-03-12,10,3,Cognitive,77,Medium,30,83.0
+child_15,2026-03-18,11,3,Communication,85,Medium,25,81.6
+child_15,2026-03-18,11,3,Communication,82,High,30,81.6
+child_15,2026-03-17,11,3,Communication,86,High,10,81.6
+child_15,2026-03-21,11,3,Communication,82,High,15,81.6
+child_15,2026-03-22,11,3,Cognitive,89,High,30,81.6
+child_15,2026-03-27,12,3,Communication,92,Medium,25,84.8
+child_15,2026-03-27,12,3,Social Skills,86,High,30,84.8
+child_15,2026-03-23,12,3,Social Skills,93,Medium,15,84.8
+child_15,2026-03-24,12,3,Communication,88,Medium,25,84.8
+child_15,2026-03-28,12,3,Sensory and Motor,76,High,15,84.8
+child_16,2026-01-05,1,2,Cognitive,54,Medium,30,47.0
+child_16,2026-01-09,1,2,Cognitive,47,Medium,10,47.0
+child_16,2026-01-13,2,2,Communication,53,High,30,50.5
+child_16,2026-01-12,2,2,Sensory and Motor,49,Medium,30,50.5
+child_16,2026-01-15,2,2,Cognitive,50,Medium,25,50.5
+child_16,2026-01-19,3,2,Cognitive,55,High,30,50.67
+child_16,2026-01-19,3,2,Social Skills,57,Medium,20,50.67
+child_16,2026-01-19,3,2,Sensory and Motor,53,Medium,10,50.67
+child_16,2026-01-25,3,2,Sensory and Motor,45,Medium,20,50.67
+child_16,2026-01-25,3,2,Social Skills,47,Low,15,50.67
+child_16,2026-02-01,4,2,Cognitive,56,Medium,20,51.4
+child_16,2026-01-30,4,2,Cognitive,54,Low,25,51.4
+child_16,2026-02-01,4,2,Communication,54,High,20,51.4
+child_16,2026-01-30,4,2,Cognitive,56,High,30,51.4
+child_16,2026-01-27,4,2,Communication,54,High,30,51.4
+child_16,2026-02-08,5,2,Social Skills,59,Low,20,54.8
+child_16,2026-02-04,5,2,Cognitive,58,Medium,25,54.8
+child_16,2026-02-07,5,2,Cognitive,63,Low,20,54.8
+child_16,2026-02-15,6,2,Sensory and Motor,58,Medium,30,60.0
+child_16,2026-02-11,6,2,Sensory and Motor,65,High,10,60.0
+child_16,2026-02-09,6,2,Social Skills,68,Medium,10,60.0
+child_16,2026-02-22,7,2,Cognitive,65,Low,20,63.67
+child_16,2026-02-20,7,2,Cognitive,67,Low,10,63.67
+child_16,2026-02-17,7,2,Sensory and Motor,61,Low,15,63.67
+child_16,2026-02-28,8,2,Cognitive,63,High,20,64.33
+child_16,2026-02-26,8,2,Sensory and Motor,70,Medium,25,64.33
+child_16,2026-02-28,8,2,Cognitive,64,High,30,64.33
+child_16,2026-02-27,8,2,Sensory and Motor,71,High,20,64.33
+child_16,2026-03-05,9,2,Sensory and Motor,72,Medium,20,67.0
+child_16,2026-03-07,9,2,Social Skills,68,High,20,67.0
+child_16,2026-03-09,10,2,Sensory and Motor,74,High,25,70.0
+child_16,2026-03-14,10,2,Sensory and Motor,72,High,20,70.0
+child_16,2026-03-12,10,2,Communication,72,High,25,70.0
+child_16,2026-03-18,11,2,Sensory and Motor,74,High,25,72.67
+child_16,2026-03-20,11,2,Social Skills,72,High,15,72.67
+child_16,2026-03-18,11,2,Social Skills,76,High,30,72.67
+child_16,2026-03-28,12,2,Sensory and Motor,79,Medium,15,74.0
+child_16,2026-03-24,12,2,Sensory and Motor,78,High,20,74.0
+child_16,2026-03-27,12,2,Communication,75,High,25,74.0
+child_16,2026-03-26,12,2,Communication,84,High,30,74.0
+child_17,2026-01-09,1,2,Sensory and Motor,62,Low,25,58.0
+child_17,2026-01-08,1,2,Sensory and Motor,68,Low,15,58.0
+child_17,2026-01-08,1,2,Social Skills,63,High,25,58.0
+child_17,2026-01-18,2,2,Communication,66,Low,20,64.33
+child_17,2026-01-12,2,2,Social Skills,64,Medium,20,64.33
+child_17,2026-01-18,2,2,Communication,63,Low,25,64.33
+child_17,2026-01-24,3,2,Cognitive,59,Medium,25,64.33
+child_17,2026-01-22,3,2,Communication,63,Low,20,64.33
+child_17,2026-01-21,3,2,Communication,65,High,15,64.33
+child_17,2026-01-24,3,2,Sensory and Motor,71,Medium,20,64.33
+child_17,2026-01-20,3,2,Sensory and Motor,64,Low,25,64.33
+child_17,2026-01-28,4,2,Sensory and Motor,70,High,30,64.4
+child_17,2026-01-29,4,2,Sensory and Motor,65,High,15,64.4
+child_17,2026-02-04,5,2,Social Skills,70,High,10,67.5
+child_17,2026-02-03,5,2,Social Skills,68,High,15,67.5
+child_17,2026-02-07,5,2,Communication,75,Medium,20,67.5
+child_17,2026-02-05,5,2,Communication,71,High,20,67.5
+child_17,2026-02-06,5,2,Communication,76,High,10,67.5
+child_17,2026-02-12,6,2,Sensory and Motor,73,High,10,72.0
+child_17,2026-02-12,6,2,Sensory and Motor,73,High,10,72.0
+child_17,2026-02-12,6,2,Sensory and Motor,71,High,10,72.0
+child_17,2026-02-13,6,2,Communication,72,Medium,30,72.0
+child_17,2026-02-11,6,2,Cognitive,72,Medium,10,72.0
+child_17,2026-02-22,7,2,Cognitive,75,Medium,20,72.2
+child_17,2026-02-18,7,2,Cognitive,80,Medium,10,72.2
+child_17,2026-02-17,7,2,Communication,74,Medium,10,72.2
+child_17,2026-03-01,8,2,Social Skills,74,High,25,76.33
+child_17,2026-02-23,8,2,Sensory and Motor,79,High,10,76.33
+child_17,2026-03-04,9,2,Communication,80,High,25,76.5
+child_17,2026-03-02,9,2,Sensory and Motor,85,High,20,76.5
+child_17,2026-03-05,9,2,Communication,74,High,10,76.5
+child_17,2026-03-08,9,2,Sensory and Motor,82,Medium,15,76.5
+child_17,2026-03-04,9,2,Sensory and Motor,80,High,30,76.5
+child_17,2026-03-11,10,2,Cognitive,86,High,25,80.2
+child_17,2026-03-11,10,2,Cognitive,83,High,25,80.2
+child_17,2026-03-16,11,2,Cognitive,93,Medium,10,84.5
+child_17,2026-03-20,11,2,Cognitive,93,High,30,84.5
+child_17,2026-03-17,11,2,Social Skills,83,High,10,84.5
+child_17,2026-03-23,12,2,Communication,87,High,25,89.67
+child_17,2026-03-23,12,2,Social Skills,91,High,30,89.67
+child_17,2026-03-28,12,2,Communication,95,High,30,89.67
+child_17,2026-03-26,12,2,Social Skills,90,High,25,89.67
+child_17,2026-03-29,12,2,Communication,89,High,30,89.67
+child_18,2026-01-09,1,2,Cognitive,71,Medium,10,65.0
+child_18,2026-01-07,1,2,Sensory and Motor,60,Low,20,65.0
+child_18,2026-01-05,1,2,Social Skills,61,Medium,25,65.0
+child_18,2026-01-18,2,2,Communication,68,High,25,64.0
+child_18,2026-01-18,2,2,Communication,64,Medium,10,64.0
+child_18,2026-01-15,2,2,Communication,68,Medium,10,64.0
+child_18,2026-01-18,2,2,Social Skills,72,High,20,64.0
+child_18,2026-01-17,2,2,Sensory and Motor,71,High,25,64.0
+child_18,2026-01-25,3,2,Cognitive,71,High,30,68.6
+child_18,2026-01-24,3,2,Cognitive,74,High,20,68.6
+child_18,2026-01-26,4,2,Sensory and Motor,68,Medium,30,72.5
+child_18,2026-01-31,4,2,Social Skills,78,Medium,10,72.5
+child_18,2026-01-29,4,2,Communication,76,High,25,72.5
+child_18,2026-02-03,5,2,Social Skills,79,Medium,25,74.0
+child_18,2026-02-05,5,2,Cognitive,75,High,10,74.0
+child_18,2026-02-02,5,2,Communication,72,High,30,74.0
+child_18,2026-02-12,6,2,Communication,72,Medium,25,75.33
+child_18,2026-02-13,6,2,Cognitive,69,High,10,75.33
+child_18,2026-02-15,6,2,Social Skills,70,Medium,30,75.33
+child_18,2026-02-14,6,2,Cognitive,73,Medium,10,75.33
+child_18,2026-02-14,6,2,Cognitive,71,High,25,75.33
+child_18,2026-02-18,7,2,Sensory and Motor,77,High,20,71.0
+child_18,2026-02-19,7,2,Sensory and Motor,82,High,30,71.0
+child_18,2026-02-22,7,2,Sensory and Motor,79,High,30,71.0
+child_18,2026-02-24,8,2,Social Skills,86,High,20,79.33
+child_18,2026-02-28,8,2,Sensory and Motor,91,High,15,79.33
+child_18,2026-02-28,8,2,Cognitive,88,High,30,79.33
+child_18,2026-03-08,9,2,Communication,90,High,10,88.33
+child_18,2026-03-02,9,2,Sensory and Motor,87,Medium,15,88.33
+child_18,2026-03-08,9,2,Sensory and Motor,89,Medium,20,88.33
+child_18,2026-03-03,9,2,Communication,91,High,15,88.33
+child_18,2026-03-09,10,2,Social Skills,85,High,30,89.25
+child_18,2026-03-14,10,2,Communication,88,High,20,89.25
+child_18,2026-03-12,10,2,Sensory and Motor,87,High,25,89.25
+child_18,2026-03-13,10,2,Cognitive,97,Medium,30,89.25
+child_18,2026-03-15,10,2,Social Skills,92,Medium,20,89.25
+child_18,2026-03-18,11,2,Social Skills,83,Medium,15,89.8
+child_18,2026-03-21,11,2,Cognitive,97,High,10,89.8
+child_18,2026-03-16,11,2,Sensory and Motor,89,Medium,15,89.8
+child_18,2026-03-28,12,2,Social Skills,97,Medium,10,89.67
+child_18,2026-03-25,12,2,Sensory and Motor,90,High,30,89.67
+child_18,2026-03-26,12,2,Sensory and Motor,91,High,30,89.67
+child_18,2026-03-23,12,2,Communication,96,Medium,15,89.67
+child_18,2026-03-29,12,2,Cognitive,92,High,15,89.67
+child_19,2026-01-05,1,1,Sensory and Motor,62,High,20,64.0
+child_19,2026-01-07,1,1,Cognitive,73,High,15,64.0
+child_19,2026-01-09,1,1,Sensory and Motor,71,Medium,10,64.0
+child_19,2026-01-08,1,1,Social Skills,56,Low,30,64.0
+child_19,2026-01-05,1,1,Sensory and Motor,65,Low,25,64.0
+child_19,2026-01-12,2,1,Cognitive,66,High,20,65.4
+child_19,2026-01-15,2,1,Communication,77,Medium,20,65.4
+child_19,2026-01-12,2,1,Communication,72,Medium,30,65.4
+child_19,2026-01-17,2,1,Communication,75,Medium,25,65.4
+child_19,2026-01-24,3,1,Communication,74,Medium,15,72.5
+child_19,2026-01-22,3,1,Social Skills,71,Medium,10,72.5
+child_19,2026-01-25,3,1,Communication,70,High,30,72.5
+child_19,2026-01-23,3,1,Cognitive,75,High,25,72.5
+child_19,2026-01-24,3,1,Sensory and Motor,63,Medium,25,72.5
+child_19,2026-01-30,4,1,Communication,79,Medium,30,70.6
+child_19,2026-01-31,4,1,Communication,73,Medium,20,70.6
+child_19,2026-02-06,5,1,Cognitive,81,High,25,76.0
+child_19,2026-02-08,5,1,Cognitive,79,High,10,76.0
+child_19,2026-02-03,5,1,Sensory and Motor,73,High,30,76.0
+child_19,2026-02-07,5,1,Sensory and Motor,75,Medium,20,76.0
+child_19,2026-02-13,6,1,Cognitive,80,Medium,10,77.0
+child_19,2026-02-13,6,1,Sensory and Motor,77,High,10,77.0
+child_19,2026-02-17,7,1,Social Skills,76,High,15,78.5
+child_19,2026-02-17,7,1,Sensory and Motor,84,Medium,30,78.5
+child_19,2026-02-17,7,1,Cognitive,85,High,10,78.5
+child_19,2026-02-21,7,1,Sensory and Motor,85,High,10,78.5
+child_19,2026-02-23,8,1,Social Skills,86,High,20,82.5
+child_19,2026-02-28,8,1,Communication,89,High,15,82.5
+child_19,2026-02-25,8,1,Cognitive,78,High,25,82.5
+child_19,2026-02-25,8,1,Social Skills,78,High,20,82.5
+child_19,2026-03-08,9,1,Social Skills,85,Medium,20,82.75
+child_19,2026-03-08,9,1,Sensory and Motor,91,Medium,25,82.75
+child_19,2026-03-08,9,1,Cognitive,83,High,25,82.75
+child_19,2026-03-05,9,1,Cognitive,92,High,20,82.75
+child_19,2026-03-14,10,1,Social Skills,84,Medium,30,87.75
+child_19,2026-03-11,10,1,Communication,85,High,10,87.75
+child_19,2026-03-09,10,1,Cognitive,93,High,30,87.75
+child_19,2026-03-16,11,1,Cognitive,89,High,20,87.33
+child_19,2026-03-21,11,1,Sensory and Motor,94,Medium,30,87.33
+child_19,2026-03-17,11,1,Communication,90,High,30,87.33
+child_19,2026-03-28,12,1,Social Skills,97,High,15,91.0
+child_19,2026-03-26,12,1,Social Skills,100,Medium,15,91.0
+child_20,2026-01-07,1,1,Sensory and Motor,71,Medium,10,62.0
+child_20,2026-01-07,1,1,Social Skills,67,Low,10,62.0
+child_20,2026-01-09,1,1,Communication,68,Medium,25,62.0
+child_20,2026-01-05,1,1,Communication,63,High,20,62.0
+child_20,2026-01-10,1,1,Social Skills,70,High,20,62.0
+child_20,2026-01-14,2,1,Sensory and Motor,66,High,10,67.8
+child_20,2026-01-15,2,1,Sensory and Motor,70,High,20,67.8
+child_20,2026-01-15,2,1,Communication,67,Medium,30,67.8
+child_20,2026-01-16,2,1,Sensory and Motor,70,Medium,10,67.8
+child_20,2026-01-13,2,1,Social Skills,64,Low,15,67.8
+child_20,2026-01-24,3,1,Cognitive,71,High,10,67.4
+child_20,2026-01-24,3,1,Social Skills,77,High,25,67.4
+child_20,2026-01-26,4,1,Social Skills,73,High,15,74.0
+child_20,2026-01-31,4,1,Social Skills,75,High,10,74.0
+child_20,2026-01-26,4,1,Communication,77,High,25,74.0
+child_20,2026-01-31,4,1,Communication,80,High,20,74.0
+child_20,2026-01-27,4,1,Social Skills,61,Medium,15,74.0
+child_20,2026-02-08,5,1,Sensory and Motor,80,High,15,73.2
+child_20,2026-02-03,5,1,Communication,76,High,30,73.2
+child_20,2026-02-03,5,1,Social Skills,73,High,25,73.2
+child_20,2026-02-13,6,1,Communication,81,High,15,76.33
+child_20,2026-02-10,6,1,Communication,74,High,30,76.33
+child_20,2026-02-15,6,1,Social Skills,71,Medium,25,76.33
+child_20,2026-02-22,7,1,Cognitive,80,High,25,75.33
+child_20,2026-02-18,7,1,Cognitive,86,High,15,75.33
+child_20,2026-02-25,8,1,Communication,81,High,30,83.0
+child_20,2026-02-26,8,1,Sensory and Motor,88,Medium,10,83.0
+child_20,2026-02-27,8,1,Sensory and Motor,89,High,25,83.0
+child_20,2026-02-24,8,1,Communication,92,Medium,30,83.0
+child_20,2026-02-27,8,1,Social Skills,85,Medium,25,83.0
+child_20,2026-03-05,9,1,Sensory and Motor,87,High,30,87.0
+child_20,2026-03-04,9,1,Sensory and Motor,90,High,25,87.0
+child_20,2026-03-06,9,1,Cognitive,87,Medium,25,87.0
+child_20,2026-03-03,9,1,Cognitive,94,High,30,87.0
+child_20,2026-03-13,10,1,Communication,87,High,15,89.5
+child_20,2026-03-14,10,1,Social Skills,96,Medium,25,89.5
+child_20,2026-03-09,10,1,Communication,91,High,30,89.5
+child_20,2026-03-10,10,1,Communication,95,High,10,89.5
+child_20,2026-03-20,11,1,Communication,93,Medium,20,92.25
+child_20,2026-03-20,11,1,Cognitive,95,Medium,25,92.25
+child_20,2026-03-20,11,1,Social Skills,92,High,10,92.25
+child_20,2026-03-21,11,1,Communication,91,High,25,92.25
+child_20,2026-03-17,11,1,Social Skills,100,High,20,92.25
+child_20,2026-03-27,12,1,Sensory and Motor,88,Medium,10,94.2
+child_20,2026-03-24,12,1,Cognitive,90,Medium,20,94.2
+child_20,2026-03-25,12,1,Cognitive,87,High,25,94.2
+child_21,2026-01-10,1,2,Sensory and Motor,50,High,20,50.0
+child_21,2026-01-07,1,2,Social Skills,44,Low,15,50.0
+child_21,2026-01-16,2,2,Communication,58,High,10,47.0
+child_21,2026-01-16,2,2,Communication,55,Medium,20,47.0
+child_21,2026-01-18,2,2,Sensory and Motor,52,High,30,47.0
+child_21,2026-01-17,2,2,Cognitive,55,Medium,25,47.0
+child_21,2026-01-18,2,2,Communication,55,Medium,25,47.0
+child_21,2026-01-19,3,2,Social Skills,61,Medium,15,55.0
+child_21,2026-01-25,3,2,Communication,54,High,30,55.0
+child_21,2026-01-24,3,2,Sensory and Motor,67,Medium,15,55.0
+child_21,2026-01-19,3,2,Social Skills,52,Medium,10,55.0
+child_21,2026-01-27,4,2,Social Skills,64,High,20,58.5
+child_21,2026-01-31,4,2,Social Skills,57,Medium,15,58.5
+child_21,2026-01-31,4,2,Social Skills,52,Low,20,58.5
+child_21,2026-01-27,4,2,Social Skills,61,High,20,58.5
+child_21,2026-02-02,5,2,Communication,67,High,25,58.5
+child_21,2026-02-08,5,2,Sensory and Motor,70,High,20,58.5
+child_21,2026-02-12,6,2,Sensory and Motor,59,Low,30,68.5
+child_21,2026-02-12,6,2,Cognitive,68,Low,30,68.5
+child_21,2026-02-12,6,2,Sensory and Motor,72,High,10,68.5
+child_21,2026-02-12,6,2,Cognitive,71,High,10,68.5
+child_21,2026-02-16,7,2,Cognitive,64,High,15,67.5
+child_21,2026-02-20,7,2,Sensory and Motor,72,High,15,67.5
+child_21,2026-02-27,8,2,Social Skills,73,High,20,68.0
+child_21,2026-02-26,8,2,Cognitive,67,Medium,20,68.0
+child_21,2026-02-25,8,2,Social Skills,73,High,15,68.0
+child_21,2026-02-27,8,2,Social Skills,68,High,20,68.0
+child_21,2026-02-27,8,2,Social Skills,64,Medium,25,68.0
+child_21,2026-03-05,9,2,Sensory and Motor,74,High,15,69.0
+child_21,2026-03-08,9,2,Sensory and Motor,71,High,20,69.0
+child_21,2026-03-06,9,2,Communication,74,Medium,15,69.0
+child_21,2026-03-12,10,2,Cognitive,74,High,10,73.0
+child_21,2026-03-14,10,2,Sensory and Motor,73,High,30,73.0
+child_21,2026-03-11,10,2,Communication,78,Medium,25,73.0
+child_21,2026-03-11,10,2,Social Skills,82,Medium,30,73.0
+child_21,2026-03-18,11,2,Cognitive,71,High,30,76.75
+child_21,2026-03-22,11,2,Sensory and Motor,78,High,30,76.75
+child_21,2026-03-19,11,2,Social Skills,71,High,15,76.75
+child_21,2026-03-21,11,2,Cognitive,80,High,30,76.75
+child_21,2026-03-23,12,2,Social Skills,79,Medium,20,75.0
+child_21,2026-03-25,12,2,Cognitive,81,High,30,75.0
+child_22,2026-01-11,1,2,Cognitive,49,Medium,30,44.0
+child_22,2026-01-08,1,2,Sensory and Motor,50,Low,15,44.0
+child_22,2026-01-10,1,2,Social Skills,52,High,10,44.0
+child_22,2026-01-06,1,2,Communication,44,Low,30,44.0
+child_22,2026-01-05,1,2,Communication,47,Medium,30,44.0
+child_22,2026-01-12,2,2,Social Skills,43,Low,15,48.4
+child_22,2026-01-17,2,2,Social Skills,41,Low,25,48.4
+child_22,2026-01-13,2,2,Sensory and Motor,45,Low,20,48.4
+child_22,2026-01-25,3,2,Cognitive,51,High,20,43.0
+child_22,2026-01-20,3,2,Cognitive,57,Low,30,43.0
+child_22,2026-01-24,3,2,Cognitive,50,High,30,43.0
+child_22,2026-01-23,3,2,Social Skills,48,Medium,25,43.0
+child_22,2026-01-25,3,2,Sensory and Motor,47,Low,25,43.0
+child_22,2026-01-27,4,2,Sensory and Motor,53,Low,20,50.6
+child_22,2026-01-29,4,2,Cognitive,54,High,10,50.6
+child_22,2026-02-01,4,2,Social Skills,53,Medium,20,50.6
+child_22,2026-02-01,4,2,Sensory and Motor,54,Low,30,50.6
+child_22,2026-02-05,5,2,Cognitive,55,High,25,53.5
+child_22,2026-02-03,5,2,Cognitive,62,Medium,10,53.5
+child_22,2026-02-07,5,2,Sensory and Motor,56,High,20,53.5
+child_22,2026-02-07,5,2,Sensory and Motor,62,High,30,53.5
+child_22,2026-02-05,5,2,Communication,56,Low,20,53.5
+child_22,2026-02-11,6,2,Cognitive,60,High,30,58.2
+child_22,2026-02-10,6,2,Social Skills,58,High,10,58.2
+child_22,2026-02-09,6,2,Social Skills,61,Medium,20,58.2
+child_22,2026-02-14,6,2,Communication,58,Low,15,58.2
+child_22,2026-02-12,6,2,Cognitive,59,Low,20,58.2
+child_22,2026-02-18,7,2,Social Skills,54,Medium,10,59.2
+child_22,2026-02-16,7,2,Communication,62,Medium,25,59.2
+child_22,2026-02-20,7,2,Communication,58,Medium,25,59.2
+child_22,2026-02-16,7,2,Cognitive,61,High,15,59.2
+child_22,2026-02-22,7,2,Cognitive,64,Low,15,59.2
+child_22,2026-02-27,8,2,Cognitive,64,High,15,59.8
+child_22,2026-02-26,8,2,Communication,63,Medium,15,59.8
+child_22,2026-03-04,9,2,Social Skills,64,Medium,20,63.5
+child_22,2026-03-04,9,2,Social Skills,74,Medium,10,63.5
+child_22,2026-03-09,10,2,Communication,65,Low,20,69.0
+child_22,2026-03-12,10,2,Cognitive,71,Medium,30,69.0
+child_22,2026-03-14,10,2,Sensory and Motor,70,High,15,69.0
+child_22,2026-03-15,10,2,Sensory and Motor,73,Medium,30,69.0
+child_22,2026-03-16,11,2,Communication,76,High,15,69.75
+child_22,2026-03-17,11,2,Cognitive,71,High,20,69.75
+child_22,2026-03-28,12,2,Social Skills,78,High,20,73.5
+child_22,2026-03-25,12,2,Sensory and Motor,82,High,30,73.5
+child_23,2026-01-06,1,1,Sensory and Motor,64,High,15,64.0
+child_23,2026-01-07,1,1,Social Skills,66,High,30,64.0
+child_23,2026-01-05,1,1,Cognitive,63,High,15,64.0
+child_23,2026-01-07,1,1,Cognitive,68,Medium,10,64.0
+child_23,2026-01-10,1,1,Sensory and Motor,62,Low,10,64.0
+child_23,2026-01-14,2,1,Social Skills,69,High,25,64.6
+child_23,2026-01-16,2,1,Social Skills,64,High,25,64.6
+child_23,2026-01-16,2,1,Communication,69,Medium,10,64.6
+child_23,2026-01-19,3,1,Communication,77,Medium,15,67.33
+child_23,2026-01-20,3,1,Cognitive,75,Medium,30,67.33
+child_23,2026-01-26,4,1,Communication,77,High,15,76.0
+child_23,2026-01-26,4,1,Cognitive,78,High,10,76.0
+child_23,2026-02-01,4,1,Sensory and Motor,75,High,10,76.0
+child_23,2026-01-30,4,1,Sensory and Motor,75,High,10,76.0
+child_23,2026-02-08,5,1,Social Skills,70,High,10,76.25
+child_23,2026-02-06,5,1,Social Skills,84,High,25,76.25
+child_23,2026-02-13,6,1,Cognitive,84,High,15,77.0
+child_23,2026-02-14,6,1,Cognitive,85,High,25,77.0
+child_23,2026-02-09,6,1,Cognitive,84,Medium,15,77.0
+child_23,2026-02-20,7,1,Sensory and Motor,88,High,20,84.33
+child_23,2026-02-22,7,1,Cognitive,83,High,25,84.33
+child_23,2026-02-22,7,1,Social Skills,82,High,30,84.33
+child_23,2026-02-25,8,1,Cognitive,80,High,25,84.33
+child_23,2026-02-23,8,1,Social Skills,84,High,10,84.33
+child_23,2026-02-25,8,1,Social Skills,74,Medium,20,84.33
+child_23,2026-02-24,8,1,Social Skills,86,High,20,84.33
+child_23,2026-03-04,9,1,Sensory and Motor,87,Medium,15,81.0
+child_23,2026-03-04,9,1,Communication,90,High,20,81.0
+child_23,2026-03-06,9,1,Social Skills,86,High,30,81.0
+child_23,2026-03-07,9,1,Cognitive,91,High,15,81.0
+child_23,2026-03-08,9,1,Communication,89,High,30,81.0
+child_23,2026-03-09,10,1,Sensory and Motor,90,Medium,10,88.6
+child_23,2026-03-11,10,1,Communication,85,High,25,88.6
+child_23,2026-03-15,10,1,Cognitive,91,High,10,88.6
+child_23,2026-03-09,10,1,Communication,84,High,30,88.6
+child_23,2026-03-18,11,1,Cognitive,90,Medium,25,87.5
+child_23,2026-03-22,11,1,Communication,93,High,30,87.5
+child_23,2026-03-17,11,1,Sensory and Motor,86,Medium,15,87.5
+child_23,2026-03-27,12,1,Communication,97,High,20,89.67
+child_23,2026-03-26,12,1,Cognitive,88,Medium,15,89.67
+child_24,2026-01-08,1,2,Social Skills,45,High,30,43.0
+child_24,2026-01-09,1,2,Communication,41,Low,15,43.0
+child_24,2026-01-07,1,2,Communication,41,Low,20,43.0
+child_24,2026-01-05,1,2,Sensory and Motor,43,Low,15,43.0
+child_24,2026-01-07,1,2,Sensory and Motor,42,Medium,10,43.0
+child_24,2026-01-16,2,2,Cognitive,50,High,15,42.4
+child_24,2026-01-12,2,2,Sensory and Motor,41,Low,15,42.4
+child_24,2026-01-13,2,2,Social Skills,48,Low,10,42.4
+child_24,2026-01-16,2,2,Communication,40,Low,20,42.4
+child_24,2026-01-21,3,2,Social Skills,49,Low,30,44.75
+child_24,2026-01-20,3,2,Sensory and Motor,50,High,30,44.75
+child_24,2026-01-31,4,2,Communication,52,High,30,49.5
+child_24,2026-01-28,4,2,Sensory and Motor,52,Low,10,49.5
+child_24,2026-01-27,4,2,Communication,54,Low,25,49.5
+child_24,2026-02-07,5,2,Communication,49,High,20,52.67
+child_24,2026-02-02,5,2,Cognitive,52,Medium,15,52.67
+child_24,2026-02-06,5,2,Sensory and Motor,62,High,10,52.67
+child_24,2026-02-05,5,2,Cognitive,58,Low,15,52.67
+child_24,2026-02-09,6,2,Sensory and Motor,53,Low,30,55.25
+child_24,2026-02-11,6,2,Sensory and Motor,51,Low,20,55.25
+child_24,2026-02-17,7,2,Communication,60,High,20,52.0
+child_24,2026-02-21,7,2,Sensory and Motor,59,Low,30,52.0
+child_24,2026-02-17,7,2,Cognitive,63,Low,20,52.0
+child_24,2026-02-21,7,2,Social Skills,64,High,30,52.0
+child_24,2026-02-26,8,2,Sensory and Motor,67,Medium,30,61.5
+child_24,2026-02-26,8,2,Social Skills,59,Low,30,61.5
+child_24,2026-03-01,8,2,Social Skills,61,Low,20,61.5
+child_24,2026-03-07,9,2,Communication,73,High,10,62.33
+child_24,2026-03-03,9,2,Communication,61,Medium,15,62.33
+child_24,2026-03-08,9,2,Cognitive,60,Medium,20,62.33
+child_24,2026-03-10,10,2,Social Skills,78,Medium,10,64.67
+child_24,2026-03-10,10,2,Social Skills,80,High,20,64.67
+child_24,2026-03-13,10,2,Communication,70,Medium,15,64.67
+child_24,2026-03-11,10,2,Cognitive,74,Medium,30,64.67
+child_24,2026-03-17,11,2,Cognitive,75,High,25,75.5
+child_24,2026-03-17,11,2,Sensory and Motor,73,High,10,75.5
+child_24,2026-03-19,11,2,Social Skills,74,Medium,15,75.5
+child_24,2026-03-16,11,2,Cognitive,76,High,30,75.5
+child_24,2026-03-24,12,2,Communication,83,High,25,74.5
+child_24,2026-03-27,12,2,Communication,74,High,25,74.5
+child_24,2026-03-27,12,2,Cognitive,71,Medium,25,74.5
+child_24,2026-03-29,12,2,Cognitive,80,Medium,30,74.5
+child_24,2026-03-28,12,2,Cognitive,69,Low,30,74.5
+child_25,2026-01-06,1,1,Cognitive,53,Medium,20,52.0
+child_25,2026-01-06,1,1,Communication,58,Medium,20,52.0
+child_25,2026-01-15,2,1,Communication,60,High,30,55.5
+child_25,2026-01-13,2,1,Social Skills,54,High,30,55.5
+child_25,2026-01-15,2,1,Social Skills,54,Low,25,55.5
+child_25,2026-01-21,3,1,Communication,63,Medium,15,56.0
+child_25,2026-01-19,3,1,Cognitive,65,Medium,10,56.0
+child_25,2026-01-29,4,1,Communication,67,High,25,64.0
+child_25,2026-02-01,4,1,Social Skills,66,High,15,64.0
+child_25,2026-02-01,4,1,Communication,68,Low,15,64.0
+child_25,2026-02-07,5,1,Communication,68,High,15,67.0
+child_25,2026-02-03,5,1,Sensory and Motor,63,Low,10,67.0
+child_25,2026-02-02,5,1,Cognitive,59,High,10,67.0
+child_25,2026-02-03,5,1,Cognitive,69,Low,30,67.0
+child_25,2026-02-09,6,1,Social Skills,69,High,20,64.75
+child_25,2026-02-09,6,1,Communication,69,Low,15,64.75
+child_25,2026-02-14,6,1,Sensory and Motor,68,Low,30,64.75
+child_25,2026-02-11,6,1,Communication,72,Medium,10,64.75
+child_25,2026-02-12,6,1,Social Skills,72,High,30,64.75
+child_25,2026-02-16,7,1,Sensory and Motor,74,Medium,20,70.0
+child_25,2026-02-18,7,1,Communication,80,High,30,70.0
+child_25,2026-02-18,7,1,Communication,69,Medium,15,70.0
+child_25,2026-02-21,7,1,Social Skills,76,High,30,70.0
+child_25,2026-02-23,8,1,Communication,74,High,30,74.75
+child_25,2026-02-26,8,1,Cognitive,76,High,20,74.75
+child_25,2026-03-04,9,1,Sensory and Motor,75,High,30,75.0
+child_25,2026-03-03,9,1,Cognitive,76,High,25,75.0
+child_25,2026-03-08,9,1,Social Skills,77,Medium,30,75.0
+child_25,2026-03-07,9,1,Cognitive,79,Medium,10,75.0
+child_25,2026-03-14,10,1,Cognitive,86,Medium,30,76.75
+child_25,2026-03-12,10,1,Communication,87,High,15,76.75
+child_25,2026-03-18,11,1,Sensory and Motor,87,Medium,20,86.5
+child_25,2026-03-20,11,1,Sensory and Motor,80,Medium,20,86.5
+child_25,2026-03-19,11,1,Communication,84,High,30,86.5
+child_25,2026-03-22,11,1,Cognitive,88,High,25,86.5
+child_25,2026-03-26,12,1,Sensory and Motor,93,Medium,25,84.75
+child_25,2026-03-26,12,1,Sensory and Motor,90,High,10,84.75
+child_25,2026-03-27,12,1,Communication,86,High,20,84.75
+child_26,2026-01-11,1,1,Sensory and Motor,59,Low,15,51.0
+child_26,2026-01-11,1,1,Cognitive,49,Low,20,51.0
+child_26,2026-01-10,1,1,Social Skills,50,High,25,51.0
+child_26,2026-01-09,1,1,Sensory and Motor,52,Low,20,51.0
+child_26,2026-01-15,2,1,Sensory and Motor,63,Medium,25,52.5
+child_26,2026-01-13,2,1,Social Skills,60,High,20,52.5
+child_26,2026-01-12,2,1,Cognitive,55,Low,10,52.5
+child_26,2026-01-16,2,1,Social Skills,57,Low,25,52.5
+child_26,2026-01-24,3,1,Communication,60,Medium,15,58.75
+child_26,2026-01-25,3,1,Social Skills,55,High,15,58.75
+child_26,2026-01-24,3,1,Communication,62,High,10,58.75
+child_26,2026-01-21,3,1,Communication,59,Low,30,58.75
+child_26,2026-01-21,3,1,Communication,57,High,20,58.75
+child_26,2026-01-31,4,1,Social Skills,61,Low,20,58.6
+child_26,2026-01-27,4,1,Sensory and Motor,60,Medium,10,58.6
+child_26,2026-01-27,4,1,Communication,66,Low,20,58.6
+child_26,2026-01-26,4,1,Sensory and Motor,66,Low,15,58.6
+child_26,2026-02-03,5,1,Social Skills,62,High,20,63.25
+child_26,2026-02-03,5,1,Cognitive,69,Medium,30,63.25
+child_26,2026-02-02,5,1,Cognitive,66,Low,10,63.25
+child_26,2026-02-07,5,1,Cognitive,67,Low,25,63.25
+child_26,2026-02-13,6,1,Sensory and Motor,67,Medium,20,66.0
+child_26,2026-02-15,6,1,Cognitive,68,High,10,66.0
+child_26,2026-02-13,6,1,Cognitive,72,Medium,10,66.0
+child_26,2026-02-09,6,1,Cognitive,60,High,25,66.0
+child_26,2026-02-10,6,1,Sensory and Motor,67,Low,15,66.0
+child_26,2026-02-17,7,1,Cognitive,67,Medium,25,66.8
+child_26,2026-02-16,7,1,Communication,64,Low,25,66.8
+child_26,2026-02-18,7,1,Social Skills,62,Medium,20,66.8
+child_26,2026-02-20,7,1,Communication,70,Medium,25,66.8
+child_26,2026-02-18,7,1,Cognitive,68,Medium,30,66.8
+child_26,2026-02-24,8,1,Social Skills,71,High,15,66.2
+child_26,2026-02-26,8,1,Cognitive,69,High,30,66.2
+child_26,2026-03-01,8,1,Sensory and Motor,74,High,30,66.2
+child_26,2026-02-27,8,1,Cognitive,71,High,10,66.2
+child_26,2026-02-23,8,1,Cognitive,70,High,30,66.2
+child_26,2026-03-08,9,1,Communication,71,High,10,71.0
+child_26,2026-03-07,9,1,Sensory and Motor,75,High,25,71.0
+child_26,2026-03-09,10,1,Social Skills,77,High,10,73.0
+child_26,2026-03-14,10,1,Sensory and Motor,79,Medium,25,73.0
+child_26,2026-03-17,11,1,Sensory and Motor,82,High,30,78.0
+child_26,2026-03-19,11,1,Communication,87,High,20,78.0
+child_26,2026-03-20,11,1,Sensory and Motor,91,High,15,78.0
+child_26,2026-03-16,11,1,Communication,80,High,30,78.0
+child_26,2026-03-16,11,1,Sensory and Motor,77,High,10,78.0
+child_26,2026-03-26,12,1,Cognitive,76,High,30,83.4
+child_26,2026-03-28,12,1,Social Skills,81,High,25,83.4
+child_26,2026-03-28,12,1,Social Skills,87,Medium,25,83.4
+child_27,2026-01-11,1,2,Social Skills,67,Low,20,59.0
+child_27,2026-01-06,1,2,Communication,57,Low,10,59.0
+child_27,2026-01-06,1,2,Communication,60,Medium,15,59.0
+child_27,2026-01-06,1,2,Cognitive,56,High,25,59.0
+child_27,2026-01-11,1,2,Cognitive,57,High,15,59.0
+child_27,2026-01-15,2,2,Social Skills,55,Medium,15,59.4
+child_27,2026-01-15,2,2,Sensory and Motor,59,High,15,59.4
+child_27,2026-01-15,2,2,Sensory and Motor,60,High,30,59.4
+child_27,2026-01-12,2,2,Communication,68,High,20,59.4
+child_27,2026-01-16,2,2,Social Skills,63,Medium,10,59.4
+child_27,2026-01-22,3,2,Social Skills,62,High,10,61.0
+child_27,2026-01-22,3,2,Sensory and Motor,66,High,10,61.0
+child_27,2026-01-23,3,2,Cognitive,70,Medium,25,61.0
+child_27,2026-01-23,3,2,Sensory and Motor,68,Medium,30,61.0
+child_27,2026-01-28,4,2,Sensory and Motor,72,High,20,66.5
+child_27,2026-01-26,4,2,Social Skills,74,High,25,66.5
+child_27,2026-01-30,4,2,Communication,81,High,30,66.5
+child_27,2026-01-28,4,2,Social Skills,73,High,10,66.5
+child_27,2026-02-04,5,2,Communication,74,High,10,75.0
+child_27,2026-02-06,5,2,Social Skills,74,Medium,30,75.0
+child_27,2026-02-07,5,2,Cognitive,65,Medium,15,75.0
+child_27,2026-02-03,5,2,Sensory and Motor,74,High,10,75.0
+child_27,2026-02-13,6,2,Cognitive,78,High,25,71.75
+child_27,2026-02-10,6,2,Social Skills,75,High,25,71.75
+child_27,2026-02-10,6,2,Communication,69,Low,20,71.75
+child_27,2026-02-19,7,2,Cognitive,74,High,20,74.0
+child_27,2026-02-21,7,2,Cognitive,86,Medium,25,74.0
+child_27,2026-02-19,7,2,Cognitive,75,High,15,74.0
+child_27,2026-02-16,7,2,Communication,76,High,20,74.0
+child_27,2026-02-16,7,2,Cognitive,84,High,20,74.0
+child_27,2026-02-25,8,2,Cognitive,80,High,30,79.0
+child_27,2026-02-26,8,2,Social Skills,88,High,15,79.0
+child_27,2026-02-27,8,2,Communication,77,Medium,20,79.0
+child_27,2026-02-28,8,2,Communication,86,Medium,10,79.0
+child_27,2026-03-07,9,2,Social Skills,80,High,20,82.75
+child_27,2026-03-02,9,2,Communication,84,Medium,30,82.75
+child_27,2026-03-13,10,2,Social Skills,81,Medium,10,82.0
+child_27,2026-03-12,10,2,Social Skills,80,High,30,82.0
+child_27,2026-03-09,10,2,Cognitive,84,High,10,82.0
+child_27,2026-03-22,11,2,Sensory and Motor,86,High,20,81.67
+child_27,2026-03-17,11,2,Cognitive,89,Medium,25,81.67
+child_27,2026-03-18,11,2,Sensory and Motor,85,Medium,20,81.67
+child_27,2026-03-17,11,2,Cognitive,84,Medium,30,81.67
+child_27,2026-03-23,12,2,Cognitive,92,Medium,30,86.0
+child_27,2026-03-24,12,2,Communication,89,High,20,86.0
+child_27,2026-03-23,12,2,Sensory and Motor,89,Medium,10,86.0
+child_27,2026-03-29,12,2,Communication,82,Medium,10,86.0
+child_27,2026-03-28,12,2,Social Skills,93,High,20,86.0
+child_28,2026-01-09,1,2,Cognitive,74,High,25,65.0
+child_28,2026-01-08,1,2,Social Skills,68,High,10,65.0
+child_28,2026-01-05,1,2,Sensory and Motor,63,Medium,10,65.0
+child_28,2026-01-07,1,2,Cognitive,72,High,20,65.0
+child_28,2026-01-05,1,2,Sensory and Motor,61,Low,20,65.0
+child_28,2026-01-18,2,2,Social Skills,62,Medium,15,67.6
+child_28,2026-01-16,2,2,Cognitive,73,Medium,20,67.6
+child_28,2026-01-12,2,2,Cognitive,70,High,20,67.6
+child_28,2026-01-12,2,2,Communication,73,Medium,15,67.6
+child_28,2026-01-13,2,2,Social Skills,67,Low,30,67.6
+child_28,2026-01-25,3,2,Communication,69,High,25,69.0
+child_28,2026-01-19,3,2,Sensory and Motor,71,High,10,69.0
+child_28,2026-01-29,4,2,Cognitive,81,High,30,70.0
+child_28,2026-01-31,4,2,Social Skills,81,High,15,70.0
+child_28,2026-02-07,5,2,Communication,83,High,30,81.0
+child_28,2026-02-03,5,2,Communication,84,High,15,81.0
+child_28,2026-02-11,6,2,Communication,82,High,15,83.5
+child_28,2026-02-15,6,2,Cognitive,80,Medium,10,83.5
+child_28,2026-02-16,7,2,Sensory and Motor,86,High,25,81.0
+child_28,2026-02-16,7,2,Social Skills,80,High,30,81.0
+child_28,2026-02-18,7,2,Social Skills,88,Medium,30,81.0
+child_28,2026-02-25,8,2,Social Skills,81,Medium,25,84.67
+child_28,2026-02-28,8,2,Communication,85,Medium,30,84.67
+child_28,2026-03-08,9,2,Cognitive,90,Medium,10,83.0
+child_28,2026-03-02,9,2,Sensory and Motor,91,Medium,30,83.0
+child_28,2026-03-05,9,2,Social Skills,89,High,25,83.0
+child_28,2026-03-03,9,2,Social Skills,91,High,25,83.0
+child_28,2026-03-03,9,2,Social Skills,91,High,10,83.0
+child_28,2026-03-14,10,2,Social Skills,93,High,10,90.4
+child_28,2026-03-10,10,2,Communication,89,Medium,30,90.4
+child_28,2026-03-19,11,2,Social Skills,96,High,10,91.0
+child_28,2026-03-16,11,2,Cognitive,89,Medium,25,91.0
+child_28,2026-03-17,11,2,Sensory and Motor,100,Medium,20,91.0
+child_28,2026-03-25,12,2,Communication,100,High,25,95.0
+child_28,2026-03-23,12,2,Communication,96,Medium,15,95.0
+child_28,2026-03-26,12,2,Communication,88,High,10,95.0
+child_28,2026-03-24,12,2,Social Skills,96,High,25,95.0
+child_29,2026-01-06,1,1,Social Skills,61,Low,20,63.0
+child_29,2026-01-05,1,1,Social Skills,66,Low,25,63.0
+child_29,2026-01-05,1,1,Cognitive,70,High,30,63.0
+child_29,2026-01-05,1,1,Social Skills,68,High,25,63.0
+child_29,2026-01-15,2,1,Sensory and Motor,67,High,15,66.25
+child_29,2026-01-14,2,1,Communication,69,High,30,66.25
+child_29,2026-01-14,2,1,Cognitive,70,Medium,10,66.25
+child_29,2026-01-25,3,1,Social Skills,66,High,15,68.67
+child_29,2026-01-23,3,1,Communication,78,High,15,68.67
+child_29,2026-01-22,3,1,Cognitive,74,Medium,30,68.67
+child_29,2026-01-26,4,1,Social Skills,71,High,25,72.67
+child_29,2026-01-27,4,1,Communication,72,High,15,72.67
+child_29,2026-01-29,4,1,Cognitive,79,Medium,10,72.67
+child_29,2026-01-31,4,1,Cognitive,75,High,25,72.67
+child_29,2026-02-05,5,1,Communication,77,High,15,74.25
+child_29,2026-02-06,5,1,Social Skills,78,High,15,74.25
+child_29,2026-02-14,6,1,Cognitive,74,Medium,10,77.5
+child_29,2026-02-14,6,1,Communication,78,High,30,77.5
+child_29,2026-02-12,6,1,Cognitive,86,High,15,77.5
+child_29,2026-02-21,7,1,Cognitive,77,High,10,79.33
+child_29,2026-02-21,7,1,Communication,84,High,30,79.33
+child_29,2026-02-18,7,1,Social Skills,80,High,30,79.33
+child_29,2026-02-22,7,1,Sensory and Motor,84,High,10,79.33
+child_29,2026-02-27,8,1,Cognitive,91,Medium,10,81.25
+child_29,2026-02-25,8,1,Communication,84,High,30,81.25
+child_29,2026-03-07,9,1,Social Skills,87,High,15,87.5
+child_29,2026-03-04,9,1,Communication,88,Medium,30,87.5
+child_29,2026-03-07,9,1,Social Skills,79,High,15,87.5
+child_29,2026-03-13,10,1,Sensory and Motor,92,High,25,84.67
+child_29,2026-03-09,10,1,Communication,94,High,30,84.67
+child_29,2026-03-12,10,1,Sensory and Motor,92,High,30,84.67
+child_29,2026-03-12,10,1,Social Skills,85,High,10,84.67
+child_29,2026-03-16,11,1,Social Skills,89,Medium,25,90.75
+child_29,2026-03-18,11,1,Communication,96,Medium,20,90.75
+child_29,2026-03-21,11,1,Social Skills,94,Medium,25,90.75
+child_29,2026-03-22,11,1,Cognitive,97,Medium,20,90.75
+child_29,2026-03-21,11,1,Cognitive,100,High,15,90.75
+child_29,2026-03-28,12,1,Social Skills,95,Medium,10,95.2
+child_29,2026-03-29,12,1,Cognitive,94,High,20,95.2
+child_29,2026-03-27,12,1,Cognitive,93,High,25,95.2
+child_29,2026-03-26,12,1,Social Skills,100,High,30,95.2
+child_29,2026-03-29,12,1,Sensory and Motor,94,Medium,25,95.2
+child_30,2026-01-06,1,2,Cognitive,67,Medium,20,57.0
+child_30,2026-01-06,1,2,Social Skills,59,High,20,57.0
+child_30,2026-01-13,2,2,Communication,63,Low,10,63.0
+child_30,2026-01-14,2,2,Social Skills,61,Medium,15,63.0
+child_30,2026-01-16,2,2,Sensory and Motor,62,High,10,63.0
+child_30,2026-01-21,3,2,Communication,58,High,20,62.0
+child_30,2026-01-19,3,2,Social Skills,72,High,25,62.0
+child_30,2026-01-22,3,2,Sensory and Motor,70,High,30,62.0
+child_30,2026-01-29,4,2,Social Skills,70,High,30,66.67
+child_30,2026-02-01,4,2,Communication,63,Medium,20,66.67
+child_30,2026-01-31,4,2,Social Skills,68,Medium,10,66.67
+child_30,2026-01-31,4,2,Social Skills,68,Medium,30,66.67
+child_30,2026-02-04,5,2,Social Skills,73,Medium,30,67.25
+child_30,2026-02-06,5,2,Communication,67,Medium,15,67.25
+child_30,2026-02-14,6,2,Cognitive,75,High,10,70.0
+child_30,2026-02-10,6,2,Sensory and Motor,70,High,10,70.0
+child_30,2026-02-12,6,2,Sensory and Motor,76,Medium,25,70.0
+child_30,2026-02-12,6,2,Cognitive,73,High,20,70.0
+child_30,2026-02-15,6,2,Social Skills,78,High,10,70.0
+child_30,2026-02-21,7,2,Cognitive,86,High,15,74.4
+child_30,2026-02-21,7,2,Communication,79,High,15,74.4
+child_30,2026-02-17,7,2,Communication,80,High,20,74.4
+child_30,2026-02-20,7,2,Communication,83,High,10,74.4
+child_30,2026-02-19,7,2,Cognitive,77,Medium,30,74.4
+child_30,2026-02-24,8,2,Sensory and Motor,80,Medium,25,81.0
+child_30,2026-02-27,8,2,Sensory and Motor,75,High,30,81.0
+child_30,2026-02-26,8,2,Social Skills,83,High,25,81.0
+child_30,2026-03-03,9,2,Communication,83,High,25,79.33
+child_30,2026-03-07,9,2,Cognitive,94,High,20,79.33
+child_30,2026-03-09,10,2,Sensory and Motor,88,Medium,30,88.5
+child_30,2026-03-13,10,2,Cognitive,88,High,30,88.5
+child_30,2026-03-15,10,2,Sensory and Motor,86,High,10,88.5
+child_30,2026-03-22,11,2,Communication,95,High,15,87.33
+child_30,2026-03-17,11,2,Social Skills,85,Medium,20,87.33
+child_30,2026-03-26,12,2,Communication,98,High,20,90.0
+child_30,2026-03-25,12,2,Social Skills,89,Medium,30,90.0
+child_30,2026-03-29,12,2,Communication,96,High,15,90.0
+child_30,2026-03-27,12,2,Sensory and Motor,90,High,20,90.0
+child_31,2026-01-05,1,1,Sensory and Motor,50,High,30,52.0
+child_31,2026-01-11,1,1,Cognitive,56,Medium,20,52.0
+child_31,2026-01-08,1,1,Communication,56,Medium,15,52.0
+child_31,2026-01-06,1,1,Communication,56,Low,30,52.0
+child_31,2026-01-12,2,1,Cognitive,60,Low,10,54.5
+child_31,2026-01-14,2,1,Sensory and Motor,56,Medium,30,54.5
+child_31,2026-01-19,3,1,Social Skills,63,High,10,58.0
+child_31,2026-01-20,3,1,Social Skills,61,Low,20,58.0
+child_31,2026-01-20,3,1,Cognitive,57,Low,10,58.0
+child_31,2026-01-24,3,1,Cognitive,59,Low,25,58.0
+child_31,2026-01-26,4,1,Communication,59,High,30,60.0
+child_31,2026-01-29,4,1,Communication,63,Low,20,60.0
+child_31,2026-02-06,5,1,Social Skills,66,Low,30,61.0
+child_31,2026-02-03,5,1,Sensory and Motor,64,Low,20,61.0
+child_31,2026-02-13,6,1,Communication,66,High,10,65.0
+child_31,2026-02-15,6,1,Sensory and Motor,66,Low,15,65.0
+child_31,2026-02-10,6,1,Communication,66,High,10,65.0
+child_31,2026-02-18,7,1,Social Skills,70,High,10,66.0
+child_31,2026-02-22,7,1,Cognitive,68,Medium,25,66.0
+child_31,2026-02-17,7,1,Cognitive,66,Medium,10,66.0
+child_31,2026-02-16,7,1,Cognitive,70,High,15,66.0
+child_31,2026-02-22,7,1,Communication,68,High,10,66.0
+child_31,2026-02-26,8,1,Sensory and Motor,75,High,25,68.4
+child_31,2026-02-28,8,1,Sensory and Motor,77,High,25,68.4
+child_31,2026-03-03,9,1,Sensory and Motor,76,Medium,25,76.0
+child_31,2026-03-03,9,1,Cognitive,83,High,10,76.0
+child_31,2026-03-05,9,1,Communication,77,High,10,76.0
+child_31,2026-03-03,9,1,Communication,72,Medium,15,76.0
+child_31,2026-03-04,9,1,Social Skills,80,Medium,20,76.0
+child_31,2026-03-09,10,1,Sensory and Motor,80,High,20,77.6
+child_31,2026-03-15,10,1,Sensory and Motor,84,High,25,77.6
+child_31,2026-03-12,10,1,Sensory and Motor,75,High,30,77.6
+child_31,2026-03-10,10,1,Communication,71,High,10,77.6
+child_31,2026-03-11,10,1,Communication,77,Medium,10,77.6
+child_31,2026-03-19,11,1,Social Skills,83,High,10,77.4
+child_31,2026-03-19,11,1,Communication,80,High,30,77.4
+child_31,2026-03-29,12,1,Sensory and Motor,84,High,15,81.5
+child_31,2026-03-28,12,1,Communication,82,High,20,81.5
+child_31,2026-03-29,12,1,Communication,86,Medium,25,81.5
+child_31,2026-03-26,12,1,Communication,79,High,25,81.5
+child_31,2026-03-23,12,1,Sensory and Motor,89,Medium,30,81.5
+child_32,2026-01-08,1,1,Communication,57,Medium,25,57.0
+child_32,2026-01-09,1,1,Cognitive,62,High,25,57.0
+child_32,2026-01-08,1,1,Sensory and Motor,58,Low,25,57.0
+child_32,2026-01-16,2,1,Sensory and Motor,62,High,20,59.0
+child_32,2026-01-14,2,1,Sensory and Motor,68,Low,20,59.0
+child_32,2026-01-18,2,1,Communication,65,High,30,59.0
+child_32,2026-01-18,2,1,Sensory and Motor,66,Low,25,59.0
+child_32,2026-01-14,2,1,Communication,61,Medium,20,59.0
+child_32,2026-01-20,3,1,Sensory and Motor,63,High,10,64.4
+child_32,2026-01-19,3,1,Communication,62,Medium,15,64.4
+child_32,2026-01-23,3,1,Cognitive,64,Medium,30,64.4
+child_32,2026-01-30,4,1,Cognitive,72,Medium,20,63.0
+child_32,2026-01-30,4,1,Social Skills,64,Medium,10,63.0
+child_32,2026-01-28,4,1,Sensory and Motor,72,High,30,63.0
+child_32,2026-01-27,4,1,Cognitive,65,Medium,15,63.0
+child_32,2026-01-31,4,1,Social Skills,66,Low,30,63.0
+child_32,2026-02-04,5,1,Communication,75,Medium,30,67.8
+child_32,2026-02-07,5,1,Sensory and Motor,70,High,10,67.8
+child_32,2026-02-12,6,1,Sensory and Motor,74,High,20,72.5
+child_32,2026-02-12,6,1,Sensory and Motor,80,High,30,72.5
+child_32,2026-02-10,6,1,Social Skills,70,High,25,72.5
+child_32,2026-02-09,6,1,Social Skills,74,High,30,72.5
+child_32,2026-02-13,6,1,Sensory and Motor,67,High,25,72.5
+child_32,2026-02-20,7,1,Social Skills,77,High,10,73.0
+child_32,2026-02-18,7,1,Cognitive,74,High,20,73.0
+child_32,2026-02-19,7,1,Social Skills,77,High,10,73.0
+child_32,2026-02-22,7,1,Sensory and Motor,70,High,15,73.0
+child_32,2026-02-21,7,1,Cognitive,80,High,15,73.0
+child_32,2026-02-24,8,1,Cognitive,86,High,25,75.6
+child_32,2026-02-27,8,1,Communication,80,High,25,75.6
+child_32,2026-02-24,8,1,Social Skills,80,High,20,75.6
+child_32,2026-03-07,9,1,Communication,84,High,10,82.0
+child_32,2026-03-08,9,1,Cognitive,84,High,10,82.0
+child_32,2026-03-12,10,1,Social Skills,83,High,15,84.0
+child_32,2026-03-09,10,1,Sensory and Motor,81,Medium,30,84.0
+child_32,2026-03-17,11,1,Sensory and Motor,86,High,10,82.0
+child_32,2026-03-18,11,1,Cognitive,91,High,15,82.0
+child_32,2026-03-24,12,1,Cognitive,85,Medium,20,88.5
+child_32,2026-03-26,12,1,Sensory and Motor,90,High,30,88.5
+child_33,2026-01-07,1,2,Cognitive,68,High,25,60.0
+child_33,2026-01-10,1,2,Cognitive,63,Low,20,60.0
+child_33,2026-01-12,2,2,Communication,69,High,30,65.5
+child_33,2026-01-18,2,2,Sensory and Motor,66,Low,15,65.5
+child_33,2026-01-16,2,2,Sensory and Motor,59,Medium,20,65.5
+child_33,2026-01-18,2,2,Cognitive,64,Low,25,65.5
+child_33,2026-01-21,3,2,Social Skills,63,Medium,10,64.5
+child_33,2026-01-21,3,2,Cognitive,70,High,20,64.5
+child_33,2026-01-25,3,2,Communication,76,Medium,20,64.5
+child_33,2026-01-25,3,2,Sensory and Motor,68,High,25,64.5
+child_33,2026-01-24,3,2,Social Skills,63,Medium,10,64.5
+child_33,2026-01-28,4,2,Cognitive,65,High,20,68.0
+child_33,2026-01-31,4,2,Social Skills,74,Medium,10,68.0
+child_33,2026-02-02,5,2,Communication,69,Medium,30,69.5
+child_33,2026-02-02,5,2,Social Skills,77,Medium,15,69.5
+child_33,2026-02-08,5,2,Cognitive,70,High,25,69.5
+child_33,2026-02-11,6,2,Sensory and Motor,75,Medium,30,72.0
+child_33,2026-02-15,6,2,Cognitive,77,High,15,72.0
+child_33,2026-02-12,6,2,Communication,79,High,15,72.0
+child_33,2026-02-16,7,2,Communication,84,High,15,77.0
+child_33,2026-02-19,7,2,Sensory and Motor,81,High,25,77.0
+child_33,2026-02-17,7,2,Communication,85,High,10,77.0
+child_33,2026-03-01,8,2,Communication,87,High,25,83.33
+child_33,2026-02-24,8,2,Cognitive,84,High,20,83.33
+child_33,2026-02-26,8,2,Social Skills,82,Medium,25,83.33
+child_33,2026-02-27,8,2,Cognitive,86,High,15,83.33
+child_33,2026-02-24,8,2,Communication,92,High,15,83.33
+child_33,2026-03-03,9,2,Cognitive,81,High,30,86.2
+child_33,2026-03-02,9,2,Social Skills,81,Medium,25,86.2
+child_33,2026-03-08,9,2,Cognitive,84,High,15,86.2
+child_33,2026-03-07,9,2,Sensory and Motor,92,High,30,86.2
+child_33,2026-03-09,10,2,Communication,87,High,30,84.5
+child_33,2026-03-09,10,2,Cognitive,91,High,30,84.5
+child_33,2026-03-21,11,2,Social Skills,84,High,10,89.0
+child_33,2026-03-18,11,2,Cognitive,99,Medium,30,89.0
+child_33,2026-03-18,11,2,Cognitive,92,High,30,89.0
+child_33,2026-03-17,11,2,Sensory and Motor,89,High,10,89.0
+child_33,2026-03-16,11,2,Cognitive,96,High,20,89.0
+child_33,2026-03-27,12,2,Sensory and Motor,92,High,30,92.0
+child_33,2026-03-26,12,2,Cognitive,96,High,15,92.0
+child_33,2026-03-23,12,2,Communication,91,Medium,15,92.0
+child_33,2026-03-24,12,2,Cognitive,95,Medium,25,92.0
+child_34,2026-01-05,1,3,Cognitive,56,Medium,20,51.0
+child_34,2026-01-08,1,3,Sensory and Motor,45,Low,10,51.0
+child_34,2026-01-05,1,3,Social Skills,53,Low,20,51.0
+child_34,2026-01-11,1,3,Social Skills,55,Medium,30,51.0
+child_34,2026-01-09,1,3,Social Skills,56,Low,30,51.0
+child_34,2026-01-13,2,3,Sensory and Motor,56,Medium,10,53.0
+child_34,2026-01-17,2,3,Cognitive,49,High,10,53.0
+child_34,2026-01-25,3,3,Cognitive,57,Medium,25,52.5
+child_34,2026-01-24,3,3,Communication,58,Medium,30,52.5
+child_34,2026-01-31,4,3,Social Skills,56,High,30,57.5
+child_34,2026-01-27,4,3,Sensory and Motor,57,Low,20,57.5
+child_34,2026-02-06,5,3,Social Skills,67,Medium,20,56.5
+child_34,2026-02-03,5,3,Communication,62,Medium,10,56.5
+child_34,2026-02-12,6,3,Communication,67,High,15,64.5
+child_34,2026-02-11,6,3,Sensory and Motor,63,Medium,25,64.5
+child_34,2026-02-14,6,3,Social Skills,64,Low,20,64.5
+child_34,2026-02-19,7,3,Cognitive,67,Medium,30,64.67
+child_34,2026-02-16,7,3,Cognitive,70,High,15,64.67
+child_34,2026-02-21,7,3,Communication,62,Medium,10,64.67
+child_34,2026-02-20,7,3,Cognitive,67,Low,15,64.67
+child_34,2026-02-20,7,3,Communication,73,High,30,64.67
+child_34,2026-02-23,8,3,Sensory and Motor,75,Medium,15,67.8
+child_34,2026-03-01,8,3,Cognitive,69,Low,30,67.8
+child_34,2026-02-25,8,3,Communication,67,Low,30,67.8
+child_34,2026-02-27,8,3,Communication,70,High,25,67.8
+child_34,2026-02-26,8,3,Sensory and Motor,69,Medium,20,67.8
+child_34,2026-03-02,9,3,Social Skills,70,High,25,70.0
+child_34,2026-03-08,9,3,Sensory and Motor,76,Medium,25,70.0
+child_34,2026-03-15,10,3,Sensory and Motor,81,High,25,73.0
+child_34,2026-03-11,10,3,Social Skills,85,Medium,15,73.0
+child_34,2026-03-09,10,3,Sensory and Motor,75,High,30,73.0
+child_34,2026-03-15,10,3,Cognitive,75,Medium,10,73.0
+child_34,2026-03-09,10,3,Cognitive,73,Medium,15,73.0
+child_34,2026-03-22,11,3,Sensory and Motor,76,High,25,77.8
+child_34,2026-03-20,11,3,Cognitive,74,High,20,77.8
+child_34,2026-03-22,11,3,Communication,79,Medium,15,77.8
+child_34,2026-03-22,11,3,Communication,82,Medium,15,77.8
+child_34,2026-03-17,11,3,Social Skills,77,Medium,25,77.8
+child_34,2026-03-24,12,3,Communication,82,High,25,77.6
+child_34,2026-03-23,12,3,Cognitive,82,High,25,77.6
+child_34,2026-03-26,12,3,Social Skills,83,Medium,25,77.6
+child_34,2026-03-24,12,3,Sensory and Motor,79,High,10,77.6
+child_34,2026-03-23,12,3,Cognitive,89,Medium,25,77.6
+child_35,2026-01-05,1,3,Cognitive,45,High,30,46.0
+child_35,2026-01-06,1,3,Communication,49,High,10,46.0
+child_35,2026-01-08,1,3,Cognitive,45,Medium,25,46.0
+child_35,2026-01-05,1,3,Sensory and Motor,47,Medium,30,46.0
+child_35,2026-01-12,2,3,Cognitive,55,Medium,20,46.5
+child_35,2026-01-13,2,3,Sensory and Motor,57,High,15,46.5
+child_35,2026-01-16,2,3,Sensory and Motor,56,Medium,15,46.5
+child_35,2026-01-17,2,3,Cognitive,47,High,25,46.5
+child_35,2026-01-18,2,3,Social Skills,57,Medium,25,46.5
+child_35,2026-01-24,3,3,Cognitive,53,High,10,54.4
+child_35,2026-01-20,3,3,Cognitive,56,Medium,10,54.4
+child_35,2026-01-22,3,3,Social Skills,57,Medium,15,54.4
+child_35,2026-01-23,3,3,Social Skills,56,Medium,20,54.4
+child_35,2026-02-01,4,3,Cognitive,57,Low,20,55.5
+child_35,2026-01-26,4,3,Sensory and Motor,55,Low,25,55.5
+child_35,2026-02-08,5,3,Sensory and Motor,59,Low,30,56.0
+child_35,2026-02-03,5,3,Communication,66,High,10,56.0
+child_35,2026-02-05,5,3,Communication,54,Medium,10,56.0
+child_35,2026-02-08,5,3,Communication,55,Low,30,56.0
+child_35,2026-02-14,6,3,Sensory and Motor,59,Low,15,58.5
+child_35,2026-02-10,6,3,Communication,63,High,25,58.5
+child_35,2026-02-10,6,3,Sensory and Motor,57,High,20,58.5
+child_35,2026-02-22,7,3,Cognitive,70,Medium,15,59.67
+child_35,2026-02-18,7,3,Social Skills,77,High,30,59.67
+child_35,2026-02-28,8,3,Social Skills,69,High,15,73.5
+child_35,2026-03-01,8,3,Social Skills,65,High,25,73.5
+child_35,2026-02-24,8,3,Sensory and Motor,70,High,25,73.5
+child_35,2026-02-23,8,3,Communication,65,Medium,15,73.5
+child_35,2026-03-02,9,3,Communication,70,Medium,25,67.25
+child_35,2026-03-05,9,3,Communication,75,Medium,15,67.25
+child_35,2026-03-12,10,3,Sensory and Motor,71,High,20,72.5
+child_35,2026-03-11,10,3,Social Skills,79,Medium,20,72.5
+child_35,2026-03-14,10,3,Cognitive,71,High,30,72.5
+child_35,2026-03-14,10,3,Social Skills,79,High,25,72.5
+child_35,2026-03-16,11,3,Sensory and Motor,76,High,15,75.0
+child_35,2026-03-17,11,3,Sensory and Motor,79,Medium,30,75.0
+child_35,2026-03-23,12,3,Social Skills,90,High,20,77.5
+child_35,2026-03-29,12,3,Communication,84,High,25,77.5
+child_35,2026-03-28,12,3,Sensory and Motor,86,High,30,77.5
+child_36,2026-01-08,1,3,Communication,45,Medium,30,42.0
+child_36,2026-01-08,1,3,Social Skills,42,Medium,30,42.0
+child_36,2026-01-17,2,3,Social Skills,48,High,30,43.5
+child_36,2026-01-17,2,3,Social Skills,41,Low,20,43.5
+child_36,2026-01-18,2,3,Communication,50,Medium,25,43.5
+child_36,2026-01-13,2,3,Communication,44,Low,10,43.5
+child_36,2026-01-22,3,3,Communication,41,Low,25,45.75
+child_36,2026-01-21,3,3,Cognitive,46,High,30,45.75
+child_36,2026-01-25,3,3,Cognitive,45,Medium,30,45.75
+child_36,2026-01-31,4,3,Social Skills,56,Medium,15,44.0
+child_36,2026-01-30,4,3,Cognitive,49,Low,25,44.0
+child_36,2026-01-27,4,3,Social Skills,56,High,10,44.0
+child_36,2026-01-29,4,3,Social Skills,50,Medium,10,44.0
+child_36,2026-01-30,4,3,Communication,45,High,25,44.0
+child_36,2026-02-02,5,3,Communication,60,High,15,51.2
+child_36,2026-02-04,5,3,Communication,52,Medium,25,51.2
+child_36,2026-02-08,5,3,Cognitive,57,Low,15,51.2
+child_36,2026-02-02,5,3,Social Skills,56,Medium,15,51.2
+child_36,2026-02-09,6,3,Sensory and Motor,55,Low,30,56.25
+child_36,2026-02-09,6,3,Cognitive,60,High,20,56.25
+child_36,2026-02-11,6,3,Social Skills,54,Medium,25,56.25
+child_36,2026-02-15,6,3,Social Skills,60,Medium,25,56.25
+child_36,2026-02-15,6,3,Communication,61,High,20,56.25
+child_36,2026-02-19,7,3,Cognitive,61,High,10,58.0
+child_36,2026-02-21,7,3,Social Skills,64,Medium,10,58.0
+child_36,2026-02-21,7,3,Communication,66,High,20,58.0
+child_36,2026-02-21,7,3,Social Skills,61,High,10,58.0
+child_36,2026-02-20,7,3,Social Skills,54,High,30,58.0
+child_36,2026-02-23,8,3,Social Skills,62,High,30,61.2
+child_36,2026-02-23,8,3,Cognitive,63,High,30,61.2
+child_36,2026-03-05,9,3,Cognitive,68,High,10,62.5
+child_36,2026-03-08,9,3,Communication,69,Low,25,62.5
+child_36,2026-03-08,9,3,Cognitive,64,High,20,62.5
+child_36,2026-03-04,9,3,Sensory and Motor,75,High,15,62.5
+child_36,2026-03-15,10,3,Sensory and Motor,73,Medium,15,69.0
+child_36,2026-03-12,10,3,Communication,67,Medium,15,69.0
+child_36,2026-03-14,10,3,Cognitive,66,Low,20,69.0
+child_36,2026-03-09,10,3,Cognitive,65,Medium,20,69.0
+child_36,2026-03-16,11,3,Social Skills,75,Medium,15,67.75
+child_36,2026-03-19,11,3,Communication,66,Low,20,67.75
+child_36,2026-03-23,12,3,Cognitive,73,High,10,70.5
+child_36,2026-03-28,12,3,Communication,74,High,30,70.5
+child_36,2026-03-24,12,3,Sensory and Motor,82,High,15,70.5
+child_36,2026-03-27,12,3,Social Skills,72,High,30,70.5
+child_36,2026-03-29,12,3,Social Skills,74,Medium,20,70.5
+child_37,2026-01-09,1,1,Sensory and Motor,64,Medium,30,61.0
+child_37,2026-01-10,1,1,Communication,64,Low,10,61.0
+child_37,2026-01-08,1,1,Sensory and Motor,64,High,25,61.0
+child_37,2026-01-11,1,1,Sensory and Motor,67,High,15,61.0
+child_37,2026-01-05,1,1,Communication,67,Low,20,61.0
+child_37,2026-01-18,2,1,Sensory and Motor,71,Medium,30,65.2
+child_37,2026-01-15,2,1,Sensory and Motor,68,Medium,20,65.2
+child_37,2026-01-21,3,1,Sensory and Motor,75,Medium,20,69.5
+child_37,2026-01-20,3,1,Communication,65,Low,15,69.5
+child_37,2026-01-23,3,1,Communication,72,High,10,69.5
+child_37,2026-01-24,3,1,Cognitive,73,High,25,69.5
+child_37,2026-01-23,3,1,Communication,75,Medium,10,69.5
+child_37,2026-01-31,4,1,Sensory and Motor,82,High,30,72.0
+child_37,2026-01-29,4,1,Communication,82,Medium,10,72.0
+child_37,2026-01-29,4,1,Communication,72,Medium,15,72.0
+child_37,2026-02-01,4,1,Social Skills,76,High,20,72.0
+child_37,2026-01-26,4,1,Social Skills,76,High,15,72.0
+child_37,2026-02-02,5,1,Social Skills,73,High,25,77.6
+child_37,2026-02-02,5,1,Sensory and Motor,81,High,10,77.6
+child_37,2026-02-06,5,1,Social Skills,85,High,25,77.6
+child_37,2026-02-06,5,1,Social Skills,80,High,30,77.6
+child_37,2026-02-14,6,1,Sensory and Motor,86,Medium,15,79.75
+child_37,2026-02-13,6,1,Social Skills,85,High,20,79.75
+child_37,2026-02-15,6,1,Sensory and Motor,73,High,10,79.75
+child_37,2026-02-16,7,1,Sensory and Motor,88,High,10,81.33
+child_37,2026-02-19,7,1,Communication,81,High,20,81.33
+child_37,2026-02-21,7,1,Social Skills,78,High,10,81.33
+child_37,2026-02-16,7,1,Cognitive,82,High,25,81.33
+child_37,2026-02-18,7,1,Communication,86,Medium,30,81.33
+child_37,2026-02-28,8,1,Social Skills,87,High,10,83.0
+child_37,2026-02-24,8,1,Communication,89,High,10,83.0
+child_37,2026-02-26,8,1,Sensory and Motor,90,High,10,83.0
+child_37,2026-03-02,9,1,Social Skills,81,Medium,20,88.67
+child_37,2026-03-02,9,1,Cognitive,92,High,30,88.67
+child_37,2026-03-08,9,1,Communication,94,Medium,10,88.67
+child_37,2026-03-11,10,1,Social Skills,97,High,10,89.0
+child_37,2026-03-09,10,1,Cognitive,98,High,30,89.0
+child_37,2026-03-09,10,1,Communication,92,Medium,10,89.0
+child_37,2026-03-11,10,1,Social Skills,97,High,25,89.0
+child_37,2026-03-15,10,1,Communication,91,High,30,89.0
+child_37,2026-03-22,11,1,Communication,92,Medium,20,95.0
+child_37,2026-03-19,11,1,Social Skills,99,High,20,95.0
+child_37,2026-03-16,11,1,Social Skills,100,Medium,30,95.0
+child_37,2026-03-20,11,1,Sensory and Motor,100,Medium,30,95.0
+child_37,2026-03-18,11,1,Social Skills,91,High,15,95.0
+child_37,2026-03-23,12,1,Cognitive,100,Medium,20,96.4
+child_37,2026-03-27,12,1,Social Skills,100,High,30,96.4
+child_38,2026-01-09,1,1,Sensory and Motor,64,Medium,20,64.0
+child_38,2026-01-05,1,1,Social Skills,60,Low,10,64.0
+child_38,2026-01-09,1,1,Cognitive,65,High,10,64.0
+child_38,2026-01-07,1,1,Sensory and Motor,66,Low,10,64.0
+child_38,2026-01-17,2,1,Sensory and Motor,70,High,25,63.75
+child_38,2026-01-18,2,1,Cognitive,58,High,20,63.75
+child_38,2026-01-14,2,1,Cognitive,62,Low,10,63.75
+child_38,2026-01-18,2,1,Social Skills,71,Medium,15,63.75
+child_38,2026-01-15,2,1,Social Skills,65,High,15,63.75
+child_38,2026-01-25,3,1,Sensory and Motor,70,Medium,10,65.2
+child_38,2026-01-19,3,1,Communication,67,Low,20,65.2
+child_38,2026-01-23,3,1,Sensory and Motor,73,Medium,30,65.2
+child_38,2026-01-19,3,1,Social Skills,72,Medium,15,65.2
+child_38,2026-01-28,4,1,Social Skills,72,High,15,70.5
+child_38,2026-01-27,4,1,Sensory and Motor,69,Low,15,70.5
+child_38,2026-01-26,4,1,Sensory and Motor,78,High,10,70.5
+child_38,2026-02-05,5,1,Sensory and Motor,77,Medium,20,73.0
+child_38,2026-02-07,5,1,Communication,78,High,25,73.0
+child_38,2026-02-02,5,1,Social Skills,80,Medium,15,73.0
+child_38,2026-02-03,5,1,Cognitive,70,High,30,73.0
+child_38,2026-02-09,6,1,Social Skills,79,High,30,76.25
+child_38,2026-02-15,6,1,Communication,73,High,15,76.25
+child_38,2026-02-14,6,1,Cognitive,78,High,15,76.25
+child_38,2026-02-22,7,1,Cognitive,76,Medium,15,76.67
+child_38,2026-02-22,7,1,Sensory and Motor,83,High,30,76.67
+child_38,2026-02-24,8,1,Cognitive,83,High,25,79.5
+child_38,2026-02-26,8,1,Cognitive,88,High,30,79.5
+child_38,2026-02-28,8,1,Social Skills,89,Medium,15,79.5
+child_38,2026-02-24,8,1,Cognitive,82,High,15,79.5
+child_38,2026-02-24,8,1,Sensory and Motor,82,High,15,79.5
+child_38,2026-03-03,9,1,Cognitive,95,Medium,20,84.8
+child_38,2026-03-06,9,1,Sensory and Motor,84,High,30,84.8
+child_38,2026-03-12,10,1,Cognitive,94,High,20,89.5
+child_38,2026-03-11,10,1,Sensory and Motor,89,High,15,89.5
+child_38,2026-03-14,10,1,Communication,90,Medium,20,89.5
+child_38,2026-03-11,10,1,Sensory and Motor,92,High,10,89.5
+child_38,2026-03-10,10,1,Communication,86,Medium,10,89.5
+child_38,2026-03-18,11,1,Social Skills,93,High,20,90.2
+child_38,2026-03-21,11,1,Sensory and Motor,95,High,15,90.2
+child_38,2026-03-16,11,1,Cognitive,92,High,25,90.2
+child_38,2026-03-26,12,1,Social Skills,92,High,30,93.33
+child_38,2026-03-29,12,1,Cognitive,93,High,15,93.33
+child_39,2026-01-10,1,2,Communication,43,Low,20,42.0
+child_39,2026-01-07,1,2,Social Skills,43,Medium,25,42.0
+child_39,2026-01-08,1,2,Communication,37,Low,30,42.0
+child_39,2026-01-07,1,2,Cognitive,46,Medium,10,42.0
+child_39,2026-01-11,1,2,Sensory and Motor,47,High,20,42.0
+child_39,2026-01-17,2,2,Sensory and Motor,41,Medium,30,43.2
+child_39,2026-01-14,2,2,Communication,34,Medium,10,43.2
+child_39,2026-01-13,2,2,Cognitive,46,Medium,30,43.2
+child_39,2026-01-15,2,2,Communication,49,Low,25,43.2
+child_39,2026-01-16,2,2,Cognitive,37,Low,30,43.2
+child_39,2026-01-19,3,2,Social Skills,44,Low,10,41.4
+child_39,2026-01-19,3,2,Social Skills,43,Low,15,41.4
+child_39,2026-01-19,3,2,Social Skills,36,Low,20,41.4
+child_39,2026-01-20,3,2,Sensory and Motor,39,Low,10,41.4
+child_39,2026-01-28,4,2,Social Skills,45,Medium,25,40.5
+child_39,2026-01-26,4,2,Cognitive,44,Medium,10,40.5
+child_39,2026-02-01,4,2,Social Skills,44,Low,15,40.5
+child_39,2026-02-03,5,2,Cognitive,33,Medium,15,44.33
+child_39,2026-02-04,5,2,Social Skills,35,Low,10,44.33
+child_39,2026-02-05,5,2,Sensory and Motor,44,Low,30,44.33
+child_39,2026-02-06,5,2,Cognitive,42,Low,25,44.33
+child_39,2026-02-06,5,2,Sensory and Motor,42,Medium,25,44.33
+child_39,2026-02-12,6,2,Cognitive,41,Medium,15,39.2
+child_39,2026-02-10,6,2,Cognitive,43,Low,25,39.2
+child_39,2026-02-14,6,2,Communication,46,Low,30,39.2
+child_39,2026-02-12,6,2,Sensory and Motor,40,Low,20,39.2
+child_39,2026-02-21,7,2,Cognitive,40,Medium,15,42.5
+child_39,2026-02-19,7,2,Communication,46,Medium,10,42.5
+child_39,2026-02-26,8,2,Sensory and Motor,41,Low,15,43.0
+child_39,2026-02-24,8,2,Cognitive,37,Low,25,43.0
+child_39,2026-02-25,8,2,Social Skills,41,Medium,25,43.0
+child_39,2026-02-26,8,2,Sensory and Motor,44,Medium,15,43.0
+child_39,2026-03-05,9,2,Communication,42,Low,10,40.75
+child_39,2026-03-06,9,2,Cognitive,38,Low,15,40.75
+child_39,2026-03-08,9,2,Social Skills,36,Low,15,40.75
+child_39,2026-03-08,9,2,Cognitive,43,Low,10,40.75
+child_39,2026-03-03,9,2,Sensory and Motor,42,Low,10,40.75
+child_39,2026-03-10,10,2,Social Skills,41,Medium,30,40.2
+child_39,2026-03-12,10,2,Communication,42,Medium,10,40.2
+child_39,2026-03-12,10,2,Communication,39,Medium,10,40.2
+child_39,2026-03-15,10,2,Social Skills,37,Low,15,40.2
+child_39,2026-03-17,11,2,Social Skills,44,Low,20,39.75
+child_39,2026-03-21,11,2,Social Skills,43,Medium,10,39.75
+child_39,2026-03-16,11,2,Communication,43,Low,15,39.75
+child_39,2026-03-29,12,2,Social Skills,33,Low,20,43.33
+child_39,2026-03-27,12,2,Social Skills,42,Low,10,43.33
+child_40,2026-01-07,1,1,Cognitive,47,Low,10,43.0
+child_40,2026-01-10,1,1,Communication,40,Low,15,43.0
+child_40,2026-01-10,1,1,Sensory and Motor,46,Medium,30,43.0
+child_40,2026-01-05,1,1,Cognitive,44,Low,30,43.0
+child_40,2026-01-17,2,1,Social Skills,44,Medium,30,44.25
+child_40,2026-01-14,2,1,Social Skills,48,High,25,44.25
+child_40,2026-01-25,3,1,Communication,41,Medium,25,46.0
+child_40,2026-01-21,3,1,Social Skills,51,Medium,25,46.0
+child_40,2026-01-23,3,1,Social Skills,44,Medium,10,46.0
+child_40,2026-01-19,3,1,Cognitive,36,Low,15,46.0
+child_40,2026-01-26,4,1,Cognitive,37,Low,20,43.0
+child_40,2026-01-28,4,1,Social Skills,44,Medium,10,43.0
+child_40,2026-02-07,5,1,Sensory and Motor,48,Medium,15,40.5
+child_40,2026-02-04,5,1,Sensory and Motor,40,Medium,25,40.5
+child_40,2026-02-08,5,1,Sensory and Motor,39,Low,15,40.5
+child_40,2026-02-04,5,1,Social Skills,44,Medium,15,40.5
+child_40,2026-02-06,5,1,Sensory and Motor,49,Medium,30,40.5
+child_40,2026-02-09,6,1,Social Skills,44,Low,10,44.0
+child_40,2026-02-10,6,1,Social Skills,42,Low,10,44.0
+child_40,2026-02-17,7,1,Social Skills,39,Low,20,43.0
+child_40,2026-02-21,7,1,Cognitive,43,Low,15,43.0
+child_40,2026-02-17,7,1,Social Skills,41,Medium,25,43.0
+child_40,2026-02-23,8,1,Cognitive,41,Low,25,41.0
+child_40,2026-02-24,8,1,Social Skills,39,Medium,25,41.0
+child_40,2026-03-01,8,1,Cognitive,44,Low,10,41.0
+child_40,2026-02-26,8,1,Social Skills,47,Medium,30,41.0
+child_40,2026-02-27,8,1,Sensory and Motor,38,Medium,15,41.0
+child_40,2026-03-05,9,1,Sensory and Motor,42,Low,10,41.8
+child_40,2026-03-03,9,1,Social Skills,48,High,25,41.8
+child_40,2026-03-03,9,1,Cognitive,43,Medium,20,41.8
+child_40,2026-03-05,9,1,Sensory and Motor,43,Low,25,41.8
+child_40,2026-03-14,10,1,Cognitive,44,Low,10,44.0
+child_40,2026-03-13,10,1,Cognitive,42,Low,15,44.0
+child_40,2026-03-11,10,1,Cognitive,43,Low,30,44.0
+child_40,2026-03-14,10,1,Communication,36,Medium,20,44.0
+child_40,2026-03-21,11,1,Social Skills,43,Low,10,41.25
+child_40,2026-03-18,11,1,Social Skills,47,High,25,41.25
+child_40,2026-03-18,11,1,Communication,43,Medium,15,41.25
+child_40,2026-03-16,11,1,Cognitive,48,Low,25,41.25
+child_40,2026-03-21,11,1,Cognitive,35,Medium,15,41.25
+child_40,2026-03-25,12,1,Cognitive,38,Medium,20,43.2
+child_40,2026-03-27,12,1,Communication,41,Medium,10,43.2
+child_40,2026-03-28,12,1,Social Skills,46,High,20,43.2
+child_40,2026-03-25,12,1,Communication,42,Low,20,43.2
+child_40,2026-03-24,12,1,Communication,33,Low,10,43.2
+child_41,2026-01-09,1,2,Social Skills,44,Low,15,48.0
+child_41,2026-01-07,1,2,Social Skills,48,Low,15,48.0
+child_41,2026-01-08,1,2,Social Skills,51,Medium,30,48.0
+child_41,2026-01-06,1,2,Social Skills,56,Low,10,48.0
+child_41,2026-01-11,1,2,Communication,47,Medium,25,48.0
+child_41,2026-01-12,2,2,Cognitive,44,Low,10,49.2
+child_41,2026-01-12,2,2,Cognitive,47,High,15,49.2
+child_41,2026-01-15,2,2,Communication,51,High,10,49.2
+child_41,2026-01-24,3,2,Communication,36,Low,15,47.33
+child_41,2026-01-22,3,2,Sensory and Motor,41,Medium,30,47.33
+child_41,2026-02-01,4,2,Sensory and Motor,45,Medium,20,38.5
+child_41,2026-02-01,4,2,Cognitive,51,Low,20,38.5
+child_41,2026-01-29,4,2,Communication,39,Low,10,38.5
+child_41,2026-01-29,4,2,Social Skills,40,Medium,25,38.5
+child_41,2026-01-26,4,2,Sensory and Motor,41,Low,15,38.5
+child_41,2026-02-06,5,2,Communication,42,Low,15,43.2
+child_41,2026-02-07,5,2,Communication,54,Low,20,43.2
+child_41,2026-02-08,5,2,Cognitive,45,High,20,43.2
+child_41,2026-02-03,5,2,Sensory and Motor,44,Medium,10,43.2
+child_41,2026-02-05,5,2,Cognitive,45,Medium,10,43.2
+child_41,2026-02-14,6,2,Communication,50,High,30,46.0
+child_41,2026-02-10,6,2,Sensory and Motor,51,Medium,10,46.0
+child_41,2026-02-15,6,2,Cognitive,45,Medium,15,46.0
+child_41,2026-02-21,7,2,Social Skills,43,Medium,15,48.67
+child_41,2026-02-17,7,2,Communication,52,High,10,48.67
+child_41,2026-02-19,7,2,Social Skills,56,High,10,48.67
+child_41,2026-02-18,7,2,Cognitive,53,Low,20,48.67
+child_41,2026-02-21,7,2,Cognitive,44,Low,15,48.67
+child_41,2026-03-01,8,2,Sensory and Motor,48,High,10,49.6
+child_41,2026-02-26,8,2,Cognitive,52,High,25,49.6
+child_41,2026-03-01,8,2,Communication,47,Medium,10,49.6
+child_41,2026-02-23,8,2,Social Skills,50,Medium,30,49.6
+child_41,2026-03-06,9,2,Communication,42,Low,30,49.25
+child_41,2026-03-04,9,2,Social Skills,53,Low,30,49.25
+child_41,2026-03-11,10,2,Social Skills,49,Low,30,47.5
+child_41,2026-03-09,10,2,Cognitive,41,Low,10,47.5
+child_41,2026-03-11,10,2,Cognitive,54,Low,25,47.5
+child_41,2026-03-10,10,2,Social Skills,56,High,20,47.5
+child_41,2026-03-14,10,2,Sensory and Motor,44,Medium,10,47.5
+child_41,2026-03-18,11,2,Cognitive,42,Medium,30,48.8
+child_41,2026-03-21,11,2,Communication,50,High,25,48.8
+child_41,2026-03-24,12,2,Social Skills,45,High,15,46.0
+child_41,2026-03-28,12,2,Cognitive,48,Low,25,46.0
+child_41,2026-03-25,12,2,Communication,40,Medium,15,46.0
+child_41,2026-03-27,12,2,Cognitive,45,Medium,20,46.0
+child_42,2026-01-07,1,2,Cognitive,62,High,15,60.0
+child_42,2026-01-05,1,2,Sensory and Motor,64,High,10,60.0
+child_42,2026-01-08,1,2,Social Skills,64,High,15,60.0
+child_42,2026-01-08,1,2,Social Skills,58,Low,15,60.0
+child_42,2026-01-17,2,2,Sensory and Motor,57,High,10,62.0
+child_42,2026-01-17,2,2,Cognitive,61,Low,25,62.0
+child_42,2026-01-17,2,2,Communication,58,Low,10,62.0
+child_42,2026-01-20,3,2,Cognitive,61,High,20,58.67
+child_42,2026-01-20,3,2,Social Skills,59,High,25,58.67
+child_42,2026-01-19,3,2,Social Skills,63,Medium,30,58.67
+child_42,2026-01-24,3,2,Communication,62,High,25,58.67
+child_42,2026-01-25,3,2,Cognitive,52,Medium,20,58.67
+child_42,2026-01-26,4,2,Cognitive,61,Low,10,59.4
+child_42,2026-01-31,4,2,Cognitive,57,Low,30,59.4
+child_42,2026-02-08,5,2,Cognitive,55,High,15,59.0
+child_42,2026-02-05,5,2,Social Skills,65,Medium,30,59.0
+child_42,2026-02-14,6,2,Cognitive,58,High,15,60.0
+child_42,2026-02-15,6,2,Cognitive,57,High,30,60.0
+child_42,2026-02-22,7,2,Social Skills,53,Low,10,57.5
+child_42,2026-02-22,7,2,Sensory and Motor,55,High,25,57.5
+child_42,2026-02-27,8,2,Communication,55,Low,15,54.0
+child_42,2026-02-27,8,2,Sensory and Motor,56,Low,10,54.0
+child_42,2026-02-25,8,2,Cognitive,63,High,15,54.0
+child_42,2026-03-03,9,2,Cognitive,54,High,20,58.0
+child_42,2026-03-03,9,2,Sensory and Motor,67,High,25,58.0
+child_42,2026-03-13,10,2,Social Skills,55,Low,10,60.5
+child_42,2026-03-09,10,2,Sensory and Motor,57,Low,15,60.5
+child_42,2026-03-15,10,2,Social Skills,62,High,30,60.5
+child_42,2026-03-13,10,2,Social Skills,49,Medium,20,60.5
+child_42,2026-03-16,11,2,Cognitive,55,High,15,55.75
+child_42,2026-03-19,11,2,Cognitive,57,Low,20,55.75
+child_42,2026-03-21,11,2,Social Skills,60,High,20,55.75
+child_42,2026-03-21,11,2,Social Skills,60,Medium,30,55.75
+child_42,2026-03-19,11,2,Communication,59,Medium,25,55.75
+child_42,2026-03-23,12,2,Communication,56,Medium,10,58.2
+child_42,2026-03-28,12,2,Sensory and Motor,57,High,10,58.2
+child_42,2026-03-25,12,2,Social Skills,58,Medium,15,58.2
+child_43,2026-01-08,1,2,Social Skills,47,Low,10,45.0
+child_43,2026-01-09,1,2,Cognitive,44,Medium,20,45.0
+child_43,2026-01-17,2,2,Communication,40,Low,30,45.5
+child_43,2026-01-12,2,2,Cognitive,42,Low,20,45.5
+child_43,2026-01-13,2,2,Cognitive,40,Medium,30,45.5
+child_43,2026-01-15,2,2,Sensory and Motor,49,High,15,45.5
+child_43,2026-01-24,3,2,Communication,45,High,20,42.75
+child_43,2026-01-24,3,2,Social Skills,45,High,20,42.75
+child_43,2026-01-24,3,2,Sensory and Motor,37,Low,25,42.75
+child_43,2026-01-28,4,2,Social Skills,39,Low,30,42.33
+child_43,2026-01-28,4,2,Sensory and Motor,42,Low,25,42.33
+child_43,2026-02-01,4,2,Communication,42,Low,10,42.33
+child_43,2026-01-31,4,2,Communication,43,Medium,10,42.33
+child_43,2026-02-08,5,2,Social Skills,45,Low,25,41.5
+child_43,2026-02-05,5,2,Communication,37,Medium,30,41.5
+child_43,2026-02-05,5,2,Social Skills,43,Low,30,41.5
+child_43,2026-02-08,5,2,Sensory and Motor,43,Medium,30,41.5
+child_43,2026-02-03,5,2,Communication,37,Medium,30,41.5
+child_43,2026-02-14,6,2,Communication,50,Low,15,41.0
+child_43,2026-02-11,6,2,Sensory and Motor,41,Low,30,41.0
+child_43,2026-02-09,6,2,Sensory and Motor,40,Low,10,41.0
+child_43,2026-02-22,7,2,Sensory and Motor,46,High,10,43.67
+child_43,2026-02-18,7,2,Cognitive,41,Low,30,43.67
+child_43,2026-02-17,7,2,Communication,45,Medium,30,43.67
+child_43,2026-02-23,8,2,Sensory and Motor,42,Low,20,44.0
+child_43,2026-02-23,8,2,Social Skills,50,Low,20,44.0
+child_43,2026-02-26,8,2,Communication,44,Low,15,44.0
+child_43,2026-02-27,8,2,Cognitive,47,High,15,44.0
+child_43,2026-02-23,8,2,Social Skills,46,High,20,44.0
+child_43,2026-03-04,9,2,Social Skills,45,Medium,25,45.8
+child_43,2026-03-06,9,2,Social Skills,46,Medium,25,45.8
+child_43,2026-03-03,9,2,Communication,43,Low,25,45.8
+child_43,2026-03-04,9,2,Sensory and Motor,50,Low,15,45.8
+child_43,2026-03-12,10,2,Communication,40,Medium,20,46.0
+child_43,2026-03-10,10,2,Communication,39,Medium,20,46.0
+child_43,2026-03-12,10,2,Cognitive,36,Low,30,46.0
+child_43,2026-03-15,10,2,Cognitive,43,Low,30,46.0
+child_43,2026-03-10,10,2,Communication,42,Low,10,46.0
+child_43,2026-03-20,11,2,Cognitive,50,Low,20,40.0
+child_43,2026-03-20,11,2,Cognitive,44,Medium,10,40.0
+child_43,2026-03-19,11,2,Social Skills,42,Low,15,40.0
+child_43,2026-03-21,11,2,Social Skills,48,High,15,40.0
+child_43,2026-03-29,12,2,Social Skills,43,Medium,25,46.0
+child_43,2026-03-26,12,2,Social Skills,49,High,10,46.0
+child_44,2026-01-06,1,2,Social Skills,53,Medium,15,51.0
+child_44,2026-01-08,1,2,Social Skills,53,Low,30,51.0
+child_44,2026-01-05,1,2,Social Skills,52,High,20,51.0
+child_44,2026-01-15,2,2,Cognitive,46,Low,30,52.67
+child_44,2026-01-17,2,2,Sensory and Motor,51,Medium,20,52.67
+child_44,2026-01-17,2,2,Sensory and Motor,50,Medium,15,52.67
+child_44,2026-01-12,2,2,Social Skills,49,High,20,52.67
+child_44,2026-01-14,2,2,Communication,49,Medium,20,52.67
+child_44,2026-01-22,3,2,Social Skills,47,Low,10,49.0
+child_44,2026-01-21,3,2,Sensory and Motor,52,Medium,20,49.0
+child_44,2026-01-20,3,2,Communication,48,Medium,10,49.0
+child_44,2026-01-20,3,2,Communication,47,High,30,49.0
+child_44,2026-01-27,4,2,Sensory and Motor,46,Low,30,48.5
+child_44,2026-01-28,4,2,Social Skills,40,Medium,25,48.5
+child_44,2026-01-30,4,2,Sensory and Motor,48,Low,25,48.5
+child_44,2026-02-04,5,2,Cognitive,48,Medium,10,44.67
+child_44,2026-02-02,5,2,Social Skills,44,Medium,10,44.67
+child_44,2026-02-06,5,2,Sensory and Motor,50,Medium,15,44.67
+child_44,2026-02-02,5,2,Cognitive,50,High,15,44.67
+child_44,2026-02-10,6,2,Cognitive,49,Medium,30,48.0
+child_44,2026-02-13,6,2,Social Skills,50,Medium,15,48.0
+child_44,2026-02-20,7,2,Cognitive,44,Medium,10,49.5
+child_44,2026-02-20,7,2,Sensory and Motor,47,Medium,15,49.5
+child_44,2026-02-21,7,2,Communication,43,Low,30,49.5
+child_44,2026-02-27,8,2,Social Skills,47,Low,20,44.67
+child_44,2026-02-25,8,2,Social Skills,49,Low,15,44.67
+child_44,2026-03-07,9,2,Communication,44,Low,20,48.0
+child_44,2026-03-07,9,2,Social Skills,52,High,20,48.0
+child_44,2026-03-11,10,2,Social Skills,53,Low,20,48.0
+child_44,2026-03-14,10,2,Sensory and Motor,47,Medium,15,48.0
+child_44,2026-03-09,10,2,Cognitive,36,Medium,10,48.0
+child_44,2026-03-14,10,2,Social Skills,45,Medium,30,48.0
+child_44,2026-03-18,11,2,Cognitive,47,Medium,15,45.25
+child_44,2026-03-17,11,2,Sensory and Motor,53,High,25,45.25
+child_44,2026-03-17,11,2,Social Skills,49,Low,25,45.25
+child_44,2026-03-24,12,2,Social Skills,48,High,25,49.67
+child_44,2026-03-28,12,2,Social Skills,48,Low,25,49.67
+child_44,2026-03-23,12,2,Cognitive,52,Low,10,49.67
+child_45,2026-01-05,1,1,Communication,60,Low,30,61.0
+child_45,2026-01-08,1,1,Communication,58,Medium,10,61.0
+child_45,2026-01-11,1,1,Social Skills,67,Low,15,61.0
+child_45,2026-01-11,1,1,Social Skills,61,Low,20,61.0
+child_45,2026-01-10,1,1,Sensory and Motor,54,Low,10,61.0
+child_45,2026-01-13,2,1,Cognitive,57,Low,25,60.0
+child_45,2026-01-18,2,1,Communication,63,Low,15,60.0
+child_45,2026-01-24,3,1,Communication,64,High,10,60.0
+child_45,2026-01-25,3,1,Cognitive,66,Low,30,60.0
+child_45,2026-01-20,3,1,Communication,62,Low,15,60.0
+child_45,2026-01-20,3,1,Social Skills,59,High,20,60.0
+child_45,2026-01-31,4,1,Cognitive,63,High,10,62.75
+child_45,2026-01-27,4,1,Communication,64,Medium,20,62.75
+child_45,2026-01-30,4,1,Sensory and Motor,61,Medium,10,62.75
+child_45,2026-01-26,4,1,Sensory and Motor,66,Low,25,62.75
+child_45,2026-01-30,4,1,Social Skills,58,Low,25,62.75
+child_45,2026-02-06,5,1,Cognitive,64,Low,20,62.4
+child_45,2026-02-07,5,1,Communication,59,Medium,20,62.4
+child_45,2026-02-08,5,1,Sensory and Motor,72,Medium,15,62.4
+child_45,2026-02-03,5,1,Cognitive,63,Medium,25,62.4
+child_45,2026-02-13,6,1,Sensory and Motor,57,Low,10,64.5
+child_45,2026-02-10,6,1,Sensory and Motor,66,Low,25,64.5
+child_45,2026-02-19,7,1,Social Skills,61,High,20,61.5
+child_45,2026-02-22,7,1,Cognitive,59,High,15,61.5
+child_45,2026-02-19,7,1,Social Skills,58,Medium,30,61.5
+child_45,2026-02-19,7,1,Cognitive,61,Low,30,61.5
+child_45,2026-02-20,7,1,Communication,57,High,15,61.5
+child_45,2026-02-24,8,1,Cognitive,59,Low,20,59.2
+child_45,2026-02-24,8,1,Social Skills,63,Medium,20,59.2
+child_45,2026-03-08,9,1,Social Skills,61,High,25,61.0
+child_45,2026-03-03,9,1,Social Skills,62,Low,10,61.0
+child_45,2026-03-05,9,1,Cognitive,61,High,10,61.0
+child_45,2026-03-14,10,1,Communication,58,High,15,61.33
+child_45,2026-03-10,10,1,Communication,59,Medium,15,61.33
+child_45,2026-03-20,11,1,Social Skills,63,Low,25,58.5
+child_45,2026-03-21,11,1,Cognitive,57,High,20,58.5
+child_45,2026-03-26,12,1,Social Skills,62,Medium,10,60.0
+child_45,2026-03-23,12,1,Social Skills,55,High,10,60.0
+child_45,2026-03-27,12,1,Sensory and Motor,63,Medium,25,60.0
+child_45,2026-03-27,12,1,Social Skills,64,High,20,60.0
+child_46,2026-01-07,1,2,Cognitive,67,Low,15,62.0
+child_46,2026-01-09,1,2,Cognitive,61,Low,15,62.0
+child_46,2026-01-06,1,2,Cognitive,67,High,10,62.0
+child_46,2026-01-18,2,2,Communication,52,Medium,15,65.0
+child_46,2026-01-18,2,2,Communication,59,Medium,10,65.0
+child_46,2026-01-12,2,2,Sensory and Motor,65,Medium,30,65.0
+child_46,2026-01-12,2,2,Social Skills,62,Low,10,65.0
+child_46,2026-01-16,2,2,Social Skills,65,Low,20,65.0
+child_46,2026-01-20,3,2,Cognitive,62,High,10,60.6
+child_46,2026-01-19,3,2,Communication,74,Medium,20,60.6
+child_46,2026-01-28,4,2,Sensory and Motor,61,High,15,68.0
+child_46,2026-02-01,4,2,Social Skills,51,Medium,20,68.0
+child_46,2026-02-04,5,2,Social Skills,53,Low,30,56.0
+child_46,2026-02-02,5,2,Cognitive,62,High,25,56.0
+child_46,2026-02-11,6,2,Social Skills,58,Low,10,57.5
+child_46,2026-02-10,6,2,Social Skills,60,High,15,57.5
+child_46,2026-02-19,7,2,Cognitive,54,Medium,30,59.0
+child_46,2026-02-16,7,2,Social Skills,49,High,25,59.0
+child_46,2026-02-17,7,2,Cognitive,58,Low,30,59.0
+child_46,2026-02-16,7,2,Sensory and Motor,53,Low,15,59.0
+child_46,2026-02-26,8,2,Communication,60,Medium,15,53.5
+child_46,2026-02-25,8,2,Sensory and Motor,59,High,20,53.5
+child_46,2026-03-07,9,2,Cognitive,61,Medium,20,59.5
+child_46,2026-03-07,9,2,Cognitive,58,Low,10,59.5
+child_46,2026-03-02,9,2,Social Skills,58,Medium,30,59.5
+child_46,2026-03-11,10,2,Cognitive,67,Low,25,59.0
+child_46,2026-03-11,10,2,Communication,74,Medium,30,59.0
+child_46,2026-03-14,10,2,Communication,56,Low,30,59.0
+child_46,2026-03-10,10,2,Cognitive,67,Low,30,59.0
+child_46,2026-03-19,11,2,Sensory and Motor,67,Medium,10,66.0
+child_46,2026-03-19,11,2,Communication,65,Medium,10,66.0
+child_46,2026-03-17,11,2,Cognitive,71,High,10,66.0
+child_46,2026-03-26,12,2,Social Skills,73,High,25,67.67
+child_46,2026-03-28,12,2,Communication,78,High,25,67.67
+child_46,2026-03-25,12,2,Social Skills,70,High,15,67.67
+child_47,2026-01-09,1,3,Sensory and Motor,61,Medium,10,60.0
+child_47,2026-01-11,1,3,Communication,56,Low,15,60.0
+child_47,2026-01-14,2,3,Communication,63,Medium,15,58.5
+child_47,2026-01-13,2,3,Cognitive,65,Medium,25,58.5
+child_47,2026-01-16,2,3,Social Skills,63,Low,20,58.5
+child_47,2026-01-18,2,3,Sensory and Motor,69,Medium,20,58.5
+child_47,2026-01-13,2,3,Cognitive,64,Low,20,58.5
+child_47,2026-01-24,3,3,Communication,53,High,25,64.8
+child_47,2026-01-23,3,3,Communication,65,High,15,64.8
+child_47,2026-01-24,3,3,Communication,59,Medium,20,64.8
+child_47,2026-01-27,4,3,Communication,53,Medium,20,59.0
+child_47,2026-02-01,4,3,Cognitive,61,High,10,59.0
+child_47,2026-02-01,4,3,Communication,57,Low,25,59.0
+child_47,2026-01-26,4,3,Social Skills,60,Medium,30,59.0
+child_47,2026-01-30,4,3,Sensory and Motor,68,Medium,15,59.0
+child_47,2026-02-07,5,3,Sensory and Motor,53,Medium,10,59.8
+child_47,2026-02-04,5,3,Cognitive,53,High,10,59.8
+child_47,2026-02-07,5,3,Cognitive,58,Medium,20,59.8
+child_47,2026-02-09,6,3,Cognitive,50,Low,25,54.67
+child_47,2026-02-11,6,3,Cognitive,53,High,25,54.67
+child_47,2026-02-11,6,3,Sensory and Motor,55,High,25,54.67
+child_47,2026-02-14,6,3,Communication,44,Low,10,54.67
+child_47,2026-02-20,7,3,Cognitive,40,Low,10,50.5
+child_47,2026-02-21,7,3,Communication,46,Low,25,50.5
+child_47,2026-02-24,8,3,Cognitive,41,Low,25,43.0
+child_47,2026-02-23,8,3,Cognitive,52,Low,20,43.0
+child_47,2026-02-26,8,3,Communication,55,High,25,43.0
+child_47,2026-02-25,8,3,Sensory and Motor,52,Medium,20,43.0
+child_47,2026-03-01,8,3,Communication,46,Medium,15,43.0
+child_47,2026-03-02,9,3,Sensory and Motor,58,Medium,30,49.2
+child_47,2026-03-04,9,3,Cognitive,56,Low,30,49.2
+child_47,2026-03-03,9,3,Communication,52,High,25,49.2
+child_47,2026-03-08,9,3,Social Skills,54,High,25,49.2
+child_47,2026-03-07,9,3,Social Skills,51,Medium,20,49.2
+child_47,2026-03-14,10,3,Communication,64,Low,30,54.2
+child_47,2026-03-14,10,3,Social Skills,56,High,20,54.2
+child_47,2026-03-16,11,3,Cognitive,63,Low,10,60.0
+child_47,2026-03-16,11,3,Communication,62,Low,30,60.0
+child_47,2026-03-20,11,3,Social Skills,61,Medium,10,60.0
+child_47,2026-03-24,12,3,Social Skills,71,High,15,62.0
+child_47,2026-03-28,12,3,Communication,79,High,20,62.0
+child_47,2026-03-25,12,3,Communication,73,Medium,30,62.0
+child_47,2026-03-23,12,3,Communication,72,High,30,62.0
+child_48,2026-01-07,1,1,Social Skills,60,Medium,20,59.0
+child_48,2026-01-08,1,1,Communication,57,Low,25,59.0
+child_48,2026-01-08,1,1,Cognitive,67,Low,15,59.0
+child_48,2026-01-08,1,1,Social Skills,63,Medium,25,59.0
+child_48,2026-01-13,2,1,Sensory and Motor,55,Low,10,61.75
+child_48,2026-01-14,2,1,Communication,53,Medium,30,61.75
+child_48,2026-01-19,3,1,Social Skills,58,Low,30,54.0
+child_48,2026-01-20,3,1,Social Skills,59,Medium,10,54.0
+child_48,2026-01-19,3,1,Sensory and Motor,57,High,15,54.0
+child_48,2026-01-21,3,1,Communication,60,Medium,15,54.0
+child_48,2026-01-29,4,1,Social Skills,54,High,25,58.5
+child_48,2026-01-28,4,1,Sensory and Motor,50,Low,15,58.5
+child_48,2026-01-29,4,1,Social Skills,60,High,20,58.5
+child_48,2026-02-01,4,1,Cognitive,59,Low,25,58.5
+child_48,2026-02-06,5,1,Cognitive,52,High,10,55.75
+child_48,2026-02-05,5,1,Sensory and Motor,45,Low,30,55.75
+child_48,2026-02-04,5,1,Communication,58,Medium,15,55.75
+child_48,2026-02-06,5,1,Cognitive,48,Medium,30,55.75
+child_48,2026-02-04,5,1,Cognitive,45,High,20,55.75
+child_48,2026-02-15,6,1,Social Skills,43,Low,25,49.6
+child_48,2026-02-11,6,1,Social Skills,48,Medium,20,49.6
+child_48,2026-02-15,6,1,Communication,50,Medium,10,49.6
+child_48,2026-02-21,7,1,Communication,42,Low,15,47.0
+child_48,2026-02-19,7,1,Social Skills,48,Medium,30,47.0
+child_48,2026-02-27,8,1,Cognitive,47,High,10,45.0
+child_48,2026-02-28,8,1,Sensory and Motor,54,Medium,20,45.0
+child_48,2026-03-08,9,1,Communication,50,Medium,25,50.5
+child_48,2026-03-02,9,1,Sensory and Motor,52,Medium,15,50.5
+child_48,2026-03-13,10,1,Cognitive,57,High,10,51.0
+child_48,2026-03-11,10,1,Communication,56,Low,25,51.0
+child_48,2026-03-13,10,1,Communication,57,High,10,51.0
+child_48,2026-03-21,11,1,Sensory and Motor,60,Medium,20,56.67
+child_48,2026-03-22,11,1,Communication,59,Medium,25,56.67
+child_48,2026-03-19,11,1,Cognitive,62,Medium,25,56.67
+child_48,2026-03-22,11,1,Communication,55,Medium,30,56.67
+child_48,2026-03-16,11,1,Communication,53,Low,10,56.67
+child_48,2026-03-29,12,1,Social Skills,62,Low,10,57.8
+child_48,2026-03-28,12,1,Communication,60,Medium,30,57.8
+child_48,2026-03-28,12,1,Communication,66,Low,10,57.8
+child_48,2026-03-25,12,1,Sensory and Motor,61,Low,20,57.8
+child_49,2026-01-07,1,3,Communication,42,Medium,25,45.0
+child_49,2026-01-06,1,3,Cognitive,37,Low,15,45.0
+child_49,2026-01-10,1,3,Cognitive,43,Medium,15,45.0
+child_49,2026-01-10,1,3,Sensory and Motor,46,Medium,20,45.0
+child_49,2026-01-11,1,3,Communication,45,Medium,20,45.0
+child_49,2026-01-17,2,3,Communication,43,Medium,15,42.6
+child_49,2026-01-12,2,3,Cognitive,47,Low,15,42.6
+child_49,2026-01-18,2,3,Cognitive,45,Medium,15,42.6
+child_49,2026-01-25,3,3,Cognitive,41,Low,20,45.0
+child_49,2026-01-24,3,3,Communication,43,Low,30,45.0
+child_49,2026-01-20,3,3,Social Skills,46,Medium,30,45.0
+child_49,2026-01-26,4,3,Social Skills,46,Medium,25,43.33
+child_49,2026-01-31,4,3,Social Skills,40,Medium,10,43.33
+child_49,2026-01-29,4,3,Social Skills,50,Low,10,43.33
+child_49,2026-02-03,5,3,Sensory and Motor,38,Medium,25,45.33
+child_49,2026-02-04,5,3,Communication,43,Low,30,45.33
+child_49,2026-02-04,5,3,Sensory and Motor,36,Medium,25,45.33
+child_49,2026-02-02,5,3,Sensory and Motor,39,Low,20,45.33
+child_49,2026-02-02,5,3,Sensory and Motor,42,Low,15,45.33
+child_49,2026-02-13,6,3,Cognitive,35,Low,30,39.6
+child_49,2026-02-13,6,3,Communication,29,Medium,15,39.6
+child_49,2026-02-10,6,3,Communication,37,Low,10,39.6
+child_49,2026-02-16,7,3,Cognitive,28,Medium,25,33.67
+child_49,2026-02-19,7,3,Sensory and Motor,31,Low,15,33.67
+child_49,2026-02-19,7,3,Sensory and Motor,33,Low,20,33.67
+child_49,2026-02-24,8,3,Cognitive,43,Medium,30,30.67
+child_49,2026-02-28,8,3,Sensory and Motor,33,Low,15,30.67
+child_49,2026-03-03,9,3,Social Skills,49,Medium,25,38.0
+child_49,2026-03-02,9,3,Sensory and Motor,39,Low,15,38.0
+child_49,2026-03-02,9,3,Sensory and Motor,37,Low,10,38.0
+child_49,2026-03-12,10,3,Sensory and Motor,49,Low,10,41.67
+child_49,2026-03-15,10,3,Social Skills,43,Low,30,41.67
+child_49,2026-03-16,11,3,Sensory and Motor,49,Medium,25,46.0
+child_49,2026-03-20,11,3,Sensory and Motor,57,Medium,25,46.0
+child_49,2026-03-29,12,3,Cognitive,51,High,30,53.0
+child_49,2026-03-23,12,3,Communication,60,Medium,30,53.0
+child_50,2026-01-11,1,3,Communication,65,Medium,25,63.0
+child_50,2026-01-06,1,3,Sensory and Motor,75,High,25,63.0
+child_50,2026-01-06,1,3,Sensory and Motor,62,Medium,10,63.0
+child_50,2026-01-10,1,3,Cognitive,60,High,30,63.0
+child_50,2026-01-09,1,3,Cognitive,66,Medium,20,63.0
+child_50,2026-01-14,2,3,Sensory and Motor,71,Medium,10,65.6
+child_50,2026-01-18,2,3,Sensory and Motor,60,Medium,30,65.6
+child_50,2026-01-14,2,3,Cognitive,60,Low,10,65.6
+child_50,2026-01-17,2,3,Social Skills,67,High,20,65.6
+child_50,2026-01-19,3,3,Cognitive,68,Medium,10,64.5
+child_50,2026-01-19,3,3,Cognitive,65,Low,10,64.5
+child_50,2026-01-21,3,3,Sensory and Motor,70,Medium,25,64.5
+child_50,2026-01-24,3,3,Sensory and Motor,64,Low,20,64.5
+child_50,2026-01-26,4,3,Social Skills,59,High,20,66.75
+child_50,2026-01-31,4,3,Social Skills,62,Low,20,66.75
+child_50,2026-01-26,4,3,Social Skills,66,Medium,20,66.75
+child_50,2026-02-05,5,3,Sensory and Motor,51,Medium,20,62.33
+child_50,2026-02-03,5,3,Sensory and Motor,63,High,25,62.33
+child_50,2026-02-08,5,3,Social Skills,53,Low,20,62.33
+child_50,2026-02-05,5,3,Sensory and Motor,55,High,15,62.33
+child_50,2026-02-04,5,3,Social Skills,63,High,25,62.33
+child_50,2026-02-09,6,3,Cognitive,57,Low,30,57.0
+child_50,2026-02-14,6,3,Cognitive,51,High,20,57.0
+child_50,2026-02-11,6,3,Cognitive,63,Medium,25,57.0
+child_50,2026-02-12,6,3,Communication,46,Low,25,57.0
+child_50,2026-02-15,6,3,Sensory and Motor,57,Low,30,57.0
+child_50,2026-02-17,7,3,Cognitive,46,Medium,10,54.8
+child_50,2026-02-17,7,3,Cognitive,46,Medium,10,54.8
+child_50,2026-02-22,7,3,Communication,52,Low,10,54.8
+child_50,2026-02-18,7,3,Sensory and Motor,47,High,10,54.8
+child_50,2026-02-27,8,3,Communication,53,Low,10,47.75
+child_50,2026-02-28,8,3,Social Skills,57,Low,30,47.75
+child_50,2026-02-27,8,3,Sensory and Motor,56,Low,15,47.75
+child_50,2026-02-28,8,3,Cognitive,52,Medium,10,47.75
+child_50,2026-03-02,9,3,Communication,63,Low,30,54.5
+child_50,2026-03-03,9,3,Cognitive,62,Low,10,54.5
+child_50,2026-03-02,9,3,Sensory and Motor,63,Low,10,54.5
+child_50,2026-03-15,10,3,Sensory and Motor,61,Low,30,62.67
+child_50,2026-03-15,10,3,Communication,62,High,30,62.67
+child_50,2026-03-12,10,3,Social Skills,62,Low,10,62.67
+child_50,2026-03-17,11,3,Cognitive,62,Low,25,61.67
+child_50,2026-03-18,11,3,Cognitive,68,Medium,10,61.67
+child_50,2026-03-18,11,3,Cognitive,66,High,10,61.67
+child_50,2026-03-24,12,3,Cognitive,69,Low,20,65.33
+child_50,2026-03-23,12,3,Cognitive,72,High,10,65.33
+child_50,2026-03-23,12,3,Cognitive,72,High,15,65.33
+child_50,2026-03-28,12,3,Social Skills,72,Medium,20,65.33
+child_50,2026-03-25,12,3,Cognitive,73,High,30,65.33

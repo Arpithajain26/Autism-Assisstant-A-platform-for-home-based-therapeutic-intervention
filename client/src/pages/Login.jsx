@@ -40,7 +40,7 @@ const Login = () => {
           }}>🧩</div>
           <h1 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '4px' }}>Welcome Back</h1>
           <p style={{ color: 'var(--text-light)', fontSize: '0.95rem' }}>
-            Log in to your parent dashboard
+            Log in to your account
           </p>
         </div>
 
@@ -72,7 +72,7 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>
+            <label htmlFor="login-email" style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>
               Email Address
             </label>
             <input
@@ -87,7 +87,7 @@ const Login = () => {
             />
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>
+            <label htmlFor="login-password" style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>
               Password
             </label>
             <input

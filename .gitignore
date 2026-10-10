@@ -3,3 +3,7 @@ node_modules/
 dist/
 .DS_Store
 *.local
+*.zip
+.env
+ml_model/data/
+

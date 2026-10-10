@@ -6,10 +6,17 @@ import ParentDashboard from "./pages/ParentDashboard";
 import ChildDashboard from "./pages/ChildDashboard";
 import TherapistDashboard from "./pages/TherapistDashboard";
 import Activities from "./pages/Activities";
+import Games from "./pages/Games";
+import TherapeuticGames from "./pages/TherapeuticGames";
 import AboutAutism from "./pages/AboutAutism";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import ProgressView from "./pages/ProgressView";
+import ExamPage from "./pages/ExamPage";
+import MasteryExamPage from "./pages/MasteryExamPage";
+import TherapyTrophyRoom from "./pages/TherapyTrophyRoom";
+import Chatbot from "./components/Chatbot";
 
 // ─────────────────────────────────────────────────────────────
 // Simple SPA Router
@@ -38,6 +45,20 @@ function App() {
     return () => window.removeEventListener("popstate", onNavChange);
   }, []);
 
+  // Verify token on mount if user exists
+  useEffect(() => {
+    if (user) {
+      import("./services/api").then(({ getMe }) => {
+        getMe().catch((err) => {
+          const msg = err.message || "";
+          if (msg.includes("Invalid") || msg.includes("token") || msg.includes("not found")) {
+            handleLogout();
+          }
+        });
+      });
+    }
+  }, []);
+
   const handleLogin = (userData) => {
     setUser(userData);
     navigate("/dashboard");
@@ -52,9 +73,13 @@ function App() {
 
   useEffect(() => {
     if (!user) {
-      const publicRoutes = ["/", "/login", "/about", "/contact", "/privacy", "/terms"];
+      const publicRoutes = ["/", "/login", "/about", "/contact", "/privacy", "/terms", "/exam", "/exam/result", "/challenge-mode", "/mastery-exam", "/challenge"];
       if (!publicRoutes.includes(path)) {
         navigate("/");
+      }
+    } else {
+      if (path === "/login") {
+        navigate("/dashboard");
       }
     }
   }, [path, user]);
@@ -67,9 +92,15 @@ function App() {
   let Component;
 
   // ============================================================
-  // PUBLIC ROUTES
+  // PUBLIC / DEMO ROUTES
   // ============================================================
-  if (!user) {
+  if (path === "/challenge-mode" || path === "/mastery-exam" || path === "/challenge") {
+    Component = <MasteryExamPage />;
+  } else if (path === "/exam") {
+    Component = <ExamPage />;
+  } else if (path === "/exam/result") {
+    Component = <ExamPage initialStep="result" />;
+  } else if (!user) {
     switch (path) {
       case "/":
         Component = <Home />;
@@ -106,6 +137,14 @@ function App() {
     if (path.startsWith("/child/")) {
       const childId = path.split("/child/")[1];
       Component = <ChildDashboard user={user} childId={childId} onNavigate={navigate} />;
+    } else if (path.startsWith("/progress/")) {
+      const childId = path.split("/progress/")[1];
+      Component = <ProgressView user={user} childId={childId} onNavigate={navigate} />;
+    } else if (path.startsWith("/trophy-room/")) {
+      const childId = path.split("/trophy-room/")[1];
+      Component = <TherapyTrophyRoom user={user} childId={childId} onNavigate={navigate} />;
+    } else if (path === "/trophy-room") {
+      Component = <TherapyTrophyRoom user={user} onNavigate={navigate} />;
     } else {
       switch (path) {
         case "/dashboard":
@@ -121,6 +160,14 @@ function App() {
 
         case "/activities":
           Component = <Activities user={user} />;
+          break;
+
+        case "/games":
+          Component = <Games user={user} />;
+          break;
+
+        case "/therapeutic-games":
+          Component = <TherapeuticGames user={user} />;
           break;
 
         default:
@@ -218,6 +265,45 @@ function App() {
             Activities
           </a>
 
+          <a
+            href="/games"
+            onClick={(e) => handleNavClick(e, "/games")}
+            style={{
+              textDecoration: "none",
+              color: path === "/games" ? "var(--primary)" : "var(--text)",
+              fontWeight: "600",
+            }}
+          >
+            Games
+          </a>
+
+          <a
+            href="/therapeutic-games"
+            onClick={(e) => handleNavClick(e, "/therapeutic-games")}
+            style={{
+              textDecoration: "none",
+              color: path === "/therapeutic-games" ? "var(--primary)" : "var(--text)",
+              fontWeight: "600",
+            }}
+          >
+            🧩 Therapy Games
+          </a>
+
+          <a
+            href="/trophy-room"
+            onClick={(e) => handleNavClick(e, "/trophy-room")}
+            style={{
+              textDecoration: "none",
+              color: path === "/trophy-room" || path.startsWith("/trophy-room/") ? "#ca8a04" : "var(--text)",
+              fontWeight: "700",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            🏆 Trophy Room
+          </a>
+
           <div
             style={{
               width: "1px",
@@ -247,9 +333,9 @@ function App() {
         style={{
           flex: 1,
           width: "100%",
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: user ? "20px" : "0",
+          maxWidth: (path === "/" || !user) ? "none" : "1200px",
+          margin: (path === "/" || !user) ? "0" : "0 auto",
+          padding: (path === "/" || !user) ? "0" : "20px",
         }}
       >
         {Component}
@@ -267,6 +353,9 @@ function App() {
           © 2026 Autism Assistant · Empowering every journey 🌟
         </footer>
       )}
+
+      {/* Global AI Clinical Autism Chatbot */}
+      <Chatbot />
     </div>
   );
 }

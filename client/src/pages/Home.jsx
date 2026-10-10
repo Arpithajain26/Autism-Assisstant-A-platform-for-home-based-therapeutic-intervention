@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
 import { useLang } from "../context/LanguageContext";
+import SymptomCheckModal from "../components/SymptomCheckModal";
 
 function navigate(path) {
   window.history.pushState({}, "", path);
@@ -47,7 +48,7 @@ function Counter({ target, suffix = "", color, label }) {
 }
 
 /* ─── HERO SECTION ───────────────────────────────────────────────────────── */
-function Hero() {
+function Hero({ onOpenSymptomCheck }) {
   const { t } = useLang();
   const videoRef = useRef(null);
   const [muted, setMuted] = useState(true);
@@ -59,13 +60,28 @@ function Hero() {
   }, []);
 
   return (
-    <section style={{ position: "relative", height: "100vh", minHeight: 600, overflow: "hidden", display: "flex", alignItems: "center" }}>
+    <section style={{ position: "relative", width: "100%", height: "100vh", minHeight: 600, overflow: "hidden", display: "flex", alignItems: "center" }}>
       {/* Background Video */}
       <video
         ref={videoRef}
-        autoPlay muted loop playsInline
+        autoPlay
+        muted
+        loop
+        playsInline
         onCanPlay={() => { if (videoRef.current) videoRef.current.play(); }}
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }}
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%) scale(1.36)",
+          width: "100%",
+          height: "100%",
+          minWidth: "100%",
+          minHeight: "100%",
+          objectFit: "cover",
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
       >
         <source src="/homepagevideo.mp4" type="video/mp4" />
       </video>
@@ -80,12 +96,29 @@ function Hero() {
       <div style={{ position: "absolute", top: "-100px", left: "-100px", width: 500, height: 500, borderRadius: "50%", background: "rgba(99,102,241,0.18)", filter: "blur(100px)", zIndex: 1, animation: "blobFloat 8s ease-in-out infinite" }} />
       <div style={{ position: "absolute", bottom: "-80px", right: "-80px", width: 400, height: 400, borderRadius: "50%", background: "rgba(168,85,247,0.15)", filter: "blur(90px)", zIndex: 1, animation: "blobFloat 10s ease-in-out infinite reverse" }} />
 
-      {/* Mute toggle */}
-      <button
-        onClick={() => { if (videoRef.current) { videoRef.current.muted = !videoRef.current.muted; setMuted(videoRef.current.muted); } }}
-        style={{ position: "absolute", bottom: 28, right: 28, zIndex: 10, width: 46, height: 46, borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)", color: "#fff", fontSize: "1.3rem", cursor: "pointer", transition: "all .3s" }}
-        title={muted ? "Unmute" : "Mute"}
-      >{muted ? "🔇" : "🔊"}</button>
+      {/* Controls: Fullscreen & Mute */}
+      <div style={{ position: "absolute", bottom: 28, right: 28, zIndex: 10, display: "flex", gap: 10 }}>
+        <button
+          onClick={() => {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen?.().catch(() => {});
+            } else {
+              document.exitFullscreen?.().catch(() => {});
+            }
+          }}
+          style={{ width: 46, height: 46, borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)", color: "#fff", fontSize: "1.1rem", cursor: "pointer", transition: "all .3s" }}
+          title="Toggle Fullscreen"
+        >
+          ⛶
+        </button>
+        <button
+          onClick={() => { if (videoRef.current) { videoRef.current.muted = !videoRef.current.muted; setMuted(videoRef.current.muted); } }}
+          style={{ width: 46, height: 46, borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)", color: "#fff", fontSize: "1.3rem", cursor: "pointer", transition: "all .3s" }}
+          title={muted ? "Unmute" : "Mute"}
+        >
+          {muted ? "🔇" : "🔊"}
+        </button>
+      </div>
 
       {/* Hero Content */}
       <div style={{ position: "relative", zIndex: 2, maxWidth: 1200, margin: "0 auto", padding: "0 28px", width: "100%" }}>
@@ -131,8 +164,16 @@ function Hero() {
             transition: "all .9s ease .45s",
           }}>
             <button
+              onClick={onOpenSymptomCheck}
+              style={{ padding: "14px 32px", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #ef4444, #f97316)", color: "#fff", fontWeight: 800, fontSize: "1rem", cursor: "pointer", boxShadow: "0 8px 32px rgba(239, 68, 68, 0.45)", transition: "all .3s", fontFamily: "inherit" }}
+              onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
+              onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+            >
+              🔍 Check Early Symptoms First
+            </button>
+            <button
               onClick={() => navigate("/login")}
-              style={{ padding: "14px 32px", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer", boxShadow: "0 8px 32px rgba(99,102,241,0.45)", transition: "all .3s", fontFamily: "inherit" }}
+              style={{ padding: "14px 28px", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer", boxShadow: "0 8px 32px rgba(99,102,241,0.45)", transition: "all .3s", fontFamily: "inherit" }}
               onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
               onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
             >
@@ -140,7 +181,7 @@ function Hero() {
             </button>
             <button
               onClick={() => document.getElementById("autism-info")?.scrollIntoView({ behavior: "smooth" })}
-              style={{ padding: "14px 32px", borderRadius: 12, border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)", backdropFilter: "blur(10px)", color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer", transition: "all .3s", fontFamily: "inherit" }}
+              style={{ padding: "14px 28px", borderRadius: 12, border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)", backdropFilter: "blur(10px)", color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer", transition: "all .3s", fontFamily: "inherit" }}
               onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.2)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.transform = "translateY(0)"; }}
             >
@@ -358,10 +399,10 @@ function HowItWorks() {
 
 /* ─── REVIEWS SECTION ────────────────────────────────────────────────────── */
 const reviews = [
-  { name: "Ananya R.", role: "Parent of a 6-year-old", avatar: "A", color: "#6366f1", quote: "The daily activities finally felt made for my son, not generic worksheets. Within two months we could see real changes in how he communicated with us.", stars: 5 },
-  { name: "Marcus T.", role: "Parent of a 4-year-old", avatar: "M", color: "#8b5cf6", quote: "The weekly progress reports gave us language to bring to our therapist. It turned guesswork into an actual conversation about what's working.", stars: 5 },
-  { name: "Priya S.", role: "Parent of an 8-year-old", avatar: "P", color: "#10b981", quote: "The emotion tracking was the part that surprised me most. We could finally tell 'quiet and focused' from 'quiet and overwhelmed.'", stars: 5 },
-  { name: "Dr. Linda K.", role: "Behavioral Therapist", avatar: "L", color: "#f97316", quote: "I recommend this to every family I work with. The data from home sessions has completely transformed how I plan clinical interventions.", stars: 5 },
+  { name: "Ananya R. & Aarav", role: "Parent of a 6-year-old (Level 1 Progressed)", photo: "/images/success/success_boy.jpg", color: "#6366f1", quote: "The daily activities finally felt made for my son, not generic worksheets. Within two months we could see real changes in how he communicated and engaged with us.", stars: 5 },
+  { name: "Priya S. & Diya", role: "Parent of a 7-year-old (Communication Breakthrough)", photo: "/images/success/success_girl.jpg", color: "#10b981", quote: "The emotion tracking and interactive games were the breakthrough we needed. Diya is now confident, smiling, and loves showing her creative achievements!", stars: 5 },
+  { name: "Meera K. & Kabir", role: "Parent of a 5-year-old (Active at Home Therapy)", photo: "/images/success/success_mother.jpg", color: "#8b5cf6", quote: "We used to feel overwhelmed. Now I log in every morning, see today's guided games, and Kabir claps and smiles every time we complete our daily quest together.", stars: 5 },
+  { name: "Dr. Linda K.", role: "Behavioral Therapist (BCBA-D)", avatar: "L", color: "#f97316", quote: "I recommend this to every family I work with. The data from home sessions has completely transformed how I plan clinical interventions.", stars: 5 },
   { name: "Rohan M.", role: "Parent of a 5-year-old", avatar: "R", color: "#ec4899", quote: "We used to feel so lost. Now I log in every morning, see today's activities, and feel like I actually know what I'm doing for my daughter.", stars: 5 },
   { name: "Sophie W.", role: "Occupational Therapist", avatar: "S", color: "#0ea5e9", quote: "The activity library is incredibly well-designed. Each task is evidence-informed and explained clearly enough that parents can implement it confidently.", stars: 5 },
 ];
@@ -382,10 +423,26 @@ function ReviewCard({ r, visible, delay }) {
         <div style={{ color: "#f59e0b", fontSize: "1.1rem", marginBottom: 14 }}>{"⭐".repeat(r.stars)}</div>
         <p style={{ color: "var(--text)", lineHeight: 1.7, fontStyle: "italic", fontSize: ".95rem", marginBottom: 22 }}>"{r.quote}"</p>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{ width: 44, height: 44, borderRadius: "50%", background: r.color, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "1.1rem", flexShrink: 0 }}>
-          {r.avatar}
-        </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        {r.photo ? (
+          <img
+            src={r.photo}
+            alt={r.name}
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: `2.5px solid ${r.color}`,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+              flexShrink: 0
+            }}
+          />
+        ) : (
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: r.color, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "1.1rem", flexShrink: 0 }}>
+            {r.avatar}
+          </div>
+        )}
         <div>
           <div style={{ fontWeight: 700, color: "var(--text)", fontSize: ".95rem" }}>{r.name}</div>
           <div style={{ color: "var(--text-muted)", fontSize: ".8rem" }}>{r.role}</div>
@@ -603,21 +660,78 @@ function Footer() {
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40, marginBottom: 48, flexWrap: "wrap" }}>
 
-          {/* Brand */}
+          {/* Brand & Direct Contact */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
               <span style={{ fontSize: "1.8rem" }}>🧩</span>
               <span style={{ fontWeight: 800, fontSize: "1.4rem", color: "#fff" }}>AutismAssist</span>
             </div>
-            <p style={{ color: "rgba(255,255,255,0.55)", lineHeight: 1.7, fontSize: ".9rem", maxWidth: 280 }}>
+            <p style={{ color: "rgba(255,255,255,0.65)", lineHeight: 1.7, fontSize: ".9rem", maxWidth: 300, marginBottom: 18 }}>
               AI-powered home therapy platform empowering families of children with autism to access personalized, evidence-informed support every day.
             </p>
-            <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-              {["🐦", "💼", "📘", "📸"].map((icon, i) => (
-                <button key={i} style={{ width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.07)", color: "#fff", cursor: "pointer", fontSize: "1rem", transition: "all .3s" }}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(99,102,241,0.3)"}
-                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.07)"}
-                >{icon}</button>
+
+            {/* Direct Email & Phone contact */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+              <a
+                href="mailto:autismassistant0@gmail.com"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  color: "#a5b4fc", textDecoration: "none", fontSize: ".9rem", fontWeight: 700,
+                  transition: "color .2s"
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = "#fff"}
+                onMouseLeave={e => e.currentTarget.style.color = "#a5b4fc"}
+              >
+                <span>✉️</span> autismassistant0@gmail.com
+              </a>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 8, color: "rgba(255,255,255,0.75)", fontSize: ".85rem" }}>
+                <span style={{ marginTop: 2 }}>📞</span>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 12px" }}>
+                  {[
+                    { num: "8792008746", label: "+91 87920 08746" },
+                    { num: "8310665702", label: "+91 83106 65702" },
+                    { num: "8050132187", label: "+91 80501 32187" },
+                    { num: "8830264796", label: "+91 88302 64796" },
+                  ].map((p, i) => (
+                    <a
+                      key={i}
+                      href={`tel:${p.num}`}
+                      style={{ color: "rgba(255,255,255,0.85)", textDecoration: "none", fontWeight: 600, transition: "color .2s" }}
+                      onMouseEnter={e => e.currentTarget.style.color = "#38bdf8"}
+                      onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.85)"}
+                    >
+                      {p.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Social Icons with interactive tooltips */}
+            <div style={{ display: "flex", gap: 12 }}>
+              {[
+                { icon: "✉️", label: "Email Support", href: "mailto:autismassistant0@gmail.com" },
+                { icon: "📞", label: "Helpline", href: "tel:8792008746" },
+                { icon: "💬", label: "WhatsApp Support", href: "https://wa.me/918792008746" },
+                { icon: "📍", label: "Location", href: "/contact" },
+              ].map((s, i) => (
+                <a
+                  key={i}
+                  href={s.href}
+                  title={s.label}
+                  style={{
+                    width: 38, height: 38, borderRadius: "50%",
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    background: "rgba(255,255,255,0.08)",
+                    color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+                    textDecoration: "none", fontSize: "1rem", transition: "all .3s"
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(99,102,241,0.4)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.transform = "translateY(0)"; }}
+                >
+                  {s.icon}
+                </a>
               ))}
             </div>
           </div>
@@ -670,6 +784,8 @@ const styleTag = `
 
 /* ─── HOME PAGE ──────────────────────────────────────────────────────────── */
 export default function Home() {
+  const [showSymptomModal, setShowSymptomModal] = useState(false);
+
   useEffect(() => {
     const style = document.createElement("style");
     style.textContent = styleTag;
@@ -678,15 +794,80 @@ export default function Home() {
   }, []);
 
   return (
-    <div style={{ width: "100vw", marginLeft: "calc(-50vw + 50%)" }}>
+    <div style={{ width: "100%", overflowX: "hidden" }}>
       <Navbar />
-      <Hero />
+      <Hero onOpenSymptomCheck={() => setShowSymptomModal(true)} />
+
+      {/* Early Symptom Checker Interactive Banner */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
+          color: "white",
+          padding: "24px 28px",
+          borderTop: "1px solid rgba(255,255,255,0.1)",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1200,
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 16,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <span style={{ fontSize: "2rem" }}>🔍</span>
+            <div>
+              <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800, color: "#ffffff" }}>
+                Not sure if your child shows early autism symptoms?
+              </h3>
+              <p style={{ margin: "2px 0 0", fontSize: "0.88rem", opacity: 0.85 }}>
+                Take our quick 4-question parent screening before registering on the platform.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowSymptomModal(true)}
+            style={{
+              padding: "12px 24px",
+              borderRadius: 12,
+              border: "none",
+              background: "#ef4444",
+              color: "#ffffff",
+              fontWeight: 800,
+              fontSize: "0.92rem",
+              cursor: "pointer",
+              boxShadow: "0 4px 14px rgba(239, 68, 68, 0.4)",
+              transition: "transform 0.2s ease",
+            }}
+          >
+            Start Early Symptom Check →
+          </button>
+        </div>
+      </section>
+
       <AutismInfoSection />
       <FeaturesStrip />
       <HowItWorks />
       <Reviews />
       <CTA />
       <Footer />
+
+      {/* Symptom Pre-Screening Modal */}
+      {showSymptomModal && (
+        <SymptomCheckModal
+          onClose={() => setShowSymptomModal(false)}
+          onContinueToPlatform={() => {
+            setShowSymptomModal(false);
+            navigate("/login");
+          }}
+        />
+      )}
     </div>
   );
 }

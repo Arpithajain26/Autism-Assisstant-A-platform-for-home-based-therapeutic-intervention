@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Child = require("../models/Child");
 const Activity = require("../models/Activity");
 const Question = require("../models/Question");
+const { CURATED_ACTIVITIES } = require("../data/curatedActivities");
 
 const connectDB = async () => {
   // If already connected, skip
@@ -63,314 +64,28 @@ const connectDB = async () => {
 
 // ── Handle unexpected disconnects ─────────────────────────────────────────────
 mongoose.connection.on("disconnected", () => {
-  console.warn("⚠️ MongoDB disconnected.");
+  console.warn("⚠️ MongoDB disconnected. Attempting automatic reconnection...");
+  const uri = process.env.MONGODB_URI;
+  if (uri && mongoose.connection.readyState === 0) {
+    setTimeout(() => {
+      mongoose
+        .connect(uri, {
+          serverSelectionTimeoutMS: 8000,
+          socketTimeoutMS: 45000,
+        })
+        .then(() => console.log("🍃 MongoDB Atlas Reconnected!"))
+        .catch((err) => {
+          console.warn("Reconnection retry notice:", err.message);
+        });
+    }, 3000);
+  }
 });
 
 mongoose.connection.on("error", (err) => {
   console.error("❌ MongoDB connection error:", err.message);
 });
 
-// ── Seed Data ─────────────────────────────────────────────────────────────────
-const initialActivities = [
-  // LEVEL 1 (Beginner)
-  {
-    _id: "a1",
-    title: "Mirror Play",
-    level: 1,
-    difficulty: "Beginner",
-    category: "Communication",
-    duration: "10 min",
-    focusAreas: ["communication", "emotions", "self-awareness"],
-    description:
-      "Child makes facial expressions in front of a mirror while parent names each emotion. Builds emotional recognition and self-awareness.",
-    steps: [
-      "Set up a large mirror at child's eye level",
-      "Parent demonstrates a happy face",
-      "Child mirrors the expression",
-      "Name the emotion out loud",
-      "Repeat with 5 different emotions",
-    ],
-    goalSkills: ["Emotion recognition", "Imitation", "Eye contact"],
-  },
-  {
-    _id: "a2",
-    title: "Sorting Shapes",
-    level: 1,
-    difficulty: "Beginner",
-    category: "Motor Skills",
-    duration: "15 min",
-    focusAreas: ["motor skills", "cognitive", "focus"],
-    description:
-      "Use colorful shape blocks. Child sorts by color and type, building fine motor skills, pattern recognition, and focus.",
-    steps: [
-      "Place 3 containers labeled with shapes",
-      "Mix 12 colorful blocks on the table",
-      "Child picks each block and places in correct bucket",
-      "Count together after sorting",
-      "Try again with time challenge",
-    ],
-    goalSkills: ["Fine motor control", "Pattern recognition", "Concentration"],
-  },
-  {
-    _id: "a3",
-    title: "Name That Sound",
-    level: 1,
-    difficulty: "Beginner",
-    category: "Sensory",
-    duration: "10 min",
-    focusAreas: ["sensory", "speech", "cognitive"],
-    description:
-      "Play recordings of everyday sounds. Child identifies each sound, training auditory processing and vocabulary.",
-    steps: [
-      "Prepare 5 sound clips (bell, rain, dog, phone, clapping)",
-      "Play each sound",
-      "Child points to matching picture card",
-      "Say the word together",
-      "Try animal sounds next",
-    ],
-    goalSkills: ["Auditory processing", "Vocabulary", "Attention"],
-  },
-  {
-    _id: "a4",
-    title: "Bubble Popping",
-    level: 1,
-    difficulty: "Beginner",
-    category: "Sensory",
-    duration: "10 min",
-    focusAreas: ["sensory", "motor skills", "focus"],
-    description:
-      "Blow bubbles and have child pop them with one finger. Develops eye-hand coordination and sensory exploration.",
-    steps: [
-      "Blow a stream of bubbles",
-      "Ask child to pop ONE bubble at a time",
-      "Count pops together",
-      "Try popping with nose, elbow for fun",
-      "Blow bubbles toward a target",
-    ],
-    goalSkills: ["Eye-hand coordination", "Tracking", "Turn-taking"],
-  },
-  {
-    _id: "a5",
-    title: "Playdough Sculpting",
-    level: 1,
-    difficulty: "Beginner",
-    category: "Motor Skills",
-    duration: "20 min",
-    focusAreas: ["motor skills", "focus", "creative"],
-    description:
-      "Guide child to roll, pinch, and shape playdough. Strengthens hand muscles and encourages creativity.",
-    steps: [
-      "Prepare playdough in 3 colors",
-      "Show how to roll a snake shape",
-      "Make a ball and flatten it",
-      "Create a simple face together",
-      "Child makes their own free creation",
-    ],
-    goalSkills: ["Finger strength", "Bilateral coordination", "Creativity"],
-  },
-  // LEVEL 2 (Intermediate)
-  {
-    _id: "b1",
-    title: "Emotion Flashcards",
-    level: 2,
-    difficulty: "Intermediate",
-    category: "Social",
-    duration: "15 min",
-    focusAreas: ["social interaction", "communication", "emotional"],
-    description:
-      "Show illustrated emotion cards. Child names the emotion, describes when they feel it, and acts it out.",
-    steps: [
-      "Lay out 8 emotion cards",
-      'Pick one card — ask "what emotion is this?"',
-      'Ask "when do you feel this?"',
-      "Child acts it out",
-      "Role-play a scenario causing that emotion",
-    ],
-    goalSkills: ["Emotional vocabulary", "Self-expression", "Empathy"],
-  },
-  {
-    _id: "b2",
-    title: "Story Sequencing",
-    level: 2,
-    difficulty: "Intermediate",
-    category: "Communication",
-    duration: "20 min",
-    focusAreas: ["speech", "communication", "cognitive"],
-    description:
-      "Present picture cards telling a simple story. Child arranges them in order and narrates what happens.",
-    steps: [
-      "Shuffle 5 picture cards from a story",
-      "Let child arrange them in order",
-      "Ask child to tell the story out loud",
-      'Ask "what happens next?"',
-      "Create an alternate ending",
-    ],
-    goalSkills: ["Narrative skills", "Language sequencing", "Memory"],
-  },
-  {
-    _id: "b3",
-    title: "Turn-Taking Board Game",
-    level: 2,
-    difficulty: "Intermediate",
-    category: "Social",
-    duration: "25 min",
-    focusAreas: ["social interaction", "cognitive", "emotional"],
-    description:
-      "Play a simple board game. Teaches taking turns, following rules, and handling winning/losing gracefully.",
-    steps: [
-      "Set up Snakes & Ladders or similar",
-      "Explain turn-taking rules",
-      "Each player announces their roll",
-      "Celebrate both winning and losing moments",
-      'Debrief: "How did it feel when you...?"',
-    ],
-    goalSkills: ["Turn-taking", "Rule-following", "Emotional regulation"],
-  },
-  {
-    _id: "b4",
-    title: "Balloon Tapping",
-    level: 2,
-    difficulty: "Intermediate",
-    category: "Motor Skills",
-    duration: "15 min",
-    focusAreas: ["motor skills", "coordination", "focus"],
-    description:
-      "Keep a balloon in the air by tapping it. Develops bilateral coordination, tracking, and turn-taking.",
-    steps: [
-      "Inflate a balloon",
-      "Tap it gently to keep it airborne",
-      "Count the taps without letting it fall",
-      "Add a rule: only use left hand",
-      "Play two-person cooperative version",
-    ],
-    goalSkills: ["Gross motor", "Bilateral coordination", "Cooperation"],
-  },
-  {
-    _id: "b5",
-    title: "Simple Cooking Together",
-    level: 2,
-    difficulty: "Intermediate",
-    category: "Life Skills",
-    duration: "30 min",
-    focusAreas: ["life skills", "motor skills", "communication", "focus"],
-    description:
-      "Make a simple no-cook recipe (sandwich, fruit salad). Teaches sequencing, fine motor skills, and following instructions.",
-    steps: [
-      "Choose a 3-ingredient recipe",
-      "Read recipe steps together",
-      "Child performs each step with guidance",
-      "Name ingredients and utensils",
-      "Eat and celebrate together",
-    ],
-    goalSkills: ["Following instructions", "Sequencing", "Independence"],
-  },
-  // LEVEL 3 (Advanced)
-  {
-    _id: "c1",
-    title: "Role Play Scenarios",
-    level: 3,
-    difficulty: "Advanced",
-    category: "Social",
-    duration: "30 min",
-    focusAreas: ["social interaction", "communication", "confidence"],
-    description:
-      "Act out real-world scenarios (ordering food, greeting a friend). Reinforces social scripts for real interactions.",
-    steps: [
-      "Choose a scenario: at the store",
-      "Set up props (fake items)",
-      "Parent plays shopkeeper",
-      "Child orders and pays",
-      "Switch roles and debrief what went well",
-    ],
-    goalSkills: ["Social scripts", "Confidence", "Perspective-taking"],
-  },
-  {
-    _id: "c2",
-    title: "Obstacle Course",
-    level: 3,
-    difficulty: "Advanced",
-    category: "Motor Skills",
-    duration: "20 min",
-    focusAreas: ["motor skills", "coordination", "confidence"],
-    description:
-      "Set up an indoor path with pillows, tunnels, step targets. Child navigates and develops gross motor skills.",
-    steps: [
-      "Design course with 5 stations",
-      "Walk through once to demonstrate",
-      "Child completes timed run",
-      "Add verbal instructions mid-course",
-      "Have child design next course",
-    ],
-    goalSkills: [
-      "Body awareness",
-      "Following complex instructions",
-      "Confidence",
-    ],
-  },
-  {
-    _id: "c3",
-    title: "Peer Play Date",
-    level: 3,
-    difficulty: "Advanced",
-    category: "Social",
-    duration: "45 min",
-    focusAreas: ["social interaction", "emotional", "communication"],
-    description:
-      "Structured play with a peer. Practices sharing, conflict resolution, and maintaining conversation.",
-    steps: [
-      "Invite one familiar peer",
-      "Set up structured activity (lego, art)",
-      "Parent observes from distance",
-      "Prompt conversation starters if needed",
-      "Debrief feelings after",
-    ],
-    goalSkills: ["Peer interaction", "Sharing", "Conflict resolution"],
-  },
-  {
-    _id: "c4",
-    title: "Feelings Journal",
-    level: 3,
-    difficulty: "Advanced",
-    category: "Emotional",
-    duration: "15 min",
-    focusAreas: ["emotional", "communication", "cognitive"],
-    description:
-      "Child draws or writes about their day and feelings. Builds introspection, self-regulation, and communication.",
-    steps: [
-      "Provide a dedicated journal",
-      'Ask "What was the best part of today?"',
-      "Draw or write 3 emotions felt today",
-      "On a scale of 1-10, how was your day?",
-      "Share one thing with parent",
-    ],
-    goalSkills: ["Self-reflection", "Emotional regulation", "Written expression"],
-  },
-  {
-    _id: "c5",
-    title: "Community Helper Interview",
-    level: 3,
-    difficulty: "Advanced",
-    category: "Social",
-    duration: "30 min",
-    focusAreas: [
-      "social interaction",
-      "communication",
-      "confidence",
-      "cognitive",
-    ],
-    description:
-      "Child prepares 5 questions, interviews a family member or friend. Builds conversation initiation and listening skills.",
-    steps: [
-      "Brainstorm 5 interview questions",
-      "Practice asking questions aloud",
-      "Conduct the interview (phone or in-person)",
-      "Draw or write what was learned",
-      "Share learnings at dinner",
-    ],
-    goalSkills: ["Initiation", "Active listening", "Question formation"],
-  },
-];
-
+// ── Seed Data Questions ───────────────────────────────────────────────────────
 const initialQuestions = [
   {
     id: 1,
@@ -443,60 +158,79 @@ const initialQuestions = [
 
 const seedDB = async () => {
   try {
-    const actCount = await Activity.countDocuments();
-    if (actCount === 0) {
-      await Activity.insertMany(initialActivities);
-      console.log("✅ Seeded activities into MongoDB");
+    // 1. Sync all 45 Curated Activities into MongoDB
+    for (const act of CURATED_ACTIVITIES) {
+      await Activity.updateOne(
+        { _id: act._id },
+        {
+          $set: {
+            title: act.title,
+            titleKn: act.titleKn || "",
+            ageGroup: act.ageGroup || "2-5",
+            level: act.level,
+            tier: act.tier || "Beginner",
+            category: act.category,
+            categoryKn: act.categoryKn || "",
+            therapyPrinciple: act.therapyPrinciple || "",
+            icon: act.icon || "🧩",
+            color: act.color || "#6366f1",
+            bg: act.bg || "#eef2ff",
+            difficulty: act.tier || "Beginner",
+            duration: act.duration,
+            durationKn: act.durationKn || "",
+            xp: act.xp || 50,
+            stars: act.stars || 3,
+            materials: act.materials || "",
+            materialsKn: act.materialsKn || "",
+            description: act.description,
+            descriptionKn: act.descriptionKn || "",
+            steps: (act.instructions || []).map((ins) => (typeof ins === "string" ? ins : ins.en || ins.kn)),
+            instructions: act.instructions || [],
+            goalSkills: [act.category, act.therapyPrinciple].filter(Boolean),
+            focusAreas: [act.category, act.tier].filter(Boolean),
+          },
+        },
+        { upsert: true }
+      );
     }
 
+    // Delete legacy mock activities (a1, a2, b1, etc.) not in CURATED_ACTIVITIES
+    const curatedIds = CURATED_ACTIVITIES.map((a) => a._id);
+    await Activity.deleteMany({ _id: { $nin: curatedIds } });
+    console.log(`✅ Seeded ${CURATED_ACTIVITIES.length} Curated Therapy Activities into MongoDB (replaces all legacy activities)`);
+
+    // 2. Seed Assessment Questions
     const qCount = await Question.countDocuments();
     if (qCount === 0) {
       await Question.insertMany(initialQuestions);
       console.log("✅ Seeded assessment questions into MongoDB");
     }
 
-    const userCount = await User.countDocuments();
-    if (userCount === 0) {
-      const parent = new User({
-        name: "Alex Johnson",
-        email: "parent@example.com",
-        password: "password123",
-        role: "parent",
-        phone: "+1 555-0192",
-      });
-      await parent.save();
+    // 3. Update any children whose assigned/completed tasks contain old IDs (a1, b1, etc.)
+    const childrenToUpdate = await Child.find({});
+    for (const ch of childrenToUpdate) {
+      let changed = false;
+      const validAssigned = (ch.assignedTasks || []).filter((id) => curatedIds.includes(id));
+      const validCompleted = (ch.completedTasks || []).filter((id) => curatedIds.includes(id));
 
-      const therapist = new User({
-        name: "Dr. Sarah Patel",
-        email: "therapist@example.com",
-        password: "password123",
-        role: "therapist",
-        specialization: "ABA & Pediatric Speech Therapy",
-      });
-      await therapist.save();
+      // If empty after removing legacy IDs, assign curated activities matching their level
+      if (validAssigned.length === 0) {
+        const matchingCurated = CURATED_ACTIVITIES.filter((a) => a.level === (ch.level || 1)).slice(0, 3);
+        ch.assignedTasks = matchingCurated.map((a) => a._id);
+        changed = true;
+      } else if (validAssigned.length !== (ch.assignedTasks || []).length) {
+        ch.assignedTasks = validAssigned;
+        changed = true;
+      }
 
-      const child = new Child({
-        name: "Timmy Johnson",
-        age: 6,
-        gender: "male",
-        parentId: parent._id,
-        therapistId: therapist._id,
-        level: 2,
-        assessmentDone: true,
-        assignedTasks: ["b1", "b2", "b3"],
-        completedTasks: ["a1", "a2"],
-      });
-      await child.save();
+      if (validCompleted.length !== (ch.completedTasks || []).length) {
+        ch.completedTasks = validCompleted;
+        changed = true;
+      }
 
-      parent.children.push(child._id);
-      await parent.save();
-
-      therapist.assignedChildren.push(child._id);
-      await therapist.save();
-
-      console.log("✅ Seeded demo Parent, Therapist, and Child");
-      console.log("   parent@example.com / password123");
-      console.log("   therapist@example.com / password123");
+      if (changed) {
+        await ch.save();
+      }
     }
   } catch (err) {
     console.error("❌ Seed error:", err.message);

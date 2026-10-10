@@ -133,6 +133,18 @@ cd client
 npm test
 ```
 
+## Parent AI Video Summaries
+
+The child profile can create a consented parent-video summary using HeyGen. Add these server-only values to `server/.env` before starting the backend:
+
+```text
+HEYGEN_API_KEY=your_key
+HEYGEN_AVATAR_ID=your_avatar_id
+HEYGEN_VOICE_ID=your_voice_id
+```
+
+The therapist must confirm parent/guardian consent in the child profile before a request is sent. Without these values, the app still generates and displays the child-specific parent script but does not send data to a video provider.
+
 ## Contributing
 
 Contributions are welcome. If you would like to improve the project, please open an issue or submit a pull request.

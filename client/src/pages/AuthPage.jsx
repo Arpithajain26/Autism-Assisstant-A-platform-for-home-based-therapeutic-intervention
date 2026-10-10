@@ -301,6 +301,7 @@ export default function AuthPage({ onLogin }) {
   const [mode, setMode] = useState(initialMode); // 'login' | 'register'
   const [step, setStep] = useState(1); // Step 1: select role (register), Step 2: details
   const [role, setRole] = useState(""); // 'parent' | 'therapist'
+  const [loginRole, setLoginRole] = useState("parent"); // 'parent' | 'therapist' selector for login
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -380,7 +381,7 @@ export default function AuthPage({ onLogin }) {
         console.warn("Firebase Auth notice:", fbErr.message);
       }
 
-      const data = await loginUser(form.email.trim(), form.password);
+      const data = await loginUser(form.email.trim(), form.password, loginRole);
       localStorage.setItem("auth_token", data.token);
       localStorage.setItem("auth_user", JSON.stringify(data.user));
       onLogin(data.user);
@@ -421,7 +422,7 @@ export default function AuthPage({ onLogin }) {
         await createUserWithEmailAndPassword(
           auth,
           form.email.trim(),
-          form.password
+          form.password,
         );
       } catch (fbErr) {
         if (fbErr.code === "auth/email-already-in-use") {
@@ -446,7 +447,7 @@ export default function AuthPage({ onLogin }) {
       setSuccess(
         lang === "en"
           ? "Account created successfully! Signing you in…"
-          : "ಖಾತೆಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ! ಸೈನ್ ಇನ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"
+          : "ಖಾತೆಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ! ಸೈನ್ ಇನ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
       );
       setTimeout(() => onLogin(data.user), 800);
     } catch (err) {
@@ -470,67 +471,84 @@ export default function AuthPage({ onLogin }) {
     }
   };
 
-  /* ── Google Sign In ─────────────────────────────────────────────────────── */
+  /* ── 1-Click Demo Login ─────────────────────────────────────────────── */
+  const handleQuickDemoLogin = async (demoRole = loginRole) => {
+    setLoading(true);
+    setError("");
+    try {
+      const email =
+        demoRole === "therapist"
+          ? "ananya.sharma@autismassistant.com"
+          : "parent@test.com";
+      const password = "password123";
+      const data = await loginUser(email, password, demoRole);
+      localStorage.setItem("auth_token", data.token);
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
+      setSuccess(
+        `Signed in as ${demoRole === "therapist" ? "Therapist (Dr. Ananya Sharma)" : "Demo Parent"}! Redirecting…`,
+      );
+      setTimeout(() => onLogin(data.user), 500);
+    } catch (err) {
+      setError(err.message || "Demo login failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ── Google Sign In (Real Firebase Authentication) ───────────────────────── */
   const doGoogleSignIn = async (selectedRole) => {
     setGoogleLoading(true);
     setError("");
     try {
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
       provider.addScope("email");
       provider.addScope("profile");
       const result = await signInWithPopup(auth, provider);
       const email = result.user.email;
-      const displayName = result.user.displayName || email.split("@")[0];
+      const displayName =
+        result.user.displayName || (email ? email.split("@")[0] : "");
 
-      const roleToUse =
-        selectedRole || (mode === "login" ? "parent" : "parent");
+      const roleToUse = selectedRole || role || "parent";
       const data = await googleLogin(email, displayName, roleToUse, mode);
       localStorage.setItem("auth_token", data.token);
       localStorage.setItem("auth_user", JSON.stringify(data.user));
       setSuccess("Signed in with Google! Redirecting…");
-      setTimeout(() => onLogin(data.user), 600);
+      setTimeout(() => onLogin(data.user), 500);
     } catch (err) {
-      // Firebase popup errors — provide helpful fallbacks
+      console.warn("Firebase Google Sign In Notice:", err);
       if (
-        err &&
-        (err.code === "auth/popup-closed-by-user" ||
-          err.code === "auth/cancelled-popup-request")
+        err.code === "auth/popup-closed-by-user" ||
+        err.code === "auth/cancelled-popup-request"
       ) {
-        setError("Google sign-in was cancelled. Please try again.");
-      } else if (err && err.code === "auth/popup-blocked") {
-        // Popup blocked: try redirect flow as a fallback
-        setError("Popup was blocked. Falling back to redirect sign-in.");
+        setError("Google sign-in popup was closed before completing.");
+      } else if (err.code === "auth/popup-blocked") {
+        setError(
+          "Popup was blocked by your browser. Attempting redirect to Google…",
+        );
         try {
-          setGoogleLoading(true);
           const provider = new GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: "select_account" });
           provider.addScope("email");
           provider.addScope("profile");
           await signInWithRedirect(auth, provider);
-          return; // redirecting away
+          return;
         } catch (redirErr) {
-          console.warn("Redirect fallback failed:", redirErr);
-          setError(redirErr.message || "Redirect to Google failed.");
+          console.warn("Redirect failed:", redirErr);
+          setError(
+            "Google redirect was blocked. Please allow popups or use Email/Password login.",
+          );
         }
-      } else if (err && err.code === "auth/network-request-failed") {
+      } else if (
+        err.code === "auth/operation-not-allowed" ||
+        err.message?.includes("401") ||
+        err.message?.includes("malformed")
+      ) {
         setError(
-          "Network error. Please check your internet connection and try again.",
+          "Firebase Google OAuth notice: Please ensure in Firebase Console (Authentication > Sign-in method > Google) that Google provider has a 'Project support email' configured.",
         );
       } else {
-        const msg = err?.message || "";
-        const isAlreadyRegistered =
-          msg.toLowerCase().includes("already registered") ||
-          msg.toLowerCase().includes("already exists") ||
-          msg.toLowerCase().includes("email already") ||
-          msg.includes("409");
-        if (isAlreadyRegistered) {
-          setMode("login");
-          setStep(1);
-          setRole("");
-          setSuccess("");
-          setError("Account with this email id exists, please login.");
-        } else {
-          setError(msg || "Google sign-in failed. Please try again.");
-        }
+        setError(err.message || "Google sign-in failed. Please try again.");
       }
     } finally {
       setGoogleLoading(false);
@@ -550,7 +568,7 @@ export default function AuthPage({ onLogin }) {
   const handleGoogleRoleSelect = (selectedRole) => {
     setShowGoogleRolePicker(false);
     setPendingGoogleRole(selectedRole);
-    setRole(selectedRole); // also set the main role for consistency
+    setRole(selectedRole);
     doGoogleSignIn(selectedRole);
   };
 
@@ -826,18 +844,88 @@ export default function AuthPage({ onLogin }) {
           {mode === "login" && (
             <>
               <div style={{ marginBottom: "20px" }}>
+                {/* Role Switcher Tabs */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "10px",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setLoginRole("parent")}
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: "12px",
+                      border:
+                        loginRole === "parent"
+                          ? "2px solid #7c3aed"
+                          : "1.5px solid #e5e7eb",
+                      background:
+                        loginRole === "parent"
+                          ? "rgba(124, 58, 237, 0.08)"
+                          : "#fafafa",
+                      color: loginRole === "parent" ? "#6d28d9" : "#4b5563",
+                      fontWeight: "700",
+                      fontSize: "0.88rem",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <span>👨‍👩‍👧</span> Parent Sign In
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setLoginRole("therapist")}
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: "12px",
+                      border:
+                        loginRole === "therapist"
+                          ? "2px solid #0891b2"
+                          : "1.5px solid #e5e7eb",
+                      background:
+                        loginRole === "therapist"
+                          ? "rgba(8, 145, 178, 0.08)"
+                          : "#fafafa",
+                      color: loginRole === "therapist" ? "#0e7490" : "#4b5563",
+                      fontWeight: "700",
+                      fontSize: "0.88rem",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <span>🩺</span> Therapist Sign In
+                  </button>
+                </div>
+
                 <h2
                   style={{
-                    fontSize: "1.5rem",
+                    fontSize: "1.4rem",
                     fontWeight: "800",
                     color: "#111827",
                     marginBottom: "4px",
                   }}
                 >
-                  {t("auth_welcome_back")}
+                  {loginRole === "therapist"
+                    ? "Therapist Portal Login 🩺"
+                    : "Parent Portal Login 👨‍👩‍👧"}
                 </h2>
-                <p style={{ color: "#6b7280", fontSize: "0.88rem" }}>
-                  {t("auth_signin_desc")}
+                <p style={{ color: "#6b7280", fontSize: "0.86rem" }}>
+                  {loginRole === "therapist"
+                    ? "Sign in as Therapist to access assigned age-group children, review Q-CHAT-10 assessments, and send clinical guidance."
+                    : "Sign in as Parent to access child's dashboard, daily activity streak, activities, and progress summary."}
                 </p>
               </div>
 
@@ -892,6 +980,45 @@ export default function AuthPage({ onLogin }) {
                 >
                   {loading ? t("auth_signing_in") : t("auth_signing_btn")}
                 </button>
+
+                {/* 1-Click Quick Demo Login */}
+                <div style={{ marginTop: "4px" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (loginRole === "therapist") {
+                        setMode("register");
+                        setStep(1);
+                        setRole("therapist");
+                      } else {
+                        handleQuickDemoLogin("parent");
+                      }
+                    }}
+                    disabled={loading}
+                    style={{
+                      width: "100%",
+                      padding: "8px 10px",
+                      borderRadius: "10px",
+                      border:
+                        loginRole === "therapist"
+                          ? "1px dashed #0891b2"
+                          : "1px dashed #7c3aed",
+                      background:
+                        loginRole === "therapist"
+                          ? "rgba(8, 145, 178, 0.05)"
+                          : "rgba(124, 58, 237, 0.05)",
+                      color: loginRole === "therapist" ? "#0e7490" : "#6d28d9",
+                      fontWeight: "700",
+                      fontSize: "0.8rem",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    {loginRole === "therapist"
+                      ? "✨ Register as a Therapist"
+                      : "⚡ Quick Sign In as Demo Parent"}
+                  </button>
+                </div>
               </form>
 
               <div

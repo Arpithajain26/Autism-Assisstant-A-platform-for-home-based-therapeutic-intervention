@@ -23,14 +23,20 @@ const Assessment = ({ child, onComplete }) => {
   const answered = Object.keys(answers).length;
   const progress = total > 0 ? (answered / total) * 100 : 0;
 
-  const handleAnswer = (questionId, score) => {
-    setAnswers(a => ({ ...a, [questionId]: score }));
+  const handleAnswer = (questionId, score, optIndex) => {
+    setAnswers(a => ({ ...a, [questionId]: { score, optIndex } }));
     if (current < total - 1) setTimeout(() => setCurrent(c => c + 1), 300);
   };
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    const scoreArray = questions.map(q => answers[q.id] || 1);
+    const scoreArray = questions.map(q => {
+      const ans = answers[q.id];
+      if (ans !== undefined && ans !== null) {
+        return typeof ans === 'object' && ans.score !== undefined ? ans.score : Number(ans);
+      }
+      return 1;
+    });
     const data = await submitAssessment(child._id, scoreArray);
     setResult(data);
     setSubmitting(false);
@@ -86,17 +92,23 @@ const Assessment = ({ child, onComplete }) => {
 
       {/* Question tabs */}
       <div style={{ display:'flex', gap:'6px', flexWrap:'wrap', marginBottom:'24px' }}>
-        {questions.map((_, i) => (
-          <button key={i} onClick={() => setCurrent(i)} style={{
-            width:32, height:32, borderRadius:'50%', border:'2px solid',
-            borderColor: answers[questions[i].id] ? 'var(--green)' : i===current ? 'var(--primary)' : 'var(--border)',
-            background: answers[questions[i].id] ? 'var(--green-light)' : i===current ? 'var(--primary-light)' : 'white',
-            color: answers[questions[i].id] ? 'var(--green)' : i===current ? 'var(--primary)' : 'var(--text-muted)',
-            fontWeight:'700', fontSize:'0.8rem', cursor:'pointer',
-          }}>
-            {answers[questions[i].id] ? '✓' : i + 1}
-          </button>
-        ))}
+        {questions.map((qItem, i) => {
+          const isAnswered = answers[qItem.id] !== undefined && answers[qItem.id] !== null;
+          return (
+            <button key={i} onClick={() => setCurrent(i)} style={{
+              width:34, height:34, borderRadius:'50%', border:'2px solid',
+              borderColor: isAnswered ? '#10b981' : i===current ? '#4F6EF7' : '#e2e8f0',
+              background: isAnswered ? '#d1fae5' : i===current ? '#4F6EF7' : 'white',
+              color: isAnswered ? '#059669' : i===current ? 'white' : '#64748b',
+              fontWeight:'800', fontSize:'0.85rem', cursor:'pointer',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              transition:'all 0.2s ease',
+              boxShadow: isAnswered ? '0 2px 6px rgba(16,185,129,0.2)' : 'none'
+            }}>
+              {isAnswered ? '✓' : i + 1}
+            </button>
+          );
+        })}
       </div>
 
       {/* Current Question Card */}
@@ -106,9 +118,12 @@ const Assessment = ({ child, onComplete }) => {
           <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
             {q.options.map((opt, i) => {
               const score = q.scores[i];
-              const selected = answers[q.id] === score;
+              const ansVal = answers[q.id];
+              const selected = ansVal !== undefined && (
+                typeof ansVal === 'object' ? ansVal.optIndex === i : ansVal === score
+              );
               return (
-                <button key={i} onClick={() => handleAnswer(q.id, score)} style={{
+                <button key={i} onClick={() => handleAnswer(q.id, score, i)} style={{
                   padding:'14px 18px',
                   borderRadius:'10px',
                   border: `2px solid ${selected ? 'var(--primary)' : 'var(--border)'}`,

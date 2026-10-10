@@ -1,0 +1,66 @@
+{
+  "classes": [
+    "angry",
+    "disgust",
+    "fear",
+    "happy",
+    "neutral",
+    "sad",
+    "surprise"
+  ],
+  "input_shape": [
+    1,
+    48,
+    48
+  ],
+  "normalization": {
+    "mean": 0.5,
+    "std": 0.5
+  },
+  "best_accuracy": 56.54,
+  "model_architecture": "EmotionCNN (3 Conv Blocks + BatchNorm + Dropout + Linear)",
+  "emotions_supported": {
+    "angry": {
+      "valence": -0.8,
+      "arousal": 0.8,
+      "status": "Frustrated / Agitated",
+      "color": "#ef4444"
+    },
+    "disgust": {
+      "valence": -0.6,
+      "arousal": 0.5,
+      "status": "Discomfort / Avoidance",
+      "color": "#f97316"
+    },
+    "fear": {
+      "valence": -0.7,
+      "arousal": 0.9,
+      "status": "Anxious / Overwhelmed",
+      "color": "#a855f7"
+    },
+    "happy": {
+      "valence": 0.9,
+      "arousal": 0.6,
+      "status": "Positive / Engaged",
+      "color": "#22c55e"
+    },
+    "neutral": {
+      "valence": 0.0,
+      "arousal": 0.1,
+      "status": "Calm / Baseline",
+      "color": "#3b82f6"
+    },
+    "sad": {
+      "valence": -0.7,
+      "arousal": -0.4,
+      "status": "Low energy / Down",
+      "color": "#64748b"
+    },
+    "surprise": {
+      "valence": 0.5,
+      "arousal": 0.8,
+      "status": "Curious / Attentive",
+      "color": "#eab308"
+    }
+  }
+}

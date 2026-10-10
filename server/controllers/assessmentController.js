@@ -1,7 +1,18 @@
 const axios = require("axios");
+const mongoose = require("mongoose");
 const Assessment = require("../models/Assessment");
 const Activity = require("../models/Activity");
 const Child = require("../models/Child");
+
+/**
+ * Resolve a childId that may be either a MongoDB ObjectId or a custom string
+ * like "child_1788342883269" → returns Child document or null.
+ */
+async function resolveChild(id) {
+  if (mongoose.Types.ObjectId.isValid(id)) return Child.findById(id);
+  return Child.findOne({ childId: id });
+}
+
 
 // @desc    Get assessment questions
 // @route   GET /api/assessment/questions
@@ -188,12 +199,14 @@ exports.submitAssessment = async (req, res) => {
       level_info = levelMap[level];
     }
 
-    const child = await Child.findById(childId);
+    const child = await resolveChild(childId);
     if (!child) {
       return res.status(404).json({ message: "Child profile not found." });
     }
 
-    await Child.findByIdAndUpdate(childId, { level, assessmentDone: true });
+    child.level = level;
+    child.assessmentDone = true;
+    await child.save();
 
     const activities = await Activity.find({
       $or: [
@@ -204,13 +217,30 @@ exports.submitAssessment = async (req, res) => {
     }).limit(5);
 
     const assessment = await Assessment.create({
-      child: childId,
+      child: child._id,
       scores,
       totalScore: scores.reduce((a, b) => a + b, 0),
       level,
       confidence,
       completedAt: new Date(),
     });
+
+    // Notify assigned therapist if child has therapistId
+    if (child.therapistId) {
+      try {
+        const Feedback = require("../models/Feedback");
+        await Feedback.create({
+          child: child._id,
+          therapist: child.therapistId,
+          parent: child.parentId,
+          type: "assessment_alert",
+          message: `🔔 New child assigned — ${child.name}, Age ${child.age}, Level ${level}. Q-CHAT-10 score: ${scores.reduce((a, b) => a + b, 0)}/30. Please review assessment scores and confirm or adjust support level.`,
+          isRead: false,
+        });
+      } catch (fbErr) {
+        console.warn("Therapist notification error:", fbErr.message);
+      }
+    }
 
     return res.status(200).json({
       level,

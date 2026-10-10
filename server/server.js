@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ override: true });
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -7,25 +7,59 @@ const User = require("./models/User");
 const Child = require("./models/Child");
 const Activity = require("./models/Activity");
 const Question = require("./models/Question");
+const Session = require("./models/Session");
+const ActivityLog = require("./models/ActivityLog");
+const {
+  calculateStreakAndMonthlyActivity,
+} = require("./utils/progressHelpers");
 const { verifyToken, makeToken } = require("./middleware/auth");
 
 // Validate MongoDB ObjectId format
-const isValidId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[a-fA-F0-9]{24}$/.test(id);
+const isValidId = (id) =>
+  mongoose.Types.ObjectId.isValid(id) && /^[a-fA-F0-9]{24}$/.test(id);
 
-// Connect to MongoDB
+// Connect to MongoDB. Therapist profiles are created by users and are never seeded.
 connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 5000;
+
+const startServer = (port = DEFAULT_PORT, attempt = 0, maxAttempts = 10) => {
+  const server = app.listen(port, () => {
+    console.log(`✅  Server → http://localhost:${port}`);
+    console.log(`   POST /api/auth/register | /api/auth/login`);
+    console.log(`   POST /api/children/create | GET /api/children/:userId`);
+    console.log(`   GET  /api/assessment/questions`);
+  });
+
+  server.on("error", (error) => {
+    if (error.code === "EADDRINUSE") {
+      if (attempt + 1 >= maxAttempts) {
+        console.error(
+          `❌ Ports ${DEFAULT_PORT}-${DEFAULT_PORT + maxAttempts - 1} are all in use. Please free one and restart.`,
+        );
+        process.exit(1);
+      }
+      console.warn(`⚠️ Port ${port} is busy. Trying ${port + 1}...`);
+      startServer(port + 1, attempt + 1, maxAttempts);
+    } else {
+      throw error;
+    }
+  });
+};
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "*",
     credentials: true,
-  })
+  }),
 );
 app.use(express.json({ limit: "10mb" })); // Increased body limit for base64 photo uploads
+
+app.use("/api/assessment", require("./routes/assessmentRoutes"));
+app.use("/api/parent", require("./routes/parentAIRoutes"));
+app.use("/api/exam", require("./routes/examRoutes"));
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const safeUser = (u) => {
@@ -60,7 +94,10 @@ const generateLinkCode = () => {
 
 // ── Health ────────────────────────────────────────────────────────────────────
 app.get("/", (_req, res) =>
-  res.json({ status: "ok", message: "🚀 Autism Assistant API running with MongoDB" })
+  res.json({
+    status: "ok",
+    message: "🚀 Autism Assistant API running with MongoDB",
+  }),
 );
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -80,11 +117,13 @@ app.post("/api/auth/register", async (req, res) => {
 
     if (!["parent", "therapist"].includes(role)) {
       return res.status(400).json({
-        error: "Invalid role. Children cannot register directly with credentials.",
+        error:
+          "Invalid role. Children cannot register directly with credentials.",
       });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const emailLower = email.trim().toLowerCase();
+    const existingUser = await User.findOne({ email: emailLower });
     if (existingUser) {
       return res.status(409).json({ error: "Email already registered." });
     }
@@ -92,7 +131,7 @@ app.post("/api/auth/register", async (req, res) => {
     const newUser = new User({
       role,
       name,
-      email: email.toLowerCase(),
+      email: emailLower,
       password,
       phone: phone || "",
       specialization: specialization || (role === "therapist" ? "General" : ""),
@@ -110,19 +149,41 @@ app.post("/api/auth/register", async (req, res) => {
 // POST /api/auth/login
 app.post("/api/auth/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, expectedRole } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password required." });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const emailLower = email.trim().toLowerCase();
+    let user = await User.findOne({ email: emailLower });
+
+    // Handle domain spelling variation (autismassisstant.com vs autismassistant.com)
+    if (!user) {
+      const altEmail = emailLower.includes("autismassisstant.com")
+        ? emailLower.replace("autismassisstant.com", "autismassistant.com")
+        : emailLower.includes("autismassistant.com")
+          ? emailLower.replace("autismassistant.com", "autismassisstant.com")
+          : emailLower;
+      user = await User.findOne({ email: altEmail });
+    }
+
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
-    const isMatch = await user.comparePassword(password);
+    let isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ error: "Invalid email or password." });
+    }
+
+    // Ensure role matches expectedRole if specified
+    if (
+      expectedRole &&
+      ["parent", "therapist"].includes(expectedRole) &&
+      user.role !== expectedRole
+    ) {
+      user.role = expectedRole;
+      await user.save();
     }
 
     const token = makeToken(user._id, user.role);
@@ -133,10 +194,58 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+// POST /api/auth/firebase-sync
+app.post("/api/auth/firebase-sync", async (req, res) => {
+  try {
+    const { email, name, role, mode } = req.body;
+    if (!email) {
+      return res
+        .status(400)
+        .json({ error: "Email is required for synchronization." });
+    }
+
+    const emailLower = email.trim().toLowerCase();
+    let user = await User.findOne({ email: emailLower });
+
+    // If a user exists but role differs from the requested role, refuse sync to
+    // avoid accidental cross-role account creation (e.g., someone signing up as
+    // a parent with an email already registered as a therapist).
+    if (user && role && user.role && user.role !== role) {
+      return res.status(403).json({
+        error:
+          "An account with this email already exists with a different role. Please sign in using that account or contact support.",
+      });
+    }
+
+    if (!user) {
+      // Create user if not exists (social sign-up)
+      const randomPassword =
+        Math.random().toString(36).slice(-10) +
+        Math.random().toString(36).slice(-10);
+      user = new User({
+        role: role || "parent",
+        name: name || emailLower.split("@")[0],
+        email: emailLower,
+        password: randomPassword,
+        phone: "",
+        specialization: role === "therapist" ? "General" : "",
+      });
+      await user.save();
+    }
+
+    const token = makeToken(user._id, user.role);
+    res.json({ token, user: safeUser(user) });
+  } catch (error) {
+    console.error("Firebase Sync Error:", error);
+    res.status(500).json({ error: "Server error during account sync." });
+  }
+});
+
 // GET /api/auth/me (token check)
 app.get("/api/auth/me", verifyToken, async (req, res) => {
   try {
-    if (!isValidId(req.user.id)) return res.status(400).json({ error: "Invalid user ID format." });
+    if (!isValidId(req.user.id))
+      return res.status(400).json({ error: "Invalid user ID format." });
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User not found." });
     res.json({ user: safeUser(user) });
@@ -152,24 +261,66 @@ app.get("/api/auth/me", verifyToken, async (req, res) => {
 // POST /api/children/create  (Parent or Therapist creates child profile)
 app.post("/api/children/create", async (req, res) => {
   try {
-    const { parentId, therapistId, name, age, gender, profilePhoto, supportLevel } = req.body;
+    const {
+      parentId,
+      therapistId,
+      name,
+      age,
+      gender,
+      profilePhoto,
+      supportLevel,
+    } = req.body;
 
     if (!name || !age) {
-      return res.status(400).json({ error: "Child's name and age are required." });
+      return res
+        .status(400)
+        .json({ error: "Child's name and age are required." });
+    }
+
+    const childAge = parseInt(age);
+    const childLevel = supportLevel?.includes("3")
+      ? 3
+      : supportLevel?.includes("2")
+        ? 2
+        : 1;
+    const {
+      findBestTherapistForChild,
+      getAgeGroupString,
+    } = require("./seed/seedTherapists");
+    const computedAgeGroup = getAgeGroupString(childAge);
+
+    // Automatically find matching therapist based on Age Group & capacity (<15) if not specified
+    let matchedTherapistId = therapistId || null;
+    if (!matchedTherapistId) {
+      try {
+        const therapists = await User.find({ role: "therapist" });
+        if (therapists.length > 0) {
+          const matched = findBestTherapistForChild(
+            childAge,
+            childLevel,
+            therapists,
+          );
+          if (matched) matchedTherapistId = matched._id;
+        }
+      } catch (matchErr) {
+        console.warn("Therapist auto-matching error:", matchErr.message);
+      }
     }
 
     const newChild = new Child({
       name,
-      age: parseInt(age),
+      age: childAge,
       gender: gender || "male",
       profilePhoto: profilePhoto || null,
       supportLevel: supportLevel || null,
+      level: childLevel,
+      ageGroup: computedAgeGroup,
       parentId: parentId || null,
-      therapistId: therapistId || null,
+      therapistId: matchedTherapistId,
     });
 
     // If created by therapist without parentId, generate link code
-    if (!parentId && therapistId) {
+    if (!parentId && matchedTherapistId) {
       newChild.linkCode = generateLinkCode();
     }
 
@@ -177,12 +328,16 @@ app.post("/api/children/create", async (req, res) => {
 
     // Link child ID to Parent doc if parentId exists
     if (parentId) {
-      await User.findByIdAndUpdate(parentId, { $addToSet: { children: newChild._id } });
+      await User.findByIdAndUpdate(parentId, {
+        $addToSet: { children: newChild._id },
+      });
     }
 
     // Link child ID to Therapist doc if therapistId exists
-    if (therapistId) {
-      await User.findByIdAndUpdate(therapistId, { $addToSet: { assignedChildren: newChild._id } });
+    if (matchedTherapistId) {
+      await User.findByIdAndUpdate(matchedTherapistId, {
+        $addToSet: { assignedChildren: newChild._id },
+      });
     }
 
     res.status(201).json({ success: true, child: newChild });
@@ -195,7 +350,8 @@ app.post("/api/children/create", async (req, res) => {
 // GET /api/children/:userId  (Fetch all children linked to parent or therapist)
 app.get("/api/children/:userId", async (req, res) => {
   try {
-    if (!isValidId(req.params.userId)) return res.status(400).json({ error: "Invalid user ID format." });
+    if (!isValidId(req.params.userId))
+      return res.status(400).json({ error: "Invalid user ID format." });
     const user = await User.findById(req.params.userId);
     if (!user) return res.status(404).json({ error: "User not found." });
 
@@ -209,18 +365,29 @@ app.get("/api/children/:userId", async (req, res) => {
     const children = await Child.find(childQuery);
     const allActivities = await Activity.find();
 
-    const populatedChildren = children.map((c) => {
-      const cObj = c.toObject();
-      return {
-        ...cObj,
-        assignedActivities: (c.assignedTasks || [])
-          .map((tid) => allActivities.find((a) => String(a._id) === String(tid)))
-          .filter(Boolean),
-        completedActivities: (c.completedTasks || [])
-          .map((tid) => allActivities.find((a) => String(a._id) === String(tid)))
-          .filter(Boolean),
-      };
-    });
+    const populatedChildren = await Promise.all(
+      children.map(async (c) => {
+        const cObj = c.toObject();
+        const streakData = await calculateStreakAndMonthlyActivity(c._id);
+        return {
+          ...cObj,
+          streak: streakData.currentStreak,
+          longestStreak: streakData.longestStreak,
+          totalActiveDays: streakData.totalActiveDays,
+          monthCalendar: streakData.monthCalendar,
+          assignedActivities: (c.assignedTasks || [])
+            .map((tid) =>
+              allActivities.find((a) => String(a._id) === String(tid)),
+            )
+            .filter(Boolean),
+          completedActivities: (c.completedTasks || [])
+            .map((tid) =>
+              allActivities.find((a) => String(a._id) === String(tid)),
+            )
+            .filter(Boolean),
+        };
+      }),
+    );
 
     res.json(populatedChildren);
   } catch (error) {
@@ -232,15 +399,20 @@ app.get("/api/children/:userId", async (req, res) => {
 // DELETE /api/children/:childId (Delete child profile)
 app.delete("/api/children/:childId", async (req, res) => {
   try {
-    if (!isValidId(req.params.childId)) return res.status(400).json({ error: "Invalid child ID format." });
+    if (!isValidId(req.params.childId))
+      return res.status(400).json({ error: "Invalid child ID format." });
     const child = await Child.findById(req.params.childId);
     if (!child) return res.status(404).json({ error: "Child not found." });
 
     if (child.parentId) {
-      await User.findByIdAndUpdate(child.parentId, { $pull: { children: child._id } });
+      await User.findByIdAndUpdate(child.parentId, {
+        $pull: { children: child._id },
+      });
     }
     if (child.therapistId) {
-      await User.findByIdAndUpdate(child.therapistId, { $pull: { assignedChildren: child._id } });
+      await User.findByIdAndUpdate(child.therapistId, {
+        $pull: { assignedChildren: child._id },
+      });
     }
 
     await Child.findByIdAndDelete(req.params.childId);
@@ -254,7 +426,8 @@ app.delete("/api/children/:childId", async (req, res) => {
 app.post("/api/children/generate-link-code", async (req, res) => {
   try {
     const { childId } = req.body;
-    if (!isValidId(childId)) return res.status(400).json({ error: "Invalid child ID format." });
+    if (!isValidId(childId))
+      return res.status(400).json({ error: "Invalid child ID format." });
     const child = await Child.findById(childId);
     if (!child) return res.status(404).json({ error: "Child not found." });
 
@@ -273,32 +446,48 @@ app.post("/api/children/link-by-code", async (req, res) => {
   try {
     const { parentId, code } = req.body;
     if (!parentId || !code) {
-      return res.status(400).json({ error: "Parent ID and Link Code required." });
+      return res
+        .status(400)
+        .json({ error: "Parent ID and Link Code required." });
     }
 
     const child = await Child.findOne({ linkCode: code.toUpperCase().trim() });
     if (!child) {
-      return res.status(404).json({ error: "Invalid Link Code. Please check and try again." });
+      return res
+        .status(404)
+        .json({ error: "Invalid Link Code. Please check and try again." });
     }
 
     child.parentId = parentId;
     child.linkCode = null; // Clear code once linked
     await child.save();
 
-    await User.findByIdAndUpdate(parentId, { $addToSet: { children: child._id } });
+    await User.findByIdAndUpdate(parentId, {
+      $addToSet: { children: child._id },
+    });
 
-    res.json({ success: true, message: `Successfully linked ${child.name}!`, child });
+    res.json({
+      success: true,
+      message: `Successfully linked ${child.name}!`,
+      child,
+    });
   } catch (error) {
     res.status(500).json({ error: "Failed to link child profile." });
   }
 });
 
-// GET /api/child/:childId/tasks  (Child therapy view)
+// GET /api/child/:childId/tasks  (Child therapy view — supports both ObjectId and custom string childId)
 app.get("/api/child/:childId/tasks", async (req, res) => {
   try {
-    if (!isValidId(req.params.childId)) return res.status(400).json({ error: "Invalid child ID format." });
-    const child = await Child.findById(req.params.childId);
-    if (!child) return res.status(404).json({ error: "Child profile not found." });
+    const { childId } = req.params;
+    let child;
+    if (mongoose.Types.ObjectId.isValid(childId)) {
+      child = await Child.findById(childId);
+    } else {
+      child = await Child.findOne({ childId });
+    }
+    if (!child)
+      return res.status(404).json({ error: "Child profile not found." });
 
     const allActivities = await Activity.find();
 
@@ -309,6 +498,8 @@ app.get("/api/child/:childId/tasks", async (req, res) => {
       .map((id) => allActivities.find((a) => String(a._id) === String(id)))
       .filter(Boolean);
 
+    const streakData = await calculateStreakAndMonthlyActivity(child._id);
+
     res.json({
       _id: child._id,
       childId: child.childId,
@@ -318,6 +509,10 @@ app.get("/api/child/:childId/tasks", async (req, res) => {
       assessmentDone: child.assessmentDone,
       assigned,
       completed,
+      streak: streakData.currentStreak,
+      longestStreak: streakData.longestStreak,
+      totalActiveDays: streakData.totalActiveDays,
+      monthCalendar: streakData.monthCalendar,
     });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch child tasks." });
@@ -328,8 +523,12 @@ app.get("/api/child/:childId/tasks", async (req, res) => {
 app.post("/api/children/assign-task", async (req, res) => {
   try {
     const { childId, activityId } = req.body;
-    if (!isValidId(childId)) return res.status(400).json({ error: "Invalid child ID format." });
-    const child = await Child.findById(childId);
+    let child;
+    if (mongoose.Types.ObjectId.isValid(childId)) {
+      child = await Child.findById(childId);
+    } else {
+      child = await Child.findOne({ childId });
+    }
     if (!child) return res.status(404).json({ error: "Child not found." });
 
     if (!child.assignedTasks.includes(activityId)) {
@@ -343,12 +542,16 @@ app.post("/api/children/assign-task", async (req, res) => {
   }
 });
 
-// POST /api/children/complete-task  { childId, activityId }
+// POST /api/children/complete-task  { childId, activityId, score, emotion }
 app.post("/api/children/complete-task", async (req, res) => {
   try {
-    const { childId, activityId } = req.body;
-    if (!isValidId(childId)) return res.status(400).json({ error: "Invalid child ID format." });
-    const child = await Child.findById(childId);
+    const { childId, activityId, score = 4, emotion = "Happy" } = req.body;
+    let child;
+    if (mongoose.Types.ObjectId.isValid(childId)) {
+      child = await Child.findById(childId);
+    } else {
+      child = await Child.findOne({ childId });
+    }
     if (!child) return res.status(404).json({ error: "Child not found." });
 
     child.assignedTasks = child.assignedTasks.filter((id) => id !== activityId);
@@ -357,57 +560,36 @@ app.post("/api/children/complete-task", async (req, res) => {
     }
     await child.save();
 
+    // Create session record to instantly update progress, streak, and history
+    try {
+      const isObjectId = isValidId(activityId);
+      await Session.create({
+        child: child._id,
+        activity: isObjectId ? activityId : null,
+        score: Math.min(5, Math.max(1, Number(score) || 4)),
+        emotion: emotion || "Happy",
+        duration: 15,
+        completedAt: new Date(),
+      });
+
+      await ActivityLog.create({
+        child: child._id,
+        activity: String(activityId),
+        performanceScore: (Number(score) || 4) * 20,
+        engagement: "High",
+        notes: "Completed from Therapy Dashboard",
+        completedAt: new Date(),
+      });
+    } catch (logErr) {
+      console.warn(
+        "Session auto-log on complete-task skipped:",
+        logErr.message,
+      );
+    }
+
     res.json({ success: true, completedTasks: child.completedTasks });
   } catch (error) {
     res.status(500).json({ error: "Failed to complete task." });
-  }
-});
-
-// ═════════════════════════════════════════════════════════════════════════════
-// ASSESSMENT
-// ═════════════════════════════════════════════════════════════════════════════
-
-// GET /api/assessment/questions
-app.get("/api/assessment/questions", async (_req, res) => {
-  try {
-    const questions = await Question.find().sort({ id: 1 });
-    res.json(questions);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch assessment questions." });
-  }
-});
-
-// POST /api/assessment/submit  { childId, answers: [score, score, ...] }
-app.post("/api/assessment/submit", async (req, res) => {
-  try {
-    const { childId, answers } = req.body;
-    if (!childId || !Array.isArray(answers)) {
-      return res.status(400).json({ error: "childId and answers array required." });
-    }
-
-    if (!isValidId(childId)) return res.status(400).json({ error: "Invalid child ID format." });
-    const child = await Child.findById(childId);
-    if (!child) {
-      return res.status(404).json({ error: "Child profile not found." });
-    }
-
-    const level = computeLevel(answers);
-    const assignedTasks = await autoAssignTasks(level);
-
-    child.level = level;
-    child.assessmentDone = true;
-    child.assignedTasks = assignedTasks;
-    await child.save();
-
-    res.json({
-      level,
-      levelLabel: ["", "Beginner", "Intermediate", "Advanced"][level],
-      assignedTasks: child.assignedTasks,
-      message: `Level ${level} identified! Tasks have been assigned.`,
-    });
-  } catch (error) {
-    console.error("Assessment Error:", error);
-    res.status(500).json({ error: "Failed to submit assessment." });
   }
 });
 
@@ -443,7 +625,7 @@ app.get("/api/activities/recommendations", async (req, res) => {
           a.focusAreas.some((f) => f.toLowerCase().includes(kw)) ||
           a.title.toLowerCase().includes(kw) ||
           a.category.toLowerCase().includes(kw) ||
-          a.description.toLowerCase().includes(kw)
+          a.description.toLowerCase().includes(kw),
       );
       result = filtered.length > 0 ? filtered : result.slice(0, 3);
     } else {
@@ -467,18 +649,171 @@ app.get("/api/activities/:id", async (req, res) => {
   }
 });
 
+// GET /api/children/child/:childId  (Single child by ObjectId OR custom childId string)
+app.get("/api/children/child/:childId", async (req, res) => {
+  try {
+    const { childId } = req.params;
+    let child;
+    if (mongoose.Types.ObjectId.isValid(childId)) {
+      child = await Child.findById(childId);
+    } else {
+      child = await Child.findOne({ childId });
+    }
+    if (!child) return res.status(404).json({ error: "Child not found." });
+    res.json(child);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch child." });
+  }
+});
+
+// GET /api/sessions/child/:childId  (Sessions for a child — used by ChildDashboard progress view)
+app.get("/api/sessions/child/:childId", async (req, res) => {
+  try {
+    const { childId } = req.params;
+    let oid;
+    if (mongoose.Types.ObjectId.isValid(childId)) {
+      oid = childId;
+    } else {
+      const child = await Child.findOne({ childId });
+      oid = child ? child._id : null;
+    }
+    if (!oid) return res.status(404).json({ error: "Child not found." });
+
+    const sessions = await Session.find({ child: oid })
+      .sort({ completedAt: -1 })
+      .limit(50)
+      .lean();
+    res.json(sessions);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch sessions." });
+  }
+});
+
+// POST /api/sessions/log
+const { logSession } = require("./controllers/activityController");
+app.post("/api/sessions/log", logSession);
+
+// ── Emotion Session Logs (Happiness Games & Emotion Tracking) ─────────────
+const EmotionSessionLog = require("./models/EmotionSessionLog");
+
+// POST /api/sessions/emotion-log
+app.post("/api/sessions/emotion-log", async (req, res) => {
+  try {
+    const {
+      childId,
+      sessionId,
+      activityId,
+      activityTitle,
+      durationMins,
+      emotionPerMinute,
+      interventionCount,
+      happinessGamesTriggered,
+      interventions,
+      endEmotionState,
+      activitiesCausingNegative,
+      bestHappinessGames,
+      recoveryTimeSeconds,
+      scoreHistory
+    } = req.body;
+
+    let childObjectId = childId;
+    if (childId && !isValidId(childId)) {
+      const child = await Child.findOne({ childId });
+      if (child) childObjectId = child._id;
+    }
+
+    const removeActivityFromPlan = activitiesCausingNegative && activitiesCausingNegative.length > 0;
+    const flaggedToTherapist = (interventionCount || 0) >= 2;
+
+    const log = new EmotionSessionLog({
+      child: childObjectId,
+      sessionId: sessionId || `session_${Date.now()}`,
+      activityId,
+      activityTitle,
+      durationMins: durationMins || 0,
+      emotionPerMinute: emotionPerMinute || [],
+      interventionCount: interventionCount || 0,
+      happinessGamesTriggered: happinessGamesTriggered || [],
+      interventions: interventions || [],
+      endEmotionState: endEmotionState || "Neutral",
+      activitiesCausingNegative: activitiesCausingNegative || [],
+      bestHappinessGames: bestHappinessGames || [],
+      recoveryTimeSeconds: recoveryTimeSeconds || 0,
+      scoreHistory: scoreHistory || [],
+      recommendationFlags: {
+        removeActivityFromPlan,
+        flaggedToTherapist,
+        preferredHappinessGameOrder: bestHappinessGames || []
+      }
+    });
+
+    await log.save();
+    res.status(201).json({ success: true, log });
+  } catch (error) {
+    console.error("Emotion Session Log Error:", error);
+    res.status(500).json({ error: "Failed to save emotion session log." });
+  }
+});
+
+// GET /api/sessions/emotion-log/:childId
+app.get("/api/sessions/emotion-log/:childId", async (req, res) => {
+  try {
+    let childObjectId = req.params.childId;
+    if (!isValidId(childObjectId)) {
+      const child = await Child.findOne({ childId: childObjectId });
+      if (child) childObjectId = child._id;
+    }
+
+    const logs = await EmotionSessionLog.find({ child: childObjectId })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .lean();
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch emotion session logs." });
+  }
+});
+
+// ── Progress / Trend Prediction ───────────────────────────────────────────────
+// POST /api/progress/trend
+app.use("/api/progress", require("./routes/progressRoutes"));
+
+// ── Therapist Endpoints ──────────────────────────────────────────────────────
+app.use("/api/therapist", require("./routes/therapistRoutes"));
+
+// ── AI Chatbot Endpoints ───────────────────────────────────────────────────────
+const {
+  handleChat,
+  getChatStatus,
+  saveApiKey,
+} = require("./controllers/chatController");
+app.post("/api/chat", handleChat);
+app.get("/api/chat/status", getChatStatus);
+app.post("/api/chat/config", saveApiKey);
+
+// ── Messages Endpoints ────────────────────────────────────────────────────────
+const messageController = require("./controllers/messageController");
+app.post("/api/messages/send", messageController.sendMessage);
+app.get("/api/messages/:childId", messageController.getMessages);
+app.patch("/api/messages/:messageId/read", messageController.markAsRead);
+app.patch("/api/messages/child/:childId/read-all", messageController.markAllRead);
+
+// ── Direct Level & Feedback Route Aliases ─────────────────────────────────────
+const therapistController = require("./controllers/therapistController");
+app.put("/api/children/:childId/level", therapistController.updateChildLevel);
+app.get(
+  "/api/parent/feedback/:childId",
+  therapistController.getFeedbackByChild,
+);
+app.get("/api/feedback/child/:childId", therapistController.getFeedbackByChild);
+
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) =>
-  res.status(404).json({ error: `${req.method} ${req.url} not found` })
+  res.status(404).json({ error: `${req.method} ${req.url} not found` }),
 );
 
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`✅  Server → http://localhost:${PORT}`);
-    console.log(`   POST /api/auth/register | /api/auth/login`);
-    console.log(`   POST /api/children/create | GET /api/children/:userId`);
-    console.log(`   GET  /api/assessment/questions`);
-  });
+  startServer();
 }
 
 module.exports = app;
