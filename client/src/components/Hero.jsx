@@ -349,36 +349,26 @@ function Hero() {
         </div>
 
         {/* =======================
-            Glass Video
+            Full-Screen Background Video
         ======================== */}
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster="/images/poster.jpg"
+          src="/videos/autism.mp4"
+          style={styles.bgVideo}
+        />
+        <div style={styles.bgVideoOverlay} />
 
-        <div style={styles.videoContainer}>
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            loop
-            playsInline
-            poster="/images/poster.jpg"
-            src="/videos/autism.mp4"
-            style={styles.video}
-          />
+        {/* Mute / unmute button — bottom right of hero */}
+        <button onClick={toggleMute} style={styles.muteButton}>
+          {muted ? "🔇" : "🔊"}
+        </button>
 
-          <div style={styles.videoOverlay} />
-
-          <button
-            onClick={toggleMute}
-            style={styles.muteButton}
-          >
-            {muted ? "🔇" : "🔊"}
-          </button>
-
-          <div style={styles.videoBadge}>
-            Live Therapy Session
-          </div>
-        </div>
-
-      </div>
+      </div>{/* /heroWrapper */}
 
     </section>
   );
@@ -523,36 +513,69 @@ function InfoSlider() {
                   "The daily activities finally felt made for my son, not just generic worksheets. Within two months we could see real changes in how he communicated with us."
                 </p>
                 <div style={styles.authorSection}>
-                  <div style={styles.avatar}>A</div>
+                  <img
+                    src="/images/success/success_boy.jpg"
+                    alt="Aarav"
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "2px solid #6366f1",
+                      boxShadow: "0 4px 10px rgba(99,102,241,0.2)"
+                    }}
+                  />
                   <div>
-                    <h5 style={styles.authorName}>Ananya R.</h5>
-                    <span style={styles.authorRole}>Parent of a 6-year-old</span>
+                    <h5 style={styles.authorName}>Ananya R. & Aarav</h5>
+                    <span style={styles.authorRole}>Parent of a 6-year-old (Level 1 Progressed)</span>
                   </div>
                 </div>
               </div>
               <div style={styles.reviewCard}>
                 <div style={styles.stars}>⭐⭐⭐⭐⭐</div>
                 <p style={styles.reviewQuote}>
-                  "The weekly progress reports gave us language to bring to our therapist. It turned guesswork into an actual conversation about what's working."
+                  "We used to feel overwhelmed. Now Kabir claps, smiles, and completes puzzle games with enthusiasm every morning."
                 </p>
                 <div style={styles.authorSection}>
-                  <div style={styles.avatar}>M</div>
+                  <img
+                    src="/images/success/success_mother.jpg"
+                    alt="Kabir & Meera"
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "2px solid #8b5cf6",
+                      boxShadow: "0 4px 10px rgba(139,92,246,0.2)"
+                    }}
+                  />
                   <div>
-                    <h5 style={styles.authorName}>Marcus T.</h5>
-                    <span style={styles.authorRole}>Parent of a 4-year-old</span>
+                    <h5 style={styles.authorName}>Meera K. & Kabir</h5>
+                    <span style={styles.authorRole}>Parent of a 5-year-old (At-Home Therapy)</span>
                   </div>
                 </div>
               </div>
               <div style={styles.reviewCard}>
                 <div style={styles.stars}>⭐⭐⭐⭐⭐</div>
                 <p style={styles.reviewQuote}>
-                  "The emotion tracking during sessions was the part that surprised me most. We could finally tell the difference between 'quiet and focused' and 'quiet and overwhelmed.'"
+                  "The emotion tracking and creative games were the breakthrough we needed. Diya is now confident, smiling, and loves showing her creative achievements!"
                 </p>
                 <div style={styles.authorSection}>
-                  <div style={styles.avatar}>P</div>
+                  <img
+                    src="/images/success/success_girl.jpg"
+                    alt="Diya"
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "2px solid #10b981",
+                      boxShadow: "0 4px 10px rgba(16,185,129,0.2)"
+                    }}
+                  />
                   <div>
-                    <h5 style={styles.authorName}>Priya S.</h5>
-                    <span style={styles.authorRole}>Parent of a 8-year-old</span>
+                    <h5 style={styles.authorName}>Priya S. & Diya</h5>
+                    <span style={styles.authorRole}>Parent of a 7-year-old (Communication Breakthrough)</span>
                   </div>
                 </div>
               </div>
@@ -612,84 +635,70 @@ export default function HomePage() {
 const styles = {
 
 heroSection:{
-minHeight:"100vh",
-paddingTop:"90px",
-paddingBottom:"80px",
 position:"relative",
-overflow:"hidden"
+minHeight:"100vh",
+overflow:"hidden",
+display:"flex",
+alignItems:"center"
 },
 
 heroWrapper:{
-maxWidth:"1200px",
+maxWidth:"900px",
 margin:"auto",
-padding:"0 25px"
+padding:"120px 32px 80px",
+position:"relative",
+zIndex:2,
+width:"100%"
 },
 
 heroGrid:{
-display:"grid",
-gridTemplateColumns:"1fr 1fr",
-gap:"60px",
-alignItems:"center",
-marginTop:"60px"
+display:"flex",
+flexDirection:"column",
+gap:"32px",
+alignItems:"flex-start"
 },
 
-videoContainer:{
-position:"relative",
-height:"430px",
-borderRadius:"28px",
-overflow:"hidden",
-marginBottom:"70px",
-boxShadow:"0 30px 70px rgba(0,0,0,.18)"
-},
-
-video:{
-width:"100%",
-height:"100%",
-objectFit:"cover"
-},
-
-videoOverlay:{
+bgVideo:{
 position:"absolute",
 inset:0,
-background:
-"linear-gradient(rgba(255,255,255,.08),rgba(0,0,0,.35))",
-backdropFilter:"blur(2px)"
+width:"100%",
+height:"100%",
+objectFit:"cover",
+zIndex:0
 },
 
-videoBadge:{
+bgVideoOverlay:{
 position:"absolute",
-left:"25px",
-bottom:"25px",
-background:"rgba(255,255,255,.15)",
-backdropFilter:"blur(18px)",
-padding:"10px 18px",
-borderRadius:"50px",
-color:"#fff",
-fontWeight:600
+inset:0,
+background:"linear-gradient(135deg,rgba(15,10,40,0.72) 0%,rgba(30,20,70,0.60) 60%,rgba(0,0,0,0.45) 100%)",
+zIndex:1
 },
 
 muteButton:{
 position:"absolute",
-right:"20px",
-bottom:"20px",
-width:"45px",
-height:"45px",
+right:"28px",
+bottom:"28px",
+zIndex:10,
+width:"46px",
+height:"46px",
 borderRadius:"50%",
-border:"none",
+border:"2px solid rgba(255,255,255,0.35)",
 cursor:"pointer",
 fontSize:"20px",
-background:"rgba(255,255,255,.2)",
-backdropFilter:"blur(15px)",
+background:"rgba(255,255,255,.15)",
+backdropFilter:"blur(18px)",
 color:"#fff"
 },
 
 badge:{
 display:"inline-block",
 padding:"8px 18px",
-background:"var(--primary-light)",
+background:"rgba(255,255,255,0.18)",
+backdropFilter:"blur(10px)",
 borderRadius:"50px",
 fontWeight:700,
-color:"var(--primary)",
+color:"#fff",
+border:"1px solid rgba(255,255,255,0.3)",
 marginBottom:"25px"
 },
 
@@ -698,13 +707,13 @@ fontSize:"3.6rem",
 fontWeight:800,
 lineHeight:1.15,
 marginBottom:"25px",
-color:"var(--text)"
+color:"#ffffff"
 },
 
 description:{
 fontSize:"1.05rem",
 lineHeight:1.8,
-color:"var(--text-muted)",
+color:"rgba(255,255,255,0.85)",
 marginBottom:"35px"
 },
 
@@ -728,17 +737,19 @@ fontSize:"1rem"
 secondaryButton:{
 padding:"15px 28px",
 borderRadius:"15px",
-border:"2px solid var(--primary)",
-background:"transparent",
+border:"2px solid rgba(255,255,255,0.6)",
+background:"rgba(255,255,255,0.1)",
+backdropFilter:"blur(10px)",
 cursor:"pointer",
 fontWeight:700,
-color:"var(--primary)"
+color:"#fff"
 },
 
 stats:{
 display:"grid",
-gridTemplateColumns:"repeat(3,1fr)",
-gap:"20px"
+gridTemplateColumns:"repeat(4,1fr)",
+gap:"20px",
+marginTop:"12px"
 },
 
 rightContainer:{

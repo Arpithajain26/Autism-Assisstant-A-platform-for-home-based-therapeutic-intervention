@@ -78,6 +78,17 @@ exports.logSession = async (req, res) => {
   }
 };
 
+exports.getHappyBooster = async (req, res) => {
+  try {
+    const { ageGroup, level, age } = req.query;
+    const { getHappyBoosterActivity } = require("../data/curatedActivities");
+    const happyAct = getHappyBoosterActivity(age || ageGroup || "2-5", level || 1);
+    res.json({ success: true, activity: happyAct });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 function getWeekNumber(date) {
   const start = new Date(date.getFullYear(), 0, 1);
   return Math.ceil((((date - start) / 86400000) + start.getDay() + 1) / 7);

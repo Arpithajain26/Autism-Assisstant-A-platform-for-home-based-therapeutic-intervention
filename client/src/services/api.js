@@ -97,7 +97,6 @@ export const registerUser = async (payload) => {
   try {
     return await req("POST", "/api/auth/register", payload);
   } catch (err) {
-
     // Only fall to localStorage if server is completely unreachable
     const isNetworkError =
       err.message === "Failed to fetch" ||
@@ -131,11 +130,14 @@ export const registerUser = async (payload) => {
   }
 };
 
-export const loginUser = async (email, password) => {
+export const loginUser = async (email, password, expectedRole = null) => {
   try {
-    return await req("POST", "/api/auth/login", { email, password });
+    return await req("POST", "/api/auth/login", {
+      email,
+      password,
+      expectedRole,
+    });
   } catch (err) {
-
     const isNetworkError =
       err.message === "Failed to fetch" ||
       err.message === "NetworkError when attempting to fetch resource." ||
@@ -148,7 +150,7 @@ export const loginUser = async (email, password) => {
       const user = users.find((u) => u.email === emailLower);
       if (!user) {
         throw new Error(
-          "No account found with this email. Please sign up first."
+          "No account found with this email. Please sign up first.",
         );
       }
       const token = "token_" + Date.now();
@@ -167,7 +169,6 @@ export const firebaseSync = async (payload) => {
   try {
     return await req("POST", "/api/auth/firebase-sync", payload);
   } catch (err) {
-
     // Only fall to localStorage if server is completely unreachable
     const isNetworkError =
       err.message === "Failed to fetch" ||
@@ -192,9 +193,6 @@ export const firebaseSync = async (payload) => {
         };
         saveLocalUsers([...users, user]);
       } else {
-        if (payload.mode === "register") {
-          throw new Error("Email already registered. Please sign in.");
-        }
         if (payload.role && user.role && user.role !== payload.role) {
           throw new Error(
             "An account with this email already exists with a different role. Please sign in using that account or contact support.",
@@ -378,7 +376,10 @@ export const submitAssessment = async (childId, scores) => {
 
 // ── Activities ────────────────────────────────────────────────────────────────
 export const getActivities = (level, ageGroup) =>
-  req("GET", `/api/activities${level ? `?level=${level}` : ""}${ageGroup ? `&ageGroup=${ageGroup}` : ""}`).catch(() => {
+  req(
+    "GET",
+    `/api/activities${level ? `?level=${level}` : ""}${ageGroup ? `&ageGroup=${ageGroup}` : ""}`,
+  ).catch(() => {
     return CURATED_ACTIVITIES.filter((a) => {
       const matchLvl = !level || Number(a.level) === parseInt(level);
       const matchAge = !ageGroup || a.ageGroup === ageGroup;
@@ -400,7 +401,9 @@ export const getRecommendations = (level, focusArea = "") => {
 
 export const getActivityById = (id) =>
   req("GET", `/api/activities/${id}`).catch(() => {
-    return CURATED_ACTIVITIES.find((a) => a._id === id) || CURATED_ACTIVITIES[0];
+    return (
+      CURATED_ACTIVITIES.find((a) => a._id === id) || CURATED_ACTIVITIES[0]
+    );
   });
 
 // ── Children Management ────────────────────────────────────────────────────────
@@ -934,7 +937,9 @@ export const logSession = async (sessionData) => {
         _id: "log_" + Date.now(),
         child: sessionData.childId,
         activity: sessionData.activityId,
-        performanceScore: Number(sessionData.score || sessionData.performanceScore || 80),
+        performanceScore: Number(
+          sessionData.score || sessionData.performanceScore || 80,
+        ),
         engagement: sessionData.engagement || "Medium",
         notes: sessionData.notes || "",
         completedAt: new Date().toISOString(),
@@ -966,14 +971,8 @@ export const predictEmotion = async (imageBase64) => {
     if (!res.ok) throw new Error("ML emotion prediction failed");
     return await res.json();
   } catch (err) {
-    return {
-      emotion: "happy",
-      confidence: 90.0,
-      emoji: "😄",
-      color: "#22c55e",
-      label: "Happy / Joyful",
-      engagement_status: "Positive Engagement",
-    };
+    // Return null so EmotionDetector falls back to real client-side face-api detection
+    return null;
   }
 };
 
@@ -997,7 +996,8 @@ export const generateSessionReport = async (sessionReportData) => {
       calm_percentage: 20.0,
       distress_percentage: 5.0,
       readiness_status: "Ready for Next Level",
-      clinical_recommendation: "Child demonstrated enthusiastic engagement and joy! Great opportunity to reinforce learning or progress to next difficulty level.",
+      clinical_recommendation:
+        "Child demonstrated enthusiastic engagement and joy! Great opportunity to reinforce learning or progress to next difficulty level.",
     };
   }
 };
@@ -1032,7 +1032,9 @@ export const getChildSessions = async (childId) => {
     return await req("GET", `/api/sessions/child/${childId}`);
   } catch (err) {
     try {
-      const logs = JSON.parse(localStorage.getItem("app_activity_logs") || "[]");
+      const logs = JSON.parse(
+        localStorage.getItem("app_activity_logs") || "[]",
+      );
       return logs.filter((l) => l.child === childId);
     } catch {
       return [];
@@ -1040,10 +1042,25 @@ export const getChildSessions = async (childId) => {
   }
 };
 
-// ── Therapist API Methods ───────────────────────────────────────────────────
-export const getTherapistChildren = async () => {
+export const fetchHappyBooster = async (age, level) => {
   try {
-    return await req("GET", "/api/therapist/children");
+    const res = await req("GET", `/api/activities/happy-booster?age=${age}&level=${level}`);
+    return res.activity;
+  } catch (err) {
+    const { getHappyBoosterActivity } = await import("../data/curatedActivities");
+    return getHappyBoosterActivity(age, level);
+  }
+};
+
+// ── Therapist API Methods ───────────────────────────────────────────────────
+export const getTherapistChildren = async (therapistId) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("auth_user") || "{}");
+    const tId = therapistId || user._id || user.id;
+    const url = tId
+      ? `/api/therapist/children?therapistId=${tId}`
+      : "/api/therapist/children";
+    return await req("GET", url);
   } catch (err) {
     const localKids = getLocalChildren();
     return localKids.map((k) => ({
@@ -1065,41 +1082,42 @@ export const getTherapistChildProgress = async (childId) => {
   } catch (err) {
     return {
       child: { _id: childId, name: "Child", level: 2 },
-      progressStatus: "Improving",
-      aiPrediction: "Improving",
-      weeklyScoreTrend: [
-        { week: "Week 1", score: 68 },
-        { week: "Week 2", score: 74 },
-        { week: "Week 3", score: 80 },
-        { week: "Current", score: 85 },
-      ],
+      progressStatus: "Collecting Data",
+      aiPrediction: "Collecting Data",
+      hasProgressData: false,
+      weeklyScoreTrend: [],
       domainScores: {
-        communication: 82,
-        social: 76,
-        sensory: 88,
-        motor: 84,
-        cognitive: 78,
+        communication: { score: 0, hasData: false, count: 0 },
+        social: { score: 0, hasData: false, count: 0 },
+        sensory: { score: 0, hasData: false, count: 0 },
+        motor: { score: 0, hasData: false, count: 0 },
+        cognitive: { score: 0, hasData: false, count: 0 },
       },
-      emotionDistribution: [
-        { emotion: "Happy 😊", percentage: 65, color: "#22c55e" },
-        { emotion: "Neutral 😐", percentage: 22, color: "#3b82f6" },
-        { emotion: "Curious 😲", percentage: 8, color: "#eab308" },
-        { emotion: "Frustrated 😠", percentage: 5, color: "#ef4444" },
-      ],
-      dominantEmotion: "Happy 😊",
-      recentSessions: [
-        { _id: "s1", date: new Date().toISOString(), activityName: "Emotion Matching Game", score: 5, performanceScore: 92, emotion: "Happy 😊", duration: "15 min" },
-        { _id: "s2", date: new Date(Date.now() - 86400000).toISOString(), activityName: "Bubble Popping OT", score: 4, performanceScore: 85, emotion: "Happy 😊", duration: "10 min" },
-        { _id: "s3", date: new Date(Date.now() - 172800000).toISOString(), activityName: "Story Sequencing", score: 4, performanceScore: 80, emotion: "Neutral 😐", duration: "20 min" },
-      ],
-      activityEmotionMap: [
-        { activity: "Emotion Matching Game", emotion: "Happy 😊", effect: "High positive engagement" },
-        { activity: "Story Sequencing Cards", emotion: "Focused 😐", effect: "Calm sustained attention" },
-        { activity: "Deep Pressure Calm", emotion: "Relaxed 😌", effect: "Sensory regulation achieved" },
-      ],
-      clinicalRecommendation: "Child is demonstrating strong mastery and joint attention. Consider advancing task complexity.",
+      emotionDistribution: [],
+      dominantEmotion: "No data",
+      streak: 0,
+      longestStreak: 0,
+      totalActiveDays: 0,
+      monthCalendar: { days: [], activeDaysCount: 0, totalDays: 0 },
+      assignedActivities: [],
+      completedActivities: [],
+      badges: [],
+      certificates: [],
+      recentSessions: [],
+      clinicalRecommendation:
+        "Progress data is unavailable. Reconnect to the server and refresh this profile.",
     };
   }
+};
+
+export const generateParentVideo = async (childId) => {
+  return await req("POST", `/api/therapist/children/${childId}/parent-video`, {
+    parentConsent: true,
+  });
+};
+
+export const getParentVideoStatus = async (videoId) => {
+  return await req("GET", `/api/therapist/parent-video/${videoId}`);
 };
 
 export const sendFeedback = async (childId, message, type = "general") => {
@@ -1113,7 +1131,9 @@ export const sendFeedback = async (childId, message, type = "general") => {
     });
   } catch (err) {
     try {
-      const localFeedback = JSON.parse(localStorage.getItem("app_feedback") || "[]");
+      const localFeedback = JSON.parse(
+        localStorage.getItem("app_feedback") || "[]",
+      );
       const newFb = {
         _id: "fb_" + Date.now(),
         child: childId,
@@ -1154,7 +1174,9 @@ export const getAlerts = async (therapistId) => {
   try {
     const user = JSON.parse(localStorage.getItem("auth_user") || "{}");
     const tId = therapistId || user._id || user.id;
-    const url = tId ? `/api/therapist/alerts?therapistId=${tId}` : "/api/therapist/alerts";
+    const url = tId
+      ? `/api/therapist/alerts?therapistId=${tId}`
+      : "/api/therapist/alerts";
     return await req("GET", url);
   } catch (err) {
     return [];
@@ -1163,7 +1185,11 @@ export const getAlerts = async (therapistId) => {
 
 export const acknowledgeAlert = async (alertId, childId, action) => {
   try {
-    return await req("POST", "/api/therapist/acknowledge-alert", { alertId, childId, action });
+    return await req("POST", "/api/therapist/acknowledge-alert", {
+      alertId,
+      childId,
+      action,
+    });
   } catch (err) {
     return { success: true };
   }
@@ -1174,7 +1200,9 @@ export const getParentFeedback = async (childId) => {
     return await req("GET", `/api/parent/feedback/${childId}`);
   } catch (err) {
     try {
-      const localFeedback = JSON.parse(localStorage.getItem("app_feedback") || "[]");
+      const localFeedback = JSON.parse(
+        localStorage.getItem("app_feedback") || "[]",
+      );
       return localFeedback.filter((f) => f.child === childId || !f.child);
     } catch {
       return [];
@@ -1191,27 +1219,74 @@ export const getAllTherapists = async () => {
 };
 
 // ── AI Chatbot API ──────────────────────────────────────────────────────────
-export const sendChatMessage = async (message, history = []) => {
+export const sendChatMessage = async (
+  message,
+  history = [],
+  userApiKey = null,
+  provider = null,
+) => {
   try {
-    return await req("POST", "/api/chat", { message, history });
+    return await req("POST", "/api/chat", {
+      message,
+      history,
+      userApiKey,
+      provider,
+    });
   } catch (err) {
     return {
-      reply: "🌟 **Autism Therapy Companion:**\n\nFor behavioral support, provide a quiet sensory environment, use deep pressure calming techniques, and maintain a visual routine.",
+      reply:
+        "🌟 **Autism Therapy Companion:**\n\nFor behavioral support, provide a quiet sensory environment, use deep pressure calming techniques, and maintain a visual routine.",
       source: "local_fallback",
+      model: "Clinical Assistant",
     };
   }
 };
 
-// ── Messages API ────────────────────────────────────────────────────────────
-export const sendDirectMessage = async (childId, senderId, senderRole, message) => {
+export const getChatStatus = async () => {
   try {
-    return await req("POST", "/api/messages/send", { childId, senderId, senderRole, message });
+    return await req("GET", "/api/chat/status");
   } catch (err) {
-    const localMsgs = JSON.parse(localStorage.getItem(`app_msgs_${childId}`) || "[]");
+    return {
+      configured: false,
+      activeProvider: "none",
+      activeModel: "Clinical Assistant",
+    };
+  }
+};
+
+export const saveChatApiKey = async (provider, apiKey) => {
+  try {
+    return await req("POST", "/api/chat/config", { provider, apiKey });
+  } catch (err) {
+    throw new Error(err.message || "Failed to save AI configuration");
+  }
+};
+
+// ── Messages API ────────────────────────────────────────────────────────────
+export const sendDirectMessage = async (
+  childId,
+  senderId,
+  senderRole,
+  message,
+) => {
+  try {
+    return await req("POST", "/api/messages/send", {
+      childId,
+      senderId,
+      senderRole,
+      message,
+    });
+  } catch (err) {
+    const localMsgs = JSON.parse(
+      localStorage.getItem(`app_msgs_${childId}`) || "[]",
+    );
     const newMsg = {
       _id: "msg_" + Date.now(),
       child: childId,
-      sender: { name: senderRole === "therapist" ? "Therapist" : "Parent", role: senderRole },
+      sender: {
+        name: senderRole === "therapist" ? "Therapist" : "Parent",
+        role: senderRole,
+      },
       senderRole,
       message,
       createdAt: new Date().toISOString(),
@@ -1230,8 +1305,503 @@ export const getDirectMessages = async (childId) => {
   }
 };
 
+export const markMessageRead = async (messageId) => {
+  try {
+    return await req("PATCH", `/api/messages/${messageId}/read`);
+  } catch (err) {
+    return { success: true };
+  }
+};
 
+export const markAllMessagesRead = async (childId, role) => {
+  try {
+    return await req("PATCH", `/api/messages/child/${childId}/read-all`, { role });
+  } catch (err) {
+    return { success: true };
+  }
+};
 
+// ── Personalized Parent AI System API ───────────────────────────────────────
+export const getParentAIPreferences = async () => {
+  try {
+    return await req("GET", "/api/parent/preferences");
+  } catch (err) {
+    const cached = JSON.parse(localStorage.getItem("parent_ai_prefs") || "{}");
+    return {
+      preferences: {
+        preferredLanguage: cached.preferredLanguage || "en",
+        preferredInteraction: cached.preferredInteraction || "text",
+        explanationLevel: cached.explanationLevel || "standard",
+        guidancePreference: cached.guidancePreference || "step_by_step",
+        assistanceFrequency: cached.assistanceFrequency || "medium",
+      },
+    };
+  }
+};
 
+export const updateParentAIPreferences = async (prefs) => {
+  try {
+    const res = await req("PUT", "/api/parent/preferences", prefs);
+    localStorage.setItem(
+      "parent_ai_prefs",
+      JSON.stringify(res.preferences || prefs),
+    );
+    return res;
+  } catch (err) {
+    localStorage.setItem("parent_ai_prefs", JSON.stringify(prefs));
+    return { success: true, preferences: prefs };
+  }
+};
 
+export const getPersonalizedRecommendation = async (childId) => {
+  try {
+    return await req(
+      "GET",
+      `/api/parent/recommendation/${childId || "active"}`,
+    );
+  } catch (err) {
+    return {
+      hasChild: true,
+      activity: {
+        _id: "act_rec_1",
+        title: "Visual Matching Play",
+        category: "Cognitive",
+        duration: "10 mins",
+        icon: "🧩",
+        xp: 40,
+      },
+      recommendation: {
+        explanationLevel: "standard",
+        language: "en",
+        summary:
+          "Your child's performance has improved in this activity over the last few sessions. We recommend continuing it for 10 minutes today.",
+        steps: [
+          "1. Set up matching card pairs.",
+          "2. Guide your child step-by-step through matching.",
+          "3. Celebrate each completed match with high praise.",
+        ],
+        why: "Selected based on recent session score trends and skill difficulty progression.",
+      },
+      performanceMetrics: { recentScoreAvg: 80, streak: 5 },
+    };
+  }
+};
+
+export const explainSimplyAPI = async (text, language = "en") => {
+  try {
+    return await req("POST", "/api/parent/explain-simply", { text, language });
+  } catch (err) {
+    return {
+      simplified:
+        language === "kn"
+          ? "ನಿಮ್ಮ ಮಗು ಉತ್ತಮ ಪ್ರಗತಿ ಸಾಧಿಸುತ್ತಿದೆ! ಇಂದು 10 ನಿಮಿಷಗಳ ಕಾಲ ಈ ಆಟವನ್ನು ಅಭ್ಯಾಸ ಮಾಡಿ."
+          : "Your child is doing well with this activity! You can try practicing this for 10 minutes today.",
+    };
+  }
+};
+
+export const askParentAIAPI = async (question, childId, isVoice = false) => {
+  try {
+    return await req("POST", "/api/parent/ask-ai", {
+      question,
+      childId,
+      isVoice,
+    });
+  } catch (err) {
+    return {
+      reply:
+        "AutismAssist AI is here to support you. Practicing 15 minutes of structured play daily strengthens joint attention and confidence!",
+      source: "fallback",
+    };
+  }
+};
+
+export const learnParentInteractionAPI = async (action) => {
+  try {
+    return await req("POST", "/api/parent/learn-interaction", { action });
+  } catch (err) {
+    return { success: true };
+  }
+};
+
+export const getPersonalizedWeeklySummaryAPI = async (childId) => {
+  try {
+    return await req("GET", `/api/parent/weekly-summary/${childId}`);
+  } catch (err) {
+    return {
+      summaries: {
+        simple: "Your child improved in communication activities this week!",
+        standard:
+          "Your child showed improvement in communication activities and completed more tasks independently.",
+        detailed:
+          "Communication task completion increased compared with the previous assessment period. Improvement was observed primarily in independent task execution.",
+      },
+    };
+  }
+};
+
+// ── Exam API ─────────────────────────────────────────────────────────────────
+export const getExamQuestions = async (childId) => {
+  try {
+    return await req("GET", `/api/exam/questions/${childId || "mock_child"}`);
+  } catch (err) {
+    // Local fallback questions generator if server unreachable
+    const childStored = JSON.parse(localStorage.getItem("currentChild") || "{}");
+    const age = Number(childStored.age) || 6;
+    const level = Number(childStored.level) || 2;
+    const ageGroup = age <= 5 ? 1 : age <= 8 ? 2 : 3;
+
+    return {
+      childName: childStored.name || "Child",
+      childId: childId || childStored._id || "child_123",
+      level,
+      age,
+      ageGroup,
+      timeLimit: ageGroup === 1 ? 180 : ageGroup === 2 ? 360 : 600,
+      totalQuestions: ageGroup === 1 ? 5 : ageGroup === 2 ? 8 : 12,
+      questions: [
+        {
+          id: "q1_emotion",
+          type: "EmotionIdentifyQuestion",
+          domain: "emotion",
+          promptEn: "Look at the facial expression and choose the correct emotion.",
+          promptKn: "ಮುಖದ ಅಭಿವ್ಯಕ್ತಿಯನ್ನು ನೋಡಿ ಸರಿಯಾದ ಭಾವನೆಯನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.",
+          level,
+          ageGroup,
+          currentEmotion: { emoji: level === 1 ? "😏" : level === 2 ? "😲" : "😊", name: level === 1 ? "proud" : level === 2 ? "surprised" : "happy" }
+        },
+        {
+          id: "q2_social",
+          type: "SocialScenarioQuestion",
+          domain: "social",
+          promptEn: level === 3 ? "Your friend is crying 😢. What do you do?" : level === 2 ? "You want to play with someone's toy 🧸. What do you say?" : "Your friend is upset because you accidentally broke their pencil ✏️. What is the best thing to do?",
+          promptKn: level === 3 ? "ನಿಮ್ಮ ಸ್ನೇಹಿತ ಅಳುತ್ತಿದ್ದಾನೆ 😢. ನೀವು ಏನು ಮಾಡುತ್ತೀರಿ?" : level === 2 ? "ನೀವು ಆಟಿಕೆಯೊಂದಿಗೆ ಆಡಲು ಬಯಸುತ್ತೀರಿ 🧸. ಏನು ಹೇಳುತ್ತೀರಿ?" : "ಪೆನ್ಸಿಲ್ ಮುರಿದಿದ್ದಕ್ಕೆ ಸ್ನೇಹಿತ ಬೇಸರಗೊಂಡಿದ್ದಾನೆ ✏️. ಏನು ಮಾಡಬೇಕು?",
+          options: level === 3 ? [
+            { id: "A", textEn: "Give them a hug 🤗", textKn: "ಅವರನ್ನು ತಬ್ಬಿಕೊಳ್ಳಿ 🤗", correct: true },
+            { id: "B", textEn: "Walk away 🚶", textKn: "ದೂರ ಹೋಗಿ 🚶", correct: false }
+          ] : level === 2 ? [
+            { id: "A", textEn: "Just take it 😤", textKn: "ಬಲವಂತವಾಗಿ ಕಸಿದುಕೊಳ್ಳುವುದು 😤", correct: false },
+            { id: "B", textEn: "Can I please have a turn? 🙏", textKn: "ದಯವಿಟ್ಟು ನಾನು ಒಮ್ಮೆ ಆಡಬಹುದೇ? 🙏", correct: true },
+            { id: "C", textEn: "Start crying 😢", textKn: "ಅಳಲು ಪ್ರಾರಂಭಿಸುವುದು 😢", correct: false }
+          ] : [
+            { id: "A", textEn: "Say sorry and offer to share yours 🤝", textKn: "ಕ್ಷಮೆ ಕೇಳಿ ಮತ್ತು ಪೆನ್ಸಿಲ್ ಹಂಚಿಕೊಳ್ಳುವುದು 🤝", correct: true },
+            { id: "B", textEn: "Pretend it did not happen 🙈", textKn: "ಏನೂ ಆಗಿಲ್ಲವೆಂದು ನಟಿಸುವುದು 🙈", correct: false },
+            { id: "C", textEn: "Blame someone else 👈", textKn: "ಇನ್ನೊಬ್ಬರ ಮೇಲೆ ಗೂಬೆ ಕೂರಿಸುವುದು 👈", correct: false },
+            { id: "D", textEn: "Run away 🏃", textKn: "ಓಡಿ ಹೋಗುವುದು 🏃", correct: false }
+          ]
+        },
+        {
+          id: "q3_pattern",
+          type: "PatternCompleteQuestion",
+          domain: "cognitive",
+          promptEn: ageGroup === 1 ? "Complete the pattern: 🔴 🔵 🔴 ❓" : ageGroup === 2 ? "Complete the pattern: 🔴 🔵 🟡 🔴 🔵 ❓" : "Complete the number pattern: 2, 4, 8, 16, ❓",
+          promptKn: ageGroup === 1 ? "ವಿನ್ಯಾಸ ಪೂರ್ಣಗೊಳಿಸಿ: 🔴 🔵 🔴 ❓" : ageGroup === 2 ? "ವಿನ್ಯಾಸ ಪೂರ್ಣಗೊಳಿಸಿ: 🔴 🔵 🟡 🔴 🔵 ❓" : "ಸಂಖ್ಯಾ ವಿನ್ಯಾಸ ಪೂರ್ಣಗೊಳಿಸಿ: 2, 4, 8, 16, ❓",
+          patternDisplay: ageGroup === 1 ? ["🔴","🔵","🔴","❓"] : ageGroup === 2 ? ["🔴","🔵","🟡","🔴","🔵","❓"] : ["2","4","8","16","❓"],
+          options: ageGroup === 1 ? [{ id: "blue", text: "🔵", correct: true }, { id: "red", text: "🔴", correct: false }]
+            : ageGroup === 2 ? [{ id: "yellow", text: "🟡", correct: true }, { id: "red", text: "🔴", correct: false }, { id: "green", text: "🟢", correct: false }]
+            : [{ id: "32", text: "32", correct: true }, { id: "24", text: "24", correct: false }, { id: "20", text: "20", correct: false }, { id: "64", text: "64", correct: false }]
+        },
+        {
+          id: "q4_instruction",
+          type: "InstructionFollowQuestion",
+          domain: "communication",
+          promptEn: level === 3 || ageGroup === 1 ? "Touch the dog 🐕" : level === 2 || ageGroup === 2 ? "First touch the dog 🐕 then touch the cat 🐱" : "Touch the animals from smallest to largest size 🐜 🐛 🐕 🐘",
+          promptKn: level === 3 || ageGroup === 1 ? "ನಾಯಿಯನ್ನು ಸ್ಪರ್ಶಿಸಿ 🐕" : level === 2 || ageGroup === 2 ? "ಮೊದಲು ನಾಯಿಯನ್ನು ಸ್ಪರ್ಶಿಸಿ 🐕 ನಂತರ ಬೆಕ್ಕನ್ನು ಸ್ಪರ್ಶಿಸಿ 🐱" : "ಚಿಕ್ಕದಿನಿಂದ ದೊಡ್ಡ ಗಾತ್ರದವರೆಗೆ ಪ್ರಾಣಿಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ 🐜 🐛 🐕 🐘",
+          requiredStepsCount: level === 3 || ageGroup === 1 ? 1 : level === 2 || ageGroup === 2 ? 2 : 4,
+          items: level === 3 || ageGroup === 1 ? [
+            { id: "dog", symbol: "🐕", nameEn: "Dog", nameKn: "ನಾಯಿ", targetOrder: 1 },
+            { id: "cat", symbol: "🐱", nameEn: "Cat", nameKn: "ಬೆಕ್ಕು", targetOrder: null },
+            { id: "elephant", symbol: "🐘", nameEn: "Elephant", nameKn: "ಆನೆ", targetOrder: null }
+          ] : level === 2 || ageGroup === 2 ? [
+            { id: "dog", symbol: "🐕", nameEn: "Dog", nameKn: "ನಾಯಿ", targetOrder: 1 },
+            { id: "cat", symbol: "🐱", nameEn: "Cat", nameKn: "ಬೆಕ್ಕು", targetOrder: 2 },
+            { id: "elephant", symbol: "🐘", nameEn: "Elephant", nameKn: "ಆನೆ", targetOrder: null },
+            { id: "fish", symbol: "🐟", nameEn: "Fish", nameKn: "ಮೀನು", targetOrder: null }
+          ] : [
+            { id: "ant", symbol: "🐜", nameEn: "Ant", nameKn: "ಇರುವೆ", targetOrder: 1 },
+            { id: "caterpillar", symbol: "🐛", nameEn: "Caterpillar", nameKn: "ಕ್ರಿಮಿ", targetOrder: 2 },
+            { id: "dog", symbol: "🐕", nameEn: "Dog", nameKn: "ನಾಯಿ", targetOrder: 3 },
+            { id: "elephant", symbol: "🐘", nameEn: "Elephant", nameKn: "ಆನೆ", targetOrder: 4 }
+          ]
+        },
+        {
+          id: "q5_turntaking",
+          type: "TurnTakingQuestion",
+          domain: "social",
+          promptEn: level === 3 || ageGroup === 1 ? "Character A just threw the ball ⚾. Whose turn is it now?" : level === 2 || ageGroup === 2 ? "Player 2 just finished their turn on the board game 🎲. Who goes next?" : "Conversation sequence: Person A spoke 🗣️ -> Person B spoke 🗣️ -> Person A spoke 🗣️. Who speaks next and why?",
+          promptKn: level === 3 || ageGroup === 1 ? "ಪಾತ್ರ A ಚೆಂಡನ್ನು ಎಸೆದಿದೆ ⚾. ಈಗ ಯಾರ ಸರದಿ?" : level === 2 || ageGroup === 2 ? "ಆಟಗಾರ 2 ತಮ್ಮ ಸರದಿ ಮುಗಿಸಿದ್ದಾರೆ 🎲. ಮುಂದಿನವರು ಯಾರು?" : "ಸಂಭಾಷಣೆ ಅನುಕ್ರಮ: ವ್ಯಕ್ತಿ A -> ವ್ಯಕ್ತಿ B -> ವ್ಯಕ್ತಿ A. ಮುಂದೆ ಯಾರು ಮಾತನಾಡಬೇಕು?",
+          options: level === 3 || ageGroup === 1 ? [
+            { id: "charB", textEn: "Character B's turn 👧", textKn: "ಪಾತ್ರ B ಯ ಸರದಿ 👧", correct: true },
+            { id: "charA", textEn: "Character A again 👦", textKn: "ಮತ್ತೆ ಪಾತ್ರ A 👦", correct: false }
+          ] : level === 2 || ageGroup === 2 ? [
+            { id: "p3", textEn: "Player 3 👤", textKn: "ಆಟಗಾರ 3 👤", correct: true },
+            { id: "p1", textEn: "Player 1 👤", textKn: "ಆಟಗಾರ 1 👤", correct: false },
+            { id: "p2", textEn: "Player 2 👤", textKn: "ಆಟಗಾರ 2 👤", correct: false }
+          ] : [
+            { id: "b_turn", textEn: "Person B - because conversation requires fair turn-taking 🤝", textKn: "ವ್ಯಕ್ತಿ B - ಸಂಭಾಷಣೆಗೆ ಸರದಿ ಬೇಕು 🤝", correct: true },
+            { id: "a_turn", textEn: "Person A - because they should keep talking", textKn: "ವ್ಯಕ್ತಿ A", correct: false }
+          ]
+        },
+        {
+          id: "q6_cause",
+          type: "EmotionCausePairQuestion",
+          domain: "emotion",
+          promptEn: level === 3 || ageGroup === 1 ? "You got a birthday cake 🎂. How do you feel?" : level === 2 || ageGroup === 2 ? "Your favorite toy broke 💔. How do you feel?" : "You studied hard 📚 and achieved a great exam score! How would you feel and how would your parent feel?",
+          promptKn: level === 3 || ageGroup === 1 ? "ಜನ್ಮದಿನದ ಕೇಕ್ ಸಿಕ್ಕಿದೆ 🎂. ಹೇಗೆ ಅನ್ನಿಸುತ್ತದೆ?" : level === 2 || ageGroup === 2 ? "ನೆಚ್ಚಿನ ಆಟಿಕೆ ಮುರಿಯಿತು 💔. ಹೇಗೆ ಅನ್ನಿಸುತ್ತದೆ?" : "ಕಷ್ಟಪಟ್ಟು ಓದಿ ಉತ್ತಮ ಅಂಕ ಪಡೆದಿದ್ದೀರಿ! ನಿಮಗೂ ನಿಮ್ಮ ಪೋಷಕರಿಗೂ ಹೇಗೆ ಅನ್ನಿಸುತ್ತದೆ?",
+          options: level === 3 || ageGroup === 1 ? [
+            { id: "happy", textEn: "Happy 😊", textKn: "ಸಂತೋಷ 😊", correct: true },
+            { id: "sad", textEn: "Sad 😢", textKn: "ದುಃಖ 😢", correct: false }
+          ] : level === 2 || ageGroup === 2 ? [
+            { id: "sad", textEn: "Sad 😢", textKn: "ದುಃಖ 😢", correct: true },
+            { id: "happy", textEn: "Happy 😊", textKn: "ಸಂತೋಷ 😊", correct: false },
+            { id: "angry", textEn: "Angry 😠", textKn: "ಕೋಪ 😠", correct: false }
+          ] : [
+            { id: "proud_parent_proud", textEn: "You: Proud 🌟 / Parent: Proud ❤️", textKn: "ನೀವು: ಹೆಮ್ಮೆ 🌟 / ಪೋಷಕರು: ಹೆಮ್ಮೆ ❤️", correct: true },
+            { id: "sad_parent_angry", textEn: "You: Sad / Parent: Angry", textKn: "ನೀವು: ದುಃಖ / ಪೋಷಕರು: ಕೋಪ", correct: false }
+          ]
+        },
+        {
+          id: "q7_sequence",
+          type: "SequenceOrderQuestion",
+          domain: "cognitive",
+          promptEn: level === 3 || ageGroup === 1 ? "Arrange eating steps in correct order 🍽️" : level === 2 || ageGroup === 2 ? "Arrange morning routine steps in correct order 🌅" : "Arrange friend-making steps in logical order 🤝",
+          promptKn: level === 3 || ageGroup === 1 ? "ಊಟದ ಹಂತಗಳನ್ನು ಸರಿಯಾದ ಅನುಕ್ರಮದಲ್ಲಿ ಜೋಡಿಸಿ 🍽️" : level === 2 || ageGroup === 2 ? "ಬೆಳಗಿನ ದಿನಚರಿಯ ಹಂತಗಳನ್ನು ಜೋಡಿಸಿ 🌅" : "ಸ್ನೇಹ ಬೆಳೆಸುವ ಹಂತಗಳನ್ನು ಜೋಡಿಸಿ 🤝",
+          items: level === 3 || ageGroup === 1 ? [
+            { id: "s1", titleEn: "1. Food on plate 🍲", titleKn: "1. ತಟ್ಟೆಯಲ್ಲಿ ಊಟ 🍲", order: 1 },
+            { id: "s2", titleEn: "2. Eating food 😋", titleKn: "2. ಊಟ ಮಾಡುವುದು 😋", order: 2 },
+            { id: "s3", titleEn: "3. Empty clean plate 🧼", titleKn: "3. ಖಾಲಿ ತಟ್ಟೆ 🧼", order: 3 }
+          ] : level === 2 || ageGroup === 2 ? [
+            { id: "s1", titleEn: "1. Wake up ⏰", titleKn: "1. ಏಳುವುದು ⏰", order: 1 },
+            { id: "s2", titleEn: "2. Brush teeth 🪥", titleKn: "2. ಹಲ್ಲುಜ್ಜುವುದು 🪥", order: 2 },
+            { id: "s3", titleEn: "3. Eat breakfast 🥣", titleKn: "3. ಉಪಾಹಾರ 🥣", order: 3 },
+            { id: "s4", titleEn: "4. Go to school 🏫", titleKn: "4. ಶಾಲೆಗೆ ಹೋಗುವುದು 🏫", order: 4 }
+          ] : [
+            { id: "s1", titleEn: "1. See someone alone 👀", titleKn: "1. ಒಬ್ಬಂಟಿಯಾಗಿರುವುದನ್ನು ನೋಡುವುದು 👀", order: 1 },
+            { id: "s2", titleEn: "2. Smile & approach 😊", titleKn: "2. ನಗು ಮತ್ತು ಹತ್ತಿರ ಹೋಗುವುದು 😊", order: 2 },
+            { id: "s3", titleEn: "3. Say hello 👋", titleKn: "3. ಹಲೋ ಎಂದು ಹೇಳುವುದು 👋", order: 3 },
+            { id: "s4", titleEn: "4. Ask their name ❓", titleKn: "4. ಹೆಸರು ಕೇಳುವುದು ❓", order: 4 },
+            { id: "s5", titleEn: "5. Play together 🎮", titleKn: "5. ಒಟ್ಟಿಗೆ ಆಟವಾಡುವುದು 🎮", order: 5 }
+          ]
+        },
+        {
+          id: "q8_calming",
+          type: "CalmingStrategyQuestion",
+          domain: "sensory",
+          isMultiSelect: level === 1 && ageGroup === 3,
+          promptEn: level === 3 || ageGroup === 1 ? "You are feeling very angry 😡. What helps you feel calm?" : level === 2 || ageGroup === 2 ? "You feel overwhelmed at a loud party 🎉. What is the best thing to do?" : "You are at school and feeling anxious about a test 📝. Select ALL positive calming strategies:",
+          promptKn: level === 3 || ageGroup === 1 ? "ನಿಮಗೆ ಕೋಪ ಬಂದಿದೆ 😡. ಶಾಂತವಾಗಲು ಯಾವುದು ಸಹಾಯ ಮಾಡುತ್ತದೆ?" : level === 2 || ageGroup === 2 ? "ಸಂಭ್ರಮದ ಶಬ್ದದಲ್ಲಿ ಕಿರಿಕಿರಿಯಾದರೆ ಉತ್ತಮ ನಿರ್ಧಾರ ಯಾವುದು?" : "ಪರೀಕ್ಷೆಯ ಭಯವಾದಾಗ ಶಾಂತವಾಗಲು ಸಹಾಯ ಮಾಡುವ ತಂತ್ರಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಿ:",
+          options: level === 3 || ageGroup === 1 ? [
+            { id: "breathe", textEn: "Take deep breaths 🌬️", textKn: "ದೀರ್ಘ ಉಸಿರೆಳೆದುಕೊಳ್ಳಿ 🌬️", correct: true },
+            { id: "hit", textEn: "Hit something 👊", textKn: "ವಸ್ತುವಿಗೆ ಹೊಡೆಯುವುದು 👊", correct: false }
+          ] : level === 2 || ageGroup === 2 ? [
+            { id: "corner", textEn: "Find a quiet corner and take deep breaths 🌿", textKn: "ಶಾಂತ ಜಾಗ ಹುಡುಕಿ ಉಸಿರಾಡುವುದು 🌿", correct: true },
+            { id: "scream", textEn: "Scream loudly 🗣️", textKn: "ಜೋರಾಗಿ ಚೀರುವುದು 🗣️", correct: false }
+          ] : [
+            { id: "breathe", textEn: "Deep breathing 🌬️", textKn: "ದೀರ್ಘ ಉಸಿರಾಟ 🌬️", correct: true },
+            { id: "adult", textEn: "Telling a trusted teacher or parent 👨‍🏫", textKn: "ಶಿಕ್ಷಕರಿಗೆ ತಿಳಿಸುವುದು 👨‍🏫", correct: true },
+            { id: "calm_thought", textEn: "Thinking about something calming 🌈", textKn: "ಶಾಂತ ವಿಚಾರಾಲೋಚನೆ 🌈", correct: true },
+            { id: "prepared", textEn: "Remembering you have prepared well 👍", textKn: "ತಯಾರಿಯನ್ನು ನೆನಪಿಸಿಕೊಳ್ಳುವುದು 👍", correct: true },
+            { id: "punch", textEn: "Punching your desk 👊", textKn: "ಮೇಜಿಗೆ ಹೊಡೆಯುವುದು 👊", correct: false }
+          ]
+        }
+      ]
+    };
+  }
+};
+
+export const submitExamResult = async (childId, payload) => {
+  try {
+    return await req("POST", `/api/exam/submit/${childId || "mock_child"}`, payload);
+  } catch (err) {
+    const answers = payload?.answers || [];
+    const correctCount = answers.filter(a => a.isCorrect).length;
+    const totalCount = answers.length || 8;
+    const score = Math.round((correctCount / totalCount) * 100);
+
+    const domains = {
+      communication: { correct: 0, total: 0 },
+      social: { correct: 0, total: 0 },
+      emotion: { correct: 0, total: 0 },
+      cognitive: { correct: 0, total: 0 },
+      sensory: { correct: 0, total: 0 }
+    };
+
+    answers.forEach(a => {
+      const dom = (a.domain || "communication").toLowerCase();
+      if (!domains[dom]) domains[dom] = { correct: 0, total: 0 };
+      domains[dom].total++;
+      if (a.isCorrect) domains[dom].correct++;
+    });
+
+    const resultStatus = score >= 80 ? "PASSED" : score >= 60 ? "PARTIAL" : "NEEDS_WORK";
+    const childStored = JSON.parse(localStorage.getItem("currentChild") || "{}");
+    const childName = childStored.name || "Arjun Kumar";
+    const currentLevel = Number(childStored.level) || 2;
+
+    let recommendation = "";
+    if (score >= 80) {
+      recommendation = `Excellent! ${childName} scored ${score}% and is ready to move to Level ${Math.max(1, currentLevel - 1)}. Therapist will review and confirm.`;
+    } else if (score >= 60) {
+      recommendation = `Good effort! ${childName} scored ${score}% and needs more practice in Social Skills. Continue Level ${currentLevel} with extra focus on this area.`;
+    } else {
+      recommendation = `Keep practicing! ${childName} scored ${score}% and is still building core skills. Continue current activities and try again next week.`;
+    }
+
+    const mockResult = {
+      score,
+      correct: correctCount,
+      total: totalCount,
+      result: resultStatus,
+      recommendation,
+      domains,
+      dominantEmotion: "Happy",
+      passedExam: score >= 80,
+      examDate: new Date().toISOString(),
+      nextExamDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    };
+
+    // Save in local storage history
+    try {
+      const historyKey = `exam_history_${childId || childStored._id || "default"}`;
+      const existingHistory = JSON.parse(localStorage.getItem(historyKey) || "[]");
+      existingHistory.unshift({
+        _id: "local_exam_" + Date.now(),
+        examDate: new Date().toISOString(),
+        score,
+        result: resultStatus,
+        level: currentLevel,
+        ageGroup: Number(childStored.age) <= 5 ? 1 : Number(childStored.age) <= 8 ? 2 : 3,
+        domains,
+        recommendation
+      });
+      localStorage.setItem(historyKey, JSON.stringify(existingHistory));
+    } catch (e) {}
+
+    return { success: true, result: mockResult, examId: "local_exam_" + Date.now() };
+  }
+};
+
+export const getExamHistory = async (childId) => {
+  try {
+    return await req("GET", `/api/exam/history/${childId || "mock_child"}`);
+  } catch (err) {
+    const historyKey = `exam_history_${childId || "default"}`;
+    const local = JSON.parse(localStorage.getItem(historyKey) || "[]");
+    if (local.length > 0) return local;
+
+    // Default mock history if none
+    return [
+      {
+        _id: "mock_exam_1",
+        examDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        score: 75,
+        result: "PARTIAL",
+        level: 2,
+        ageGroup: 2,
+        domains: {
+          communication: { correct: 2, total: 2 },
+          social: { correct: 1, total: 3 },
+          emotion: { correct: 2, total: 2 },
+          cognitive: { correct: 1, total: 1 }
+        },
+        recommendation: "Good effort! Arjun needs more practice in Social Skills. Continue Level 2."
+      }
+    ];
+  }
+};
+
+export const triggerChildExamAPI = async (childId) => {
+  try {
+    return await req("POST", `/api/exam/trigger/${childId || "mock_child"}`);
+  } catch (err) {
+    return { success: true };
+  }
+};
+
+export const approveLevelUpgradeAPI = async (childId) => {
+  try {
+    return await req("POST", `/api/exam/approve-upgrade/${childId || "mock_child"}`);
+  } catch (err) {
+    return { success: true };
+  }
+};
+
+export const submitChallengeExam = async (childId, payload) => {
+  try {
+    return await req("POST", `/api/exam/submit-challenge/${childId || "mock_child"}`, payload);
+  } catch (err) {
+    console.warn("Using offline challenge exam submission fallback:", err.message);
+    const calculatedStars = payload.totalStars || (payload.gameResults || []).reduce((s, g) => s + (g.stars || 0), 0);
+    const status = calculatedStars === 15 ? "MASTERY_ACHIEVED" : calculatedStars >= 12 ? "NEAR_MASTERY" : calculatedStars >= 8 ? "PROGRESSING" : "NEEDS_PRACTICE";
+    return {
+      success: true,
+      result: {
+        stars: calculatedStars,
+        maxStars: 15,
+        percentage: Math.round((calculatedStars / 15) * 100),
+        status,
+        recommendation: calculatedStars === 15 ? "Mastery Achieved! Level advancement recommended." : "Challenge completed!",
+        levelUpgradeRecommended: calculatedStars === 15,
+        therapistNotified: true,
+        gameResults: payload.gameResults || []
+      },
+      examId: "offline_challenge_" + Date.now()
+    };
+  }
+};
+
+export const logEmotionSession = async (payload) => {
+  try {
+    return await req("POST", "/api/sessions/emotion-log", payload);
+  } catch (err) {
+    console.warn("Emotion session log saved locally:", err.message);
+    try {
+      const logs = JSON.parse(localStorage.getItem("emotion_session_logs") || "[]");
+      logs.unshift({ ...payload, createdAt: new Date().toISOString() });
+      localStorage.setItem("emotion_session_logs", JSON.stringify(logs.slice(0, 30)));
+    } catch (e) {}
+    return { success: true };
+  }
+};
+
+export const getEmotionSessionLogs = async (childId) => {
+  try {
+    return await req("GET", `/api/sessions/emotion-log/${childId || "mock_child"}`);
+  } catch (err) {
+    try {
+      return JSON.parse(localStorage.getItem("emotion_session_logs") || "[]");
+    } catch {
+      return [];
+    }
+  }
+};
+
+export const getLeaderboard = async (childId) => {
+  try {
+    return await req("GET", `/api/progress/leaderboard${childId ? `?childId=${childId}` : ""}`);
+  } catch (err) {
+    // Graceful offline mock leaderboard with child rank
+    const defaultPeers = [
+      { _id: "peer_1", name: "Aarav Menon", age: 4, level: 2, xp: 850, streak: 7, rank: 1, badgeTitle: "Super Champion 🏆" },
+      { _id: "peer_2", name: "Priya Sharma", age: 5, level: 2, xp: 720, streak: 5, rank: 2, badgeTitle: "Star Explorer 🌟" },
+      { _id: "peer_3", name: "Dev Joshi", age: 4, level: 1, xp: 580, streak: 4, rank: 3, badgeTitle: "Rising Star 🚀" },
+      { _id: "peer_4", name: "Meera Patel", age: 3, level: 1, xp: 480, streak: 3, rank: 4, badgeTitle: "Joyful Learner ⭐" },
+      { _id: "peer_5", name: "Rohan Verma", age: 5, level: 1, xp: 420, streak: 2, rank: 5, badgeTitle: "Kind Helper 🤝" },
+      { _id: "peer_6", name: "Ananya Rao", age: 4, level: 1, xp: 350, streak: 2, rank: 6, badgeTitle: "Happy Explorer 🌿" },
+    ];
+    return {
+      leaderboard: defaultPeers,
+      totalParticipants: 24,
+      currentChildRank: {
+        _id: childId || "current",
+        name: "You",
+        rank: 3,
+        xp: 580,
+        streak: 4,
+        level: 2,
+        badgeTitle: "Rising Star 🚀"
+      }
+    };
+  }
+};
 

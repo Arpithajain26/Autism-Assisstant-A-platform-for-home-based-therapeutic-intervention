@@ -116,39 +116,89 @@ const playSynthSound = (type, lang = "en") => {
 
 /* ─── MINI GAME COMPONENTS ───────────────────────────────────────────────── */
 
-// 1. MIRROR PLAY (webcam face matching simulator)
+// 1. MIRROR PLAY (webcam face matching simulator — auto-detection only, no manual override)
 function MirrorPlayGame({ language, currentEmotion, confidence, onComplete }) {
   const targetEmotions = ["Happy", "Sad", "Angry", "Surprised"];
   const emotionEmojis = { Happy: "😊", Sad: "😢", Angry: "😠", Surprised: "😮" };
   const emotionKn = { Happy: "ಸಂತೋಷ", Sad: "ದುಃಖ", Angry: "ಕೋಪ", Surprised: "ಆಶ್ಚರ್ಯ" };
-  
+
   const [targetIdx, setTargetIdx] = useState(0);
   const [successCount, setSuccessCount] = useState(0);
+  const [cooldown, setCooldown] = useState(false);
+  const [matchFlash, setMatchFlash] = useState(false); // green flash when match detected
+
   const currentTarget = targetEmotions[targetIdx];
 
+  const triggerSuccess = () => {
+    if (cooldown) return;
+    playSynthSound("correct");
+    setMatchFlash(true);
+    setTimeout(() => setMatchFlash(false), 1200);
+    setCooldown(true);
+    setTimeout(() => setCooldown(false), 1800);
+
+    setSuccessCount(c => {
+      const next = c + 1;
+      if (next >= 3) {
+        onComplete && onComplete(5);
+      } else {
+        setTargetIdx(t => (t + 1) % targetEmotions.length);
+      }
+      return next;
+    });
+  };
+
+  // ── AUTO-DETECTION: only the camera triggers success ─────────────────
   useEffect(() => {
-    if (currentEmotion === currentTarget && confidence > 40) {
-      playSynthSound("correct");
-      setSuccessCount(c => {
-        const next = c + 1;
-        if (next >= 3) {
-          onComplete && onComplete(5);
-        } else {
-          setTargetIdx(t => (t + 1) % targetEmotions.length);
-        }
-        return next;
-      });
+    if (!currentEmotion || cooldown) return;
+    const cur = String(currentEmotion).toLowerCase().trim();
+    const tgt = String(currentTarget).toLowerCase().trim();
+
+    const isMatch =
+      cur === tgt ||
+      (tgt === "happy" && (cur.includes("happy") || cur.includes("joy") || cur.includes("smile"))) ||
+      (tgt === "sad" && (cur.includes("sad") || cur.includes("cry") || cur.includes("depress"))) ||
+      (tgt === "angry" && (cur.includes("angry") || cur.includes("frustrat") || cur.includes("disgust") || cur.includes("frown"))) ||
+      (tgt === "surprised" && (cur.includes("surpris") || cur.includes("curious") || cur.includes("shock") || cur.includes("gasp")));
+
+    if (isMatch && Number(confidence) >= 30) {
+      triggerSuccess();
     }
-  }, [currentEmotion, confidence]);
+  }, [currentEmotion, confidence, currentTarget, cooldown]);
+
+  // Live emotion label shown to the user
+  const detectedLabel = currentEmotion
+    ? String(currentEmotion).charAt(0).toUpperCase() + String(currentEmotion).slice(1)
+    : null;
+
+  const confNum = Math.round(Number(confidence) || 0);
+
+  // Determine whether camera currently sees the target emotion
+  const cur = String(currentEmotion || "").toLowerCase().trim();
+  const tgt = String(currentTarget).toLowerCase().trim();
+  const isCurrentlyMatching =
+    cur === tgt ||
+    (tgt === "happy" && (cur.includes("happy") || cur.includes("joy") || cur.includes("smile"))) ||
+    (tgt === "sad" && (cur.includes("sad") || cur.includes("cry") || cur.includes("depress"))) ||
+    (tgt === "angry" && (cur.includes("angry") || cur.includes("frustrat") || cur.includes("disgust") || cur.includes("frown"))) ||
+    (tgt === "surprised" && (cur.includes("surpris") || cur.includes("curious") || cur.includes("shock") || cur.includes("gasp")));
 
   return (
     <div style={{ textAlign: "center", padding: "16px" }}>
       <div style={{ fontSize: "1.2rem", fontWeight: "900", color: "#6366f1", marginBottom: "12px" }}>
         🎭 Mimic the Emoji Face!
       </div>
-      <div style={{ fontSize: "5rem", animation: "float 2s infinite" }}>
+
+      {/* Target emoji */}
+      <div style={{
+        fontSize: "5rem",
+        animation: "float 2s infinite",
+        filter: matchFlash ? "drop-shadow(0 0 24px #22c55e)" : "none",
+        transition: "filter 0.3s"
+      }}>
         {emotionEmojis[currentTarget]}
       </div>
+
       <h3 style={{ fontSize: "1.8rem", fontWeight: "900", margin: "10px 0" }}>
         Show a <span style={{ color: "#ec4899" }}>{currentTarget}</span> Face!
       </h3>
@@ -157,17 +207,88 @@ function MirrorPlayGame({ language, currentEmotion, confidence, onComplete }) {
           {emotionKn[currentTarget]} ಮುಖ ತೋರಿಸಿ!
         </div>
       )}
+
+      {/* Stars */}
       <div style={{ marginTop: "16px", display: "flex", justifyContent: "center", gap: "8px" }}>
         {[0, 1, 2].map(i => (
           <span key={i} style={{ fontSize: "1.8rem", opacity: i < successCount ? 1 : 0.25 }}>⭐</span>
         ))}
       </div>
-      <p style={{ fontSize: "0.8rem", color: "#6b7280", marginTop: "12px" }}>
-        Look at the camera detector below and match the feeling!
+
+      {/* ── Live FER-AI Detection Panel ─────────────────────────────── */}
+      <div style={{
+        marginTop: "18px",
+        padding: "14px 20px",
+        borderRadius: "16px",
+        border: `2px solid ${isCurrentlyMatching && confNum >= 30 ? "#22c55e" : currentEmotion ? "#f59e0b" : "#e2e8f0"}`,
+        background: isCurrentlyMatching && confNum >= 30 ? "#f0fdf4" : currentEmotion ? "#fffbeb" : "#f8fafc",
+        transition: "all 0.3s ease",
+        maxWidth: 320,
+        margin: "18px auto 0",
+      }}>
+        <div style={{ fontSize: "0.75rem", fontWeight: "800", color: "#64748b", textTransform: "uppercase", marginBottom: "6px" }}>
+          📷 FER-AI Camera Detection
+        </div>
+
+        {currentEmotion ? (
+          <div>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+              <span style={{ fontSize: "1.6rem" }}>{emotionEmojis[detectedLabel] || "🤔"}</span>
+              <div>
+                <div style={{ fontSize: "1.05rem", fontWeight: "900", color: isCurrentlyMatching && confNum >= 30 ? "#16a34a" : "#dc2626" }}>
+                  {detectedLabel}
+                </div>
+                <div style={{ fontSize: "0.78rem", color: "#64748b" }}>
+                  Confidence: {confNum}%
+                </div>
+              </div>
+            </div>
+
+            {/* Match indicator */}
+            {isCurrentlyMatching && confNum >= 30 ? (
+              <div style={{
+                background: "#16a34a",
+                color: "white",
+                borderRadius: "10px",
+                padding: "6px 14px",
+                fontWeight: "900",
+                fontSize: "0.9rem",
+                animation: "pulse 0.8s infinite"
+              }}>
+                ✅ {language === "kn" ? "ಸರಿಯಾದ ಭಾವನೆ! ⭐ ಲೆಕ್ಕ ಹಾಕಲಾಗಿದೆ!" : "Correct emotion detected! ⭐ Counting…"}
+              </div>
+            ) : (
+              <div style={{
+                background: "#fef3c7",
+                color: "#92400e",
+                borderRadius: "10px",
+                padding: "6px 14px",
+                fontWeight: "800",
+                fontSize: "0.82rem"
+              }}>
+                {confNum < 30
+                  ? (language === "kn" ? "📸 ಹೆಚ್ಚು ಸ್ಪಷ್ಟವಾಗಿ ಮುಖ ತೋರಿಸಿ!" : "📸 Show your face more clearly to camera!")
+                  : (language === "kn" ? `🎭 ${emotionKn[currentTarget]} ಮುಖ ತೋರಿಸಿ!` : `🎭 Try to look more ${currentTarget}!`)
+                }
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{ color: "#94a3b8", fontSize: "0.88rem" }}>
+            📸 {language === "kn" ? "ಕ್ಯಾಮೆರಾ ನೋಡುತ್ತಿದೆ…" : "Camera is watching… look at it!"}
+          </div>
+        )}
+      </div>
+
+      <p style={{ fontSize: "0.78rem", color: "#9ca3af", marginTop: "12px" }}>
+        {language === "kn"
+          ? "ಕ್ಯಾಮೆರಾ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿಮ್ಮ ಭಾವನೆ ಪತ್ತೆ ಮಾಡುತ್ತದೆ"
+          : "Camera automatically detects your expression — no button needed!"}
       </p>
     </div>
   );
 }
+
 
 // 2. SORTING SHAPES
 function SortingShapesGame({ language, onComplete }) {

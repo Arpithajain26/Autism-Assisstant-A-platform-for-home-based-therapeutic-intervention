@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { logActivityCompletion } from '../services/api';
+import { getHappyBoosterActivity } from '../data/curatedActivities';
 
 export default function ActivityRatingModal({
   childId,
   childName = 'Child',
+  childAge = 4,
+  childLevel = 1,
   activityId,
   activityTitle = 'Activity',
   initialScore = 80,
@@ -28,6 +31,10 @@ export default function ActivityRatingModal({
   };
 
   const autoEngagement = deriveAutoEngagement(initialScore, detectedEmotion);
+
+  const emoLower = (detectedEmotion || '').toLowerCase();
+  const isSad = emoLower.includes('sad') || emoLower.includes('frustrat') || emoLower.includes('angry') || emoLower.includes('fear');
+  const happyActivity = getHappyBoosterActivity(childAge, childLevel);
 
   const [performanceScore, setPerformanceScore] = useState(initialScore);
   const [engagement, setEngagement] = useState(autoEngagement);
@@ -64,7 +71,7 @@ export default function ActivityRatingModal({
 
   const badge = getScoreBadge(performanceScore);
 
-  const handleSubmit = async (isAuto = false) => {
+  const handleSubmit = async (isAuto = false, happyToLaunch = null) => {
     setSubmitting(true);
     try {
       const autoNote = isAuto && !notes.trim() ? `Auto-tracked via facial emotion (${detectedEmotion}) & task score (${performanceScore}%)` : notes.trim();
@@ -75,11 +82,18 @@ export default function ActivityRatingModal({
         engagement,
         notes: autoNote,
       });
+
+      // Update local storage for DailyReminder and Streak/Milestones
+      if (childId) {
+        localStorage.setItem(`last_session_${childId}`, new Date().toDateString());
+        const curCount = parseInt(localStorage.getItem(`session_count_${childId}`) || "0", 10) + 1;
+        localStorage.setItem(`session_count_${childId}`, String(curCount));
+      }
     } catch (err) {
       console.warn('Failed to log activity progress:', err);
     } finally {
       setSubmitting(false);
-      if (onComplete) onComplete({ performanceScore, engagement, notes });
+      if (onComplete) onComplete({ performanceScore, engagement, notes, launchHappyActivity: happyToLaunch });
     }
   };
 
@@ -148,10 +162,67 @@ export default function ActivityRatingModal({
             </div>
             <div style={{ background: 'white', padding: '8px 10px', borderRadius: '10px', border: '1px solid #e0e7ff' }}>
               <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>😊 Facial Reaction</span>
-              <strong style={{ color: '#1e293b', fontSize: '0.95rem' }}>{detectedEmotion} ({emotionConfidence}%)</strong>
+              <strong style={{ color: isSad ? '#dc2626' : '#1e293b', fontSize: '0.95rem' }}>{detectedEmotion} ({emotionConfidence}%)</strong>
             </div>
           </div>
         </div>
+
+        {/* 💛 MOOD BOOST TRIGGERED BANNER (WHEN CHILD GETS SAD/FRUSTRATED) */}
+        {isSad && happyActivity && (
+          <div
+            style={{
+              background: 'linear-gradient(135deg, #fef2f2 0%, #fff7ed 100%)',
+              border: '2px solid #fca5a5',
+              borderRadius: '18px',
+              padding: '16px',
+              marginBottom: '18px',
+              boxShadow: '0 4px 14px rgba(239, 68, 68, 0.12)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
+              <span style={{ fontSize: '1.8rem' }}>💛</span>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '0.96rem', fontWeight: '800', color: '#991b1b' }}>
+                  Mood Boost Triggered!
+                </h4>
+                <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: '#7f1d1d', lineHeight: '1.4' }}>
+                  We detected <strong>{childName}</strong> felt <em>&quot;{detectedEmotion}&quot;</em> during this session. Here is a happy recovery activity tailored for their age &amp; level:
+                </p>
+              </div>
+            </div>
+
+            <div style={{ background: '#ffffff', borderRadius: '14px', padding: '12px 14px', border: '1.5px solid #fed7aa', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '1.6rem' }}>{happyActivity.icon}</span>
+                <div>
+                  <strong style={{ fontSize: '0.92rem', color: '#1e293b', display: 'block' }}>{happyActivity.title}</strong>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{happyActivity.category} &bull; {happyActivity.duration}</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  pauseAutoSave();
+                  handleSubmit(false, happyActivity);
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #ec4899, #d946ef)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '9px 16px',
+                  fontWeight: '800',
+                  fontSize: '0.84rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 3px 10px rgba(236, 72, 153, 0.3)',
+                }}
+              >
+                🎉 Play Happy Activity Now →
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* 0-100 Performance Score Slider */}
         <div style={{ marginBottom: '18px' }}>

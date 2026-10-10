@@ -22,9 +22,22 @@ const userSchema = new mongoose.Schema(
     targetAgeMin: { type: Number, default: 2 },
     targetAgeMax: { type: Number, default: 12 },
     targetLevels: [{ type: Number }],
+    maxPatients: { type: Number, default: 15, min: 1 },
     children: [{ type: mongoose.Schema.Types.ObjectId, ref: "Child" }],
     assignedChildren: [{ type: mongoose.Schema.Types.ObjectId, ref: "Child" }],
     isVerified: { type: Boolean, default: false },
+    aiPreferences: {
+      preferredLanguage: { type: String, enum: ["en", "kn"], default: "en" },
+      preferredInteraction: { type: String, enum: ["text", "voice", "both"], default: "text" },
+      explanationLevel: { type: String, enum: ["simple", "standard", "detailed"], default: "standard" },
+      guidancePreference: { type: String, enum: ["step_by_step", "quick"], default: "step_by_step" },
+      assistanceFrequency: { type: String, enum: ["low", "medium", "high"], default: "medium" },
+      interactionStats: {
+        explainSimplyCount: { type: Number, default: 0 },
+        voiceInputCount: { type: Number, default: 0 },
+        kannadaCount: { type: Number, default: 0 },
+      },
+    },
   },
   { timestamps: true }
 );

@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ override: true });
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -9,19 +9,17 @@ const Activity = require("./models/Activity");
 const Question = require("./models/Question");
 const Session = require("./models/Session");
 const ActivityLog = require("./models/ActivityLog");
-const { calculateStreakAndMonthlyActivity } = require("./utils/progressHelpers");
+const {
+  calculateStreakAndMonthlyActivity,
+} = require("./utils/progressHelpers");
 const { verifyToken, makeToken } = require("./middleware/auth");
 
 // Validate MongoDB ObjectId format
 const isValidId = (id) =>
   mongoose.Types.ObjectId.isValid(id) && /^[a-fA-F0-9]{24}$/.test(id);
 
-// Connect to MongoDB
-connectDB().then(() => {
-  const { seedTherapists } = require("./seed/seedTherapists");
-  seedTherapists();
-});
-
+// Connect to MongoDB. Therapist profiles are created by users and are never seeded.
+connectDB();
 
 const app = express();
 const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 5000;
@@ -60,6 +58,8 @@ app.use(
 app.use(express.json({ limit: "10mb" })); // Increased body limit for base64 photo uploads
 
 app.use("/api/assessment", require("./routes/assessmentRoutes"));
+app.use("/api/parent", require("./routes/parentAIRoutes"));
+app.use("/api/exam", require("./routes/examRoutes"));
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const safeUser = (u) => {
@@ -149,20 +149,41 @@ app.post("/api/auth/register", async (req, res) => {
 // POST /api/auth/login
 app.post("/api/auth/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, expectedRole } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password required." });
     }
 
     const emailLower = email.trim().toLowerCase();
-    const user = await User.findOne({ email: emailLower });
+    let user = await User.findOne({ email: emailLower });
+
+    // Handle domain spelling variation (autismassisstant.com vs autismassistant.com)
+    if (!user) {
+      const altEmail = emailLower.includes("autismassisstant.com")
+        ? emailLower.replace("autismassisstant.com", "autismassistant.com")
+        : emailLower.includes("autismassistant.com")
+          ? emailLower.replace("autismassistant.com", "autismassisstant.com")
+          : emailLower;
+      user = await User.findOne({ email: altEmail });
+    }
+
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
-    const isMatch = await user.comparePassword(password);
+    let isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ error: "Invalid email or password." });
+    }
+
+    // Ensure role matches expectedRole if specified
+    if (
+      expectedRole &&
+      ["parent", "therapist"].includes(expectedRole) &&
+      user.role !== expectedRole
+    ) {
+      user.role = expectedRole;
+      await user.save();
     }
 
     const token = makeToken(user._id, user.role);
@@ -186,20 +207,14 @@ app.post("/api/auth/firebase-sync", async (req, res) => {
     const emailLower = email.trim().toLowerCase();
     let user = await User.findOne({ email: emailLower });
 
-    if (user && mode === "register") {
-      return res.status(409).json({ error: "Email already registered." });
-    }
-
     // If a user exists but role differs from the requested role, refuse sync to
     // avoid accidental cross-role account creation (e.g., someone signing up as
     // a parent with an email already registered as a therapist).
     if (user && role && user.role && user.role !== role) {
-      return res
-        .status(403)
-        .json({
-          error:
-            "An account with this email already exists with a different role. Please sign in using that account or contact support.",
-        });
+      return res.status(403).json({
+        error:
+          "An account with this email already exists with a different role. Please sign in using that account or contact support.",
+      });
     }
 
     if (!user) {
@@ -263,16 +278,28 @@ app.post("/api/children/create", async (req, res) => {
     }
 
     const childAge = parseInt(age);
-    const childLevel = supportLevel?.includes("3") ? 3 : supportLevel?.includes("2") ? 2 : 1;
+    const childLevel = supportLevel?.includes("3")
+      ? 3
+      : supportLevel?.includes("2")
+        ? 2
+        : 1;
+    const {
+      findBestTherapistForChild,
+      getAgeGroupString,
+    } = require("./seed/seedTherapists");
+    const computedAgeGroup = getAgeGroupString(childAge);
 
-    // Automatically find matching therapist based on Age & Level if not explicitly specified
+    // Automatically find matching therapist based on Age Group & capacity (<15) if not specified
     let matchedTherapistId = therapistId || null;
     if (!matchedTherapistId) {
       try {
-        const { findBestTherapistForChild } = require("./seed/seedTherapists");
         const therapists = await User.find({ role: "therapist" });
         if (therapists.length > 0) {
-          const matched = findBestTherapistForChild(childAge, childLevel, therapists);
+          const matched = findBestTherapistForChild(
+            childAge,
+            childLevel,
+            therapists,
+          );
           if (matched) matchedTherapistId = matched._id;
         }
       } catch (matchErr) {
@@ -287,6 +314,7 @@ app.post("/api/children/create", async (req, res) => {
       profilePhoto: profilePhoto || null,
       supportLevel: supportLevel || null,
       level: childLevel,
+      ageGroup: computedAgeGroup,
       parentId: parentId || null,
       therapistId: matchedTherapistId,
     });
@@ -358,7 +386,7 @@ app.get("/api/children/:userId", async (req, res) => {
             )
             .filter(Boolean),
         };
-      })
+      }),
     );
 
     res.json(populatedChildren);
@@ -553,7 +581,10 @@ app.post("/api/children/complete-task", async (req, res) => {
         completedAt: new Date(),
       });
     } catch (logErr) {
-      console.warn("Session auto-log on complete-task skipped:", logErr.message);
+      console.warn(
+        "Session auto-log on complete-task skipped:",
+        logErr.message,
+      );
     }
 
     res.json({ success: true, completedTasks: child.completedTasks });
@@ -662,6 +693,87 @@ app.get("/api/sessions/child/:childId", async (req, res) => {
 const { logSession } = require("./controllers/activityController");
 app.post("/api/sessions/log", logSession);
 
+// ── Emotion Session Logs (Happiness Games & Emotion Tracking) ─────────────
+const EmotionSessionLog = require("./models/EmotionSessionLog");
+
+// POST /api/sessions/emotion-log
+app.post("/api/sessions/emotion-log", async (req, res) => {
+  try {
+    const {
+      childId,
+      sessionId,
+      activityId,
+      activityTitle,
+      durationMins,
+      emotionPerMinute,
+      interventionCount,
+      happinessGamesTriggered,
+      interventions,
+      endEmotionState,
+      activitiesCausingNegative,
+      bestHappinessGames,
+      recoveryTimeSeconds,
+      scoreHistory
+    } = req.body;
+
+    let childObjectId = childId;
+    if (childId && !isValidId(childId)) {
+      const child = await Child.findOne({ childId });
+      if (child) childObjectId = child._id;
+    }
+
+    const removeActivityFromPlan = activitiesCausingNegative && activitiesCausingNegative.length > 0;
+    const flaggedToTherapist = (interventionCount || 0) >= 2;
+
+    const log = new EmotionSessionLog({
+      child: childObjectId,
+      sessionId: sessionId || `session_${Date.now()}`,
+      activityId,
+      activityTitle,
+      durationMins: durationMins || 0,
+      emotionPerMinute: emotionPerMinute || [],
+      interventionCount: interventionCount || 0,
+      happinessGamesTriggered: happinessGamesTriggered || [],
+      interventions: interventions || [],
+      endEmotionState: endEmotionState || "Neutral",
+      activitiesCausingNegative: activitiesCausingNegative || [],
+      bestHappinessGames: bestHappinessGames || [],
+      recoveryTimeSeconds: recoveryTimeSeconds || 0,
+      scoreHistory: scoreHistory || [],
+      recommendationFlags: {
+        removeActivityFromPlan,
+        flaggedToTherapist,
+        preferredHappinessGameOrder: bestHappinessGames || []
+      }
+    });
+
+    await log.save();
+    res.status(201).json({ success: true, log });
+  } catch (error) {
+    console.error("Emotion Session Log Error:", error);
+    res.status(500).json({ error: "Failed to save emotion session log." });
+  }
+});
+
+// GET /api/sessions/emotion-log/:childId
+app.get("/api/sessions/emotion-log/:childId", async (req, res) => {
+  try {
+    let childObjectId = req.params.childId;
+    if (!isValidId(childObjectId)) {
+      const child = await Child.findOne({ childId: childObjectId });
+      if (child) childObjectId = child._id;
+    }
+
+    const logs = await EmotionSessionLog.find({ child: childObjectId })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .lean();
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch emotion session logs." });
+  }
+});
+
 // ── Progress / Trend Prediction ───────────────────────────────────────────────
 // POST /api/progress/trend
 app.use("/api/progress", require("./routes/progressRoutes"));
@@ -669,19 +781,30 @@ app.use("/api/progress", require("./routes/progressRoutes"));
 // ── Therapist Endpoints ──────────────────────────────────────────────────────
 app.use("/api/therapist", require("./routes/therapistRoutes"));
 
-// ── AI Chatbot Endpoint ───────────────────────────────────────────────────────
-const { handleChat } = require("./controllers/chatController");
+// ── AI Chatbot Endpoints ───────────────────────────────────────────────────────
+const {
+  handleChat,
+  getChatStatus,
+  saveApiKey,
+} = require("./controllers/chatController");
 app.post("/api/chat", handleChat);
+app.get("/api/chat/status", getChatStatus);
+app.post("/api/chat/config", saveApiKey);
 
 // ── Messages Endpoints ────────────────────────────────────────────────────────
 const messageController = require("./controllers/messageController");
 app.post("/api/messages/send", messageController.sendMessage);
 app.get("/api/messages/:childId", messageController.getMessages);
+app.patch("/api/messages/:messageId/read", messageController.markAsRead);
+app.patch("/api/messages/child/:childId/read-all", messageController.markAllRead);
 
 // ── Direct Level & Feedback Route Aliases ─────────────────────────────────────
 const therapistController = require("./controllers/therapistController");
 app.put("/api/children/:childId/level", therapistController.updateChildLevel);
-app.get("/api/parent/feedback/:childId", therapistController.getFeedbackByChild);
+app.get(
+  "/api/parent/feedback/:childId",
+  therapistController.getFeedbackByChild,
+);
 app.get("/api/feedback/child/:childId", therapistController.getFeedbackByChild);
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
@@ -694,4 +817,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-

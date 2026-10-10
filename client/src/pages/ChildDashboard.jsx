@@ -5,6 +5,9 @@ import gameInstructions from '../gameInstructions';
 import { getAgeLevelConfig } from '../utils/ageLevelMapping';
 import InteractiveGameZone from '../components/InteractiveGameZone';
 import EmotionDetector from '../components/EmotionDetector';
+import StudentProfileModal from '../components/StudentProfileModal';
+import MasteryExamModal from '../components/MasteryExamModal';
+import FunnyBreakModal from '../components/FunnyBreakModal';
 
 const CATEGORY_ICON = {
   Communication: '💬',
@@ -27,10 +30,56 @@ const ChildDashboard = ({ user, childId, onNavigate }) => {
   const [activeTask, setActiveTask] = useState(null); // task detail view
   const [taskViewMode, setTaskViewMode] = useState('game'); // 'game' or 'guide'
   const [allActivities, setAllActivities] = useState([]);
-  const [currentEmotion, setCurrentEmotion] = useState('Happy');
-  const [emotionConfidence, setEmotionConfidence] = useState(85);
+  const [currentEmotion, setCurrentEmotion] = useState(null);       // null = no detection yet
+  const [emotionConfidence, setEmotionConfidence] = useState(0);    // 0 = no detection yet
   const [showWebcam, setShowWebcam] = useState(false);
   const [gameCompletedReward, setGameCompletedReward] = useState(false);
+  const [showStudentProfile, setShowStudentProfile] = useState(false);
+  const [showMasteryExam, setShowMasteryExam] = useState(false);
+  const [sadSeconds, setSadSeconds] = useState(0);
+  const [showFunnyBreakModal, setShowFunnyBreakModal] = useState(false);
+
+  // Auto-start webcam for emotion-detection activities (mirror play, mimic face, etc.)
+  useEffect(() => {
+    if (!activeTask) {
+      setShowWebcam(false);
+      setCurrentEmotion(null);
+      setEmotionConfidence(0);
+      return;
+    }
+    const t = (activeTask.title || '').toLowerCase();
+    const needsCamera = t.includes('mirror') || t.includes('mimic') || t.includes('face') ||
+      t.includes('emotion') || t.includes('feeling') || t.includes('expression');
+    if (needsCamera) {
+      setShowWebcam(true); // auto-open camera for face-detection games
+    }
+  }, [activeTask]);
+
+
+
+  // Immediate negative emotion detector for Funny Break trigger (2 seconds)
+  useEffect(() => {
+    if (!activeTask) {
+      setSadSeconds(0);
+      return;
+    }
+    const isNegativeEmotion = ["sad", "angry", "frustrated", "fear", "fearful", "anxious", "disgust", "disgusted"].includes((currentEmotion || "").toLowerCase());
+    
+    if (isNegativeEmotion) {
+      const interval = setInterval(() => {
+        setSadSeconds(prev => {
+          const nextVal = prev + 1;
+          if (nextVal >= 2 && !showFunnyBreakModal) {
+            setShowFunnyBreakModal(true);
+          }
+          return nextVal;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    } else {
+      setSadSeconds(0);
+    }
+  }, [activeTask, currentEmotion, showFunnyBreakModal]);
 
   const fetchTasks = async () => {
     if (!targetChildId) return;
@@ -222,35 +271,59 @@ const ChildDashboard = ({ user, childId, onNavigate }) => {
           {/* VIEW MODE 1: INTERACTIVE ANIMATED GAME */}
           {taskViewMode === 'game' ? (
             <div>
-              {/* Optional Camera Detection Bar */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '12px 16px', borderRadius: '16px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '1.3rem' }}>📷</span>
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: '800', color: '#1e293b' }}>
-                      AI Facial Expression Feedback
+              {/* Camera Detection Bar — mandatory for face/emotion games, optional for others */}
+              {(() => {
+                const t = (activeTask.title || '').toLowerCase();
+                const isFaceGame = t.includes('mirror') || t.includes('mimic') || t.includes('face') ||
+                  t.includes('emotion') || t.includes('feeling') || t.includes('expression');
+                return (
+                  <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    background: isFaceGame ? '#f0fdf4' : '#f8fafc',
+                    padding: '12px 16px', borderRadius: '16px',
+                    border: `1.5px solid ${isFaceGame ? '#86efac' : '#e2e8f0'}`,
+                    marginBottom: '20px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '1.3rem' }}>{isFaceGame ? '🎭' : '📷'}</span>
+                      <div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: '800', color: '#1e293b' }}>
+                          {isFaceGame ? '🎥 FER-AI Camera — Required for this activity' : 'AI Facial Expression Feedback'}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                          {currentEmotion
+                            ? <>Detected: <strong>{currentEmotion}</strong> ({emotionConfidence}% confidence)</>
+                            : isFaceGame ? '📸 Camera starting… look at the lens!' : 'Camera is off'}
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                      Detected Emotion: <strong>{currentEmotion}</strong> ({emotionConfidence}% confidence)
-                    </div>
+                    {isFaceGame ? (
+                      // For face games: camera is mandatory — show status badge, not a toggle
+                      <span style={{
+                        padding: '6px 14px', borderRadius: '10px',
+                        background: showWebcam ? '#16a34a' : '#dc2626',
+                        color: 'white', fontWeight: '800', fontSize: '0.78rem'
+                      }}>
+                        {showWebcam ? '🟢 Camera Active' : '🔴 Camera Required'}
+                      </span>
+                    ) : (
+                      // For other games: optional toggle
+                      <button
+                        onClick={() => setShowWebcam(!showWebcam)}
+                        style={{
+                          padding: '6px 14px', borderRadius: '10px',
+                          border: '1.5px solid #cbd5e1',
+                          background: showWebcam ? '#e0e7ff' : '#ffffff',
+                          color: showWebcam ? '#4338ca' : '#475569',
+                          fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer',
+                        }}
+                      >
+                        {showWebcam ? 'Hide Camera' : 'Turn On Camera'}
+                      </button>
+                    )}
                   </div>
-                </div>
-                <button
-                  onClick={() => setShowWebcam(!showWebcam)}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: '10px',
-                    border: '1.5px solid #cbd5e1',
-                    background: showWebcam ? '#e0e7ff' : '#ffffff',
-                    color: showWebcam ? '#4338ca' : '#475569',
-                    fontWeight: '700',
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {showWebcam ? 'Hide Camera' : 'Turn On Camera'}
-                </button>
-              </div>
+                );
+              })()}
 
               {showWebcam && (
                 <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
@@ -258,11 +331,12 @@ const ChildDashboard = ({ user, childId, onNavigate }) => {
                     isActive={showWebcam}
                     onEmotionDetected={(data) => {
                       if (data?.emotion) setCurrentEmotion(data.emotion);
-                      if (data?.confidence) setEmotionConfidence(data.confidence);
+                      if (data?.confidence !== undefined) setEmotionConfidence(data.confidence);
                     }}
                   />
                 </div>
               )}
+
 
               {/* Central Interactive Game Zone */}
               <div style={{ background: '#fdf4ff', border: '2px solid #f0abfc', borderRadius: '24px', padding: '24px', marginBottom: '24px' }}>
@@ -428,9 +502,54 @@ const ChildDashboard = ({ user, childId, onNavigate }) => {
           </div>
         </div>
 
-        <p style={{ margin: 0, opacity: 0.92, fontSize: '1.02rem', lineHeight: '1.5', maxWidth: '750px' }}>
+        <p style={{ margin: "0 0 16px 0", opacity: 0.92, fontSize: '1.02rem', lineHeight: '1.5', maxWidth: '750px' }}>
           Play interactive animated games specifically calibrated for your age ({childAge} yrs) and level ({currentTier.label}). Complete games to earn XP and build your daily streak!
         </p>
+
+        {/* PROFILE & EXAM ACTION BUTTONS */}
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+          <button
+            type="button"
+            onClick={() => setShowStudentProfile(true)}
+            style={{
+              padding: "10px 18px",
+              borderRadius: "14px",
+              border: "1.5px solid rgba(255,255,255,0.4)",
+              background: "rgba(255,255,255,0.2)",
+              color: "white",
+              fontWeight: "800",
+              fontSize: "0.88rem",
+              cursor: "pointer",
+              backdropFilter: "blur(6px)",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            🟩 👤 View LeetCode Heatmap Profile
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowMasteryExam(true)}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "14px",
+              border: "none",
+              background: "#ffd93d",
+              color: "#1e1b4b",
+              fontWeight: "900",
+              fontSize: "0.88rem",
+              cursor: "pointer",
+              boxShadow: "0 4px 14px rgba(255, 217, 61, 0.4)",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            🎓 Conduct Adaptive Master Exam →
+          </button>
+        </div>
       </div>
 
       {/* Progress Stats */}
@@ -683,36 +802,261 @@ const ChildDashboard = ({ user, childId, onNavigate }) => {
 
       {/* Completed Tasks */}
       {completed.length > 0 && (
-        <section>
-          <h2 style={{ fontWeight: '800', fontSize: '1.35rem', marginBottom: '18px', color: '#1e1b4b' }}>
-            ✅ Completed Therapy Games
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {completed.map((act) => (
-              <div
-                key={act._id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '16px',
-                  padding: '16px 20px',
-                  border: '1px solid #d1fae5',
-                  borderRadius: '16px',
-                  background: '#f0fdf4',
-                }}
-              >
-                <span style={{ fontSize: '1.6rem' }}>{CATEGORY_ICON[act.category] || '🎮'}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '700', fontSize: '1rem', textDecoration: 'line-through', color: '#065f46' }}>
-                    {act.title}
+        <section style={{ marginBottom: '36px' }}>
+          {/* Section Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
+            <h2 style={{ fontWeight: '800', fontSize: '1.35rem', margin: 0, color: '#1e1b4b', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              ✅ Completed Therapy Games
+              <span style={{ background: '#dcfce7', color: '#16a34a', borderRadius: '20px', padding: '2px 12px', fontSize: '0.85rem', fontWeight: '800' }}>
+                {completed.length} done
+              </span>
+            </h2>
+            <button
+              onClick={() => {
+                if (onNavigate) onNavigate(`/trophy-room/${targetChildId}`);
+                else window.location.href = `/trophy-room/${targetChildId}`;
+              }}
+              style={{
+                padding: '8px 18px',
+                borderRadius: '12px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #d97706, #b45309)',
+                color: 'white',
+                fontWeight: '800',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(217,119,6,0.35)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              🏆 View Full Trophy Room →
+            </button>
+          </div>
+
+          {/* Completed Cards Grid */}
+          <div className="grid-3">
+            {completed.map((act) => {
+              const cardColor = act.color || '#16a34a';
+              const cardBg = act.bg || '#dcfce7';
+              const xpAmount = act.xp || 45;
+              const starCount = act.stars || 3;
+
+              return (
+                <div
+                  key={act._id}
+                  style={{
+                    background: '#ffffff',
+                    borderRadius: '24px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    border: '2px solid #d1fae5',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    position: 'relative',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 16px 32px rgba(22,163,74,0.18)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)';
+                  }}
+                >
+                  {/* Completed ribbon badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '14px',
+                    left: '14px',
+                    zIndex: 10,
+                    background: 'rgba(22,163,74,0.92)',
+                    color: '#fff',
+                    fontSize: '0.72rem',
+                    fontWeight: '900',
+                    padding: '4px 10px',
+                    borderRadius: '20px',
+                    letterSpacing: '0.5px',
+                    backdropFilter: 'blur(4px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}>
+                    ✅ COMPLETED
                   </div>
-                  <div style={{ fontSize: '0.82rem', color: '#047857' }}>{act.category} · Completed ⭐</div>
+
+                  {/* Card Top Color Banner (slightly dimmed for completed) */}
+                  <div
+                    style={{
+                      background: `linear-gradient(135deg, ${cardColor}99, ${cardColor}cc)`,
+                      padding: '20px 20px 36px',
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          position: 'absolute',
+                          width: '48px',
+                          height: '48px',
+                          borderRadius: '50%',
+                          border: '2px solid rgba(255,255,255,0.18)',
+                          top: `${-10 + i * 18}%`,
+                          right: `${-5 + i * 12}%`,
+                        }}
+                      />
+                    ))}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', position: 'relative', zIndex: 1 }}>
+                      <div style={{
+                        background: 'rgba(255,255,255,0.25)',
+                        backdropFilter: 'blur(4px)',
+                        color: '#ffffff',
+                        border: '1px solid rgba(255,255,255,0.4)',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        fontWeight: '900',
+                        fontSize: '0.82rem',
+                      }}>
+                        +{xpAmount} XP Earned
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'center', fontSize: '2.8rem', marginTop: '4px' }}>
+                      {act.icon || CATEGORY_ICON[act.category] || '🎮'}
+                    </div>
+                  </div>
+
+                  {/* Card Body */}
+                  <div style={{ padding: '0 20px 20px', marginTop: '-18px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 2 }}>
+                    {/* Category pill */}
+                    <div style={{ marginBottom: '10px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      <span style={{
+                        backgroundColor: cardBg,
+                        color: cardColor,
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        fontWeight: '800',
+                        fontSize: '0.75rem',
+                      }}>
+                        {act.category || 'Therapy'}
+                      </span>
+                      {act.therapyPrinciple && (
+                        <span style={{
+                          backgroundColor: '#f1f5f9',
+                          color: '#475569',
+                          padding: '3px 10px',
+                          borderRadius: '12px',
+                          fontSize: '0.72rem',
+                          fontWeight: '700',
+                          border: '1px solid #e2e8f0',
+                        }}>
+                          🧠 {act.therapyPrinciple}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Title */}
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '900', margin: '0 0 4px 0', color: '#111827', lineHeight: 1.25 }}>
+                      {act.title}
+                    </h3>
+                    {act.titleKn && (
+                      <div style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '8px', fontWeight: '700' }}>
+                        {act.titleKn}
+                      </div>
+                    )}
+
+                    {/* Description */}
+                    <p style={{ fontSize: '0.86rem', color: '#4b5563', lineHeight: '1.5', margin: '0 0 12px 0', flex: 1 }}>
+                      {act.description?.substring(0, 90)}...
+                    </p>
+
+                    {/* Stars & Duration */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                      <div style={{ fontSize: '1rem', letterSpacing: '1px' }}>
+                        {'⭐'.repeat(starCount)}{'☆'.repeat(Math.max(0, 5 - starCount))}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: '700' }}>
+                        ⏱ {act.duration || '10 mins'}
+                      </div>
+                    </div>
+
+                    {/* Play Again Button */}
+                    <button
+                      onClick={() => {
+                        setActiveTask(act);
+                        setTaskViewMode('game');
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '16px',
+                        border: '2.5px solid #16a34a',
+                        background: 'linear-gradient(135deg, #16a34a, #15803d)',
+                        color: '#ffffff',
+                        fontWeight: '900',
+                        fontSize: '0.95rem',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 14px rgba(22,163,74,0.35)',
+                        transition: 'transform 0.15s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                    >
+                      🔄 Play Again
+                    </button>
+                  </div>
                 </div>
-                <span style={{ color: 'var(--green)', fontWeight: '800', fontSize: '1.4rem' }}>✅</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
+      )}
+
+      {showStudentProfile && (
+        <StudentProfileModal
+          childId={targetChildId}
+          childData={tasks}
+          onClose={() => setShowStudentProfile(false)}
+          onOpenMasteryExam={() => {
+            setShowStudentProfile(false);
+            setShowMasteryExam(true);
+          }}
+        />
+      )}
+
+      {showMasteryExam && (
+        <MasteryExamModal
+          child={tasks}
+          onClose={() => setShowMasteryExam(false)}
+          onExamPassed={async () => {
+            await fetchTasks();
+          }}
+        />
+      )}
+
+      {showFunnyBreakModal && (
+        <FunnyBreakModal
+          open={showFunnyBreakModal}
+          onClose={() => setShowFunnyBreakModal(false)}
+          childAge={tasks?.age || 6}
+          childLevel={tasks?.level || 1}
+          onCompleteFunnyBreak={(nextHappyAct) => {
+            setShowFunnyBreakModal(false);
+            setSadSeconds(0);
+            setCurrentEmotion("Happy");
+            if (nextHappyAct) {
+              setActiveTask(nextHappyAct);
+            }
+          }}
+          language="en"
+        />
       )}
     </div>
   );

@@ -14,7 +14,7 @@ export default function EmotionDetector({ onEmotionDetected, isActive }) {
   const emotionEmoji = {
     happy:     { emoji: "😊", label: "Happy",     labelKn: "ಸಂತೋಷ",   color: "#22c55e" },
     sad:       { emoji: "😢", label: "Sad",       labelKn: "ದುಃಖ",     color: "#3b82f6" },
-    angry:     { emoji: "😠", label: "Frustrated",labelKn: "ಕೋಪ",     color: "#ef4444" },
+    angry:     { emoji: "😠", label: "Angry",     labelKn: "ಕೋಪ",     color: "#ef4444" },
     fear:      { emoji: "😨", label: "Anxious",   labelKn: "ಭಯ",      color: "#8b5cf6" },
     fearful:   { emoji: "😨", label: "Anxious",   labelKn: "ಭಯ",      color: "#8b5cf6" },
     neutral:   { emoji: "😐", label: "Focused",   labelKn: "ತಟಸ್ಥ",   color: "#6b7280" },
@@ -99,7 +99,7 @@ export default function EmotionDetector({ onEmotionDetected, isActive }) {
       if (!videoRef.current) return;
 
       try {
-        // 1. Capture 48x48 frame for PyTorch FER2013 Model
+        // 1. Try PyTorch server first if running
         const frameB64 = captureFrameBase64();
         if (frameB64) {
           const res = await predictEmotion(frameB64);
@@ -114,28 +114,51 @@ export default function EmotionDetector({ onEmotionDetected, isActive }) {
           }
         }
 
-        // 2. Fallback to client-side faceapi if server unreachable
-        const detections = await faceapi
-          .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
-          .withFaceExpressions();
+        // 2. Real-time client-side face-api detection from video element
+        if (videoRef.current.readyState === 4) {
+          const detections = await faceapi
+            .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 }))
+            .withFaceExpressions();
 
-        if (detections && detections.expressions) {
-          const expressions = detections.expressions;
-          const topEmotion = Object.entries(expressions).sort((a, b) => b[1] - a[1])[0];
-          const emotionName = topEmotion[0];
-          const emotionConf = Math.round(topEmotion[1] * 100);
+          if (detections && detections.expressions) {
+            const expressions = detections.expressions;
+            // Sort by confidence value
+            const sorted = Object.entries(expressions).sort((a, b) => b[1] - a[1]);
+            
+            // Balanced emotion classification:
+            // Face-api.js TinyFaceDetector expression network frequently classifies angry scowls / furrowed brows
+            // as "sad" or "disgusted" because downturned mouth corners trigger high sad probability.
+            const angryScore = expressions.angry || 0;
+            const disgustScore = expressions.disgusted || 0;
+            const sadScore = expressions.sad || 0;
+            const happyScore = expressions.happy || 0;
 
-          setEmotion(emotionName);
-          setConfidence(emotionConf);
+            let emotionName = sorted[0][0].toLowerCase();
+            let emotionConf = Math.round(sorted[0][1] * 100);
 
-          if (onEmotionDetected) {
-            onEmotionDetected(emotionName, emotionConf);
+            // If angry cues are clearly active (furrowed brow, tense frown)
+            const isAngerSignal =
+              angryScore >= 0.18 ||
+              (angryScore >= 0.12 && angryScore + disgustScore >= 0.24) ||
+              (angryScore >= 0.15 && (sorted[0][0] === "sad" || sorted[0][0] === "disgusted" || sorted[0][0] === "neutral"));
+
+            if (isAngerSignal && happyScore < 0.25) {
+              emotionName = "angry";
+              emotionConf = Math.max(Math.round(angryScore * 100), Math.round((angryScore + disgustScore) * 100), 75);
+            }
+
+            setEmotion(emotionName);
+            setConfidence(emotionConf);
+
+            if (onEmotionDetected) {
+              onEmotionDetected(emotionName, emotionConf, { expressions, rawEmotion: sorted[0][0] });
+            }
           }
         }
       } catch (err) {
-        // Silently continue tracking
+        // Continue tracking smoothly
       }
-    }, 2000);
+    }, 600);
   };
 
   const current = emotionEmoji[emotion.toLowerCase()] || emotionEmoji.neutral;

@@ -64,7 +64,21 @@ const connectDB = async () => {
 
 // ── Handle unexpected disconnects ─────────────────────────────────────────────
 mongoose.connection.on("disconnected", () => {
-  console.warn("⚠️ MongoDB disconnected.");
+  console.warn("⚠️ MongoDB disconnected. Attempting automatic reconnection...");
+  const uri = process.env.MONGODB_URI;
+  if (uri && mongoose.connection.readyState === 0) {
+    setTimeout(() => {
+      mongoose
+        .connect(uri, {
+          serverSelectionTimeoutMS: 8000,
+          socketTimeoutMS: 45000,
+        })
+        .then(() => console.log("🍃 MongoDB Atlas Reconnected!"))
+        .catch((err) => {
+          console.warn("Reconnection retry notice:", err.message);
+        });
+    }, 3000);
+  }
 });
 
 mongoose.connection.on("error", (err) => {

@@ -174,7 +174,7 @@ export const translations = {
   auth_sign_in:           { en: "🔑 Sign In",                             kn: "🔑 ಸೈನ್ ಇನ್" },
   auth_create_account:    { en: "✨ Create Account",                     kn: "✨ ಖಾತೆ ರಚಿಸಿ" },
   auth_welcome_back:      { en: "Welcome back",                          kn: "ಮರಳಿ ಸುಸ್ವಾಗತ" },
-  auth_signin_desc:       { en: "Sign in to continue to your dashboard",  kn: "ನಿಮ್ಮ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಲಾಗಿನ್ ಮಾಡಲು ಸೈನ್ ಇನ್ ಮಾಡಿ" },
+  auth_signin_desc:       { en: "Sign in to access your account",        kn: "ನಿಮ್ಮ ಖಾತೆಗೆ ಪ್ರವೇಶಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ" },
   auth_email:             { en: "Email Address *",                       kn: "ಇಮೇಲ್ ವಿಳಾಸ *" },
   auth_password:          { en: "Password *",                            kn: "ಪಾಸ್‌ವರ್ಡ್ *" },
   auth_no_account:        { en: "Don't have an account?",                kn: "ಖಾತೆ ಹೊಂದಿಲ್ಲವೇ?" },

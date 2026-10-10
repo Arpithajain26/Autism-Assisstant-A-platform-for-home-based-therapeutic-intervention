@@ -13,6 +13,9 @@ import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import ProgressView from "./pages/ProgressView";
+import ExamPage from "./pages/ExamPage";
+import MasteryExamPage from "./pages/MasteryExamPage";
+import TherapyTrophyRoom from "./pages/TherapyTrophyRoom";
 import Chatbot from "./components/Chatbot";
 
 // ─────────────────────────────────────────────────────────────
@@ -70,7 +73,7 @@ function App() {
 
   useEffect(() => {
     if (!user) {
-      const publicRoutes = ["/", "/login", "/about", "/contact", "/privacy", "/terms"];
+      const publicRoutes = ["/", "/login", "/about", "/contact", "/privacy", "/terms", "/exam", "/exam/result", "/challenge-mode", "/mastery-exam", "/challenge"];
       if (!publicRoutes.includes(path)) {
         navigate("/");
       }
@@ -89,9 +92,15 @@ function App() {
   let Component;
 
   // ============================================================
-  // PUBLIC ROUTES
+  // PUBLIC / DEMO ROUTES
   // ============================================================
-  if (!user) {
+  if (path === "/challenge-mode" || path === "/mastery-exam" || path === "/challenge") {
+    Component = <MasteryExamPage />;
+  } else if (path === "/exam") {
+    Component = <ExamPage />;
+  } else if (path === "/exam/result") {
+    Component = <ExamPage initialStep="result" />;
+  } else if (!user) {
     switch (path) {
       case "/":
         Component = <Home />;
@@ -131,6 +140,11 @@ function App() {
     } else if (path.startsWith("/progress/")) {
       const childId = path.split("/progress/")[1];
       Component = <ProgressView user={user} childId={childId} onNavigate={navigate} />;
+    } else if (path.startsWith("/trophy-room/")) {
+      const childId = path.split("/trophy-room/")[1];
+      Component = <TherapyTrophyRoom user={user} childId={childId} onNavigate={navigate} />;
+    } else if (path === "/trophy-room") {
+      Component = <TherapyTrophyRoom user={user} onNavigate={navigate} />;
     } else {
       switch (path) {
         case "/dashboard":
@@ -273,6 +287,21 @@ function App() {
             }}
           >
             🧩 Therapy Games
+          </a>
+
+          <a
+            href="/trophy-room"
+            onClick={(e) => handleNavClick(e, "/trophy-room")}
+            style={{
+              textDecoration: "none",
+              color: path === "/trophy-room" || path.startsWith("/trophy-room/") ? "#ca8a04" : "var(--text)",
+              fontWeight: "700",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            🏆 Trophy Room
           </a>
 
           <div

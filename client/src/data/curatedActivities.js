@@ -1307,3 +1307,308 @@ export const CURATED_ACTIVITIES = [
     ]
   }
 ];
+
+// ─────────────────────────────────────────────────────────────
+// 9 Dedicated Happy & Mood-Boosting Activities (3 Age Groups x 3 Levels)
+// ─────────────────────────────────────────────────────────────
+export const HAPPY_BOOSTER_ACTIVITIES = [
+  // ── AGE GROUP: 2-5 YEARS ────────────────────────────────────────────────
+  {
+    _id: "happy_a25_l1",
+    ageGroup: "2-5",
+    level: 1,
+    tier: "Beginner",
+    category: "Mood Booster & Joy",
+    categoryKn: "ಮೂಡ್ ಬೂಸ್ಟರ್ ಮತ್ತು ಸಂತೋಷ",
+    therapyPrinciple: "Floortime / Sensory Joyful Play",
+    icon: "🎈",
+    color: "#ec4899",
+    bg: "#fce7f3",
+    isMoodBooster: true,
+    title: "Bubble Pop Dance & Giggle Play",
+    titleKn: "ಗುಳ್ಳೆಗಳ ನೃತ್ಯ ಮತ್ತು ನಗೆ ಆಟ",
+    description: "Blow colourful bubbles with soft cheerful nursery tunes, pop them with gentle high-fives, and share warm smiles to instantly lift toddler spirits.",
+    descriptionKn: "ಮಧುರ ಸಂಗೀತದೊಂದಿಗೆ ಬಣ್ಣ ಬಣ್ಣದ ಗುಳ್ಳೆಗಳನ್ನು ಊದಿ, ಹೈ-ಫೈವ್ ನೀಡಿ ಒಡೆಯುವ ಮೂಲಕ ಮಗುವಿನ ಮೂಡ್ ಅನ್ನು ತಕ್ಷಣವೇ ಹೆಚ್ಚಿಸಿ.",
+    duration: "8 mins",
+    durationKn: "8 ನಿಮಿಷ",
+    xp: 50,
+    stars: 3,
+    materials: "Bubble wand, cheerful lullaby music, soft rug",
+    materialsKn: "ಸಾಬೂನಿನ ಗುಳ್ಳೆ ಕೋಲು, ಮಧುರ ಸಂಗೀತ, ಮೆತ್ತಗಿನ ಮ್ಯಾಟ್",
+    instructions: [
+      { en: "Play upbeat, gentle lullaby or nursery music.", kn: "ಮಧುರವಾದ ಮತ್ತು ಸಂತೋಷದಾಯಕ ಸಂಗೀತವನ್ನು ಪ್ಲೇ ಮಾಡಿ." },
+      { en: "Blow bubbles high in the air and model popping them with soft claps.", kn: "ಗುಳ್ಳೆಗಳನ್ನು ಗಾಳಿಯಲ್ಲಿ ಊದಿ ಮತ್ತು ಚಪ್ಪಾಳೆ ತಟ್ಟಿ ಒಡೆಯುವುದನ್ನು ತೋರಿಸಿ." },
+      { en: "Give high-fives and make funny happy faces when bubbles pop.", kn: "ಗುಳ್ಳೆ ಒಡೆದಾಗ ಹೈ-ಫೈವ್ ನೀಡಿ ಸಂತೋಷದ ಮುಖಭಾವ ಮಾಡಿ." },
+      { en: "Encourage child to stomp feet softly and catch bubbles with smiles.", kn: "ಮಗು ನಗುತ್ತಾ ಗುಳ್ಳೆಗಳನ್ನು ಹಿಡಿಯಲು ಪ್ರೋತ್ಸಾಹಿಸಿ." }
+    ]
+  },
+  {
+    _id: "happy_a25_l2",
+    ageGroup: "2-5",
+    level: 2,
+    tier: "Elementary",
+    category: "Mood Booster & Joy",
+    categoryKn: "ಮೂಡ್ ಬೂಸ್ಟರ್ ಮತ್ತು ಸಂತೋಷ",
+    therapyPrinciple: "Sensory Integration & Playful Motor Release",
+    icon: "🐶",
+    color: "#10b981",
+    bg: "#d1fae5",
+    isMoodBooster: true,
+    title: "Animal Freeze Dance & Silly Sounds",
+    titleKn: "ಪ್ರಾಣಿಗಳ ನೃತ್ಯ ಮತ್ತು ತಮಾಷೆಯ ಶಬ್ದಗಳು",
+    description: "Dance to fun animal tunes, freeze in playful animal poses, and make cheerful animal sounds together.",
+    descriptionKn: "ಉತ್ಸಾಹದ ಪ್ರಾಣಿಗಳ ಹಾಡಿಗೆ ನರ್ತಿಸಿ, ತಮಾಷೆಯ ಭಂಗಿಗಳಲ್ಲಿ ನಿಂತು ಮೋಜಿನ ಶಬ್ದಗಳನ್ನು ಮಾಡಿ.",
+    duration: "10 mins",
+    durationKn: "10 ನಿಮಿಷ",
+    xp: 55,
+    stars: 3,
+    materials: "Upbeat audio track, open floor space",
+    materialsKn: "ಉತ್ಸಾಹದ ಹಾಡು, ತೆರೆದ ಸ್ಥಳ",
+    instructions: [
+      { en: "Play a lively animal rhythm song.", kn: "ಉತ್ಸಾಹಭರಿತ ಪ್ರಾಣಿಗಳ ಹಾಡನ್ನು ಹಾಕಿ." },
+      { en: "Hop like a happy bunny or flap arms like a cheerful bird.", kn: "ಮೊಲದಂತೆ ನೆಗೆಯಿರಿ ಅಥವಾ ಪಕ್ಷಿಯಂತೆ ರೆಕ್ಕೆ ಬಡಿಯಿರಿ." },
+      { en: "Pause music and freeze in a silly happy face pose!", kn: "ಸಂಗೀತ ನಿಲ್ಲಿಸಿ ತಮಾಷೆಯ ನಗುವಿನ ಭಂಗಿಯಲ್ಲಿ ಫ್ರೀಜ್ ಆಗಿ!" },
+      { en: "Reward frozen pose with a warm hug and cheerful applause.", kn: "ಮಗುವನ್ನು ಅಪ್ಪಿಕೊಂಡು ಸಂತೋಷದಿಂದ ಚಪ್ಪಾಳೆ ತಟ್ಟಿ." }
+    ]
+  },
+  {
+    _id: "happy_a25_l3",
+    ageGroup: "2-5",
+    level: 3,
+    tier: "Intermediate",
+    category: "Mood Booster & Joy",
+    categoryKn: "ಮೂಡ್ ಬೂಸ್ಟರ್ ಮತ್ತು ಸಂತೋಷ",
+    therapyPrinciple: "Sensory Calming & Smile Triggering",
+    icon: "✨",
+    color: "#8b5cf6",
+    bg: "#ede9fe",
+    isMoodBooster: true,
+    title: "Sparkle Water Bottle & Smile Wand",
+    titleKn: "ಕಾಂತಿ ನೀರಿನ ಬಾಟಲಿ ಮತ್ತು ಮುಗುಳುನಗೆ ಕೋಲು",
+    description: "Shake a glitter sensory bottle to watch swirl patterns while smiling into a mirror wand for soothing visual joy.",
+    descriptionKn: "ಮಿಂಚಿನ ಬಾಟಲಿಯನ್ನು ತಿರುಗಿಸಿ ಬಣ್ಣಗಳ ಕಾಂತಿಯನ್ನು ನೋಡುತ್ತಾ ಕನ್ನಡಿಯಲ್ಲಿ ನಗು ಬೀರಿ ನೆಮ್ಮದಿ ಪಡೆಯಿರಿ.",
+    duration: "10 mins",
+    durationKn: "10 ನಿಮಿಷ",
+    xp: 60,
+    stars: 3,
+    materials: "Glitter sensory bottle, hand mirror wand",
+    materialsKn: "ಗ್ಲಿಟರ್ ಸೆನ್ಸರಿ ಬಾಟಲಿ, ಕನ್ನಡಿ ಕೋಲು",
+    instructions: [
+      { en: "Hand the child a colourful glitter-filled sensory bottle.", kn: "ಮಗುವಿಗೆ ಬಣ್ಣ ಬಣ್ಣದ ಗ್ಲಿಟರ್ ಬಾಟಲಿಯನ್ನು ನೀಡಿ." },
+      { en: "Shake it up together to release swirling sparkles.", kn: "ಬಾಟಲಿಯನ್ನು ಜೋರಾಗಿ ಅಲ್ಲಾಡಿಸಿ ಕಾಂತಿಯುತ ಬಣ್ಣಗಳನ್ನು ನೋಡಿ." },
+      { en: "Look through a hand mirror and practice making bright happy smiles.", kn: "ಕನ್ನಡಿಯಲ್ಲಿ ನೋಡಿ ಸುಂದರ ಮುಗುಳುನಗೆಯನ್ನು ಪ್ರದರ್ಶಿಸಿ." },
+      { en: "Pass a soft smile wand and celebrate with cheerful applause.", kn: "ಸ್ಮೈಲ್ ಕೋಲನ್ನು ನೀಡಿ ಪ್ರೀತಿಯಿಂದ ಪ್ರಶಂಸಿಸಿ." }
+    ]
+  },
+
+  // ── AGE GROUP: 6-9 YEARS (5-8 yrs) ──────────────────────────────────────
+  {
+    _id: "happy_a69_l1",
+    ageGroup: "5-8",
+    level: 1,
+    tier: "Elementary",
+    category: "Mood Booster & Joy",
+    categoryKn: "ಮೂಡ್ ಬೂಸ್ಟರ್ ಮತ್ತು ಸಂತೋಷ",
+    therapyPrinciple: "Social Interaction & Rhythmic Excitement",
+    icon: "🎵",
+    color: "#3b82f6",
+    bg: "#dbeafe",
+    isMoodBooster: true,
+    title: "Cartoon Musical High-Five Jam",
+    titleKn: "ಕಾರ್ಟೂನ್ ಸಂಗೀತ ಮತ್ತು ಹೈ-ಫೈವ್ ಜ್ಯಾಮ್",
+    description: "Clap and tap along to favourite cartoon melodies with interactive high-five rhythms to shift emotion to pure excitement.",
+    descriptionKn: "ಇಷ್ಟವಾದ ಕಾರ್ಟೂನ್ ಹಾಡಿಗೆ ತಕ್ಕಂತೆ ಚಪ್ಪಾಳೆ ತಟ್ಟಿ ಹೈ-ಫೈವ್ ನೀಡುವ ಮೂಲಕ ಉತ್ಸಾಹವನ್ನು ಹೆಚ್ಚಿಸಿ.",
+    duration: "10 mins",
+    durationKn: "10 ನಿಮಿಷ",
+    xp: 55,
+    stars: 3,
+    materials: "Cartoon soundtrack audio, clapping space",
+    materialsKn: "ಕಾರ್ಟೂನ್ ಹಾಡು, ಚಪ್ಪಾಳೆ ಜಾಗ",
+    instructions: [
+      { en: "Start a rhythm track from a beloved animated cartoon show.", kn: "ಮಗುವಿಗೆ ಇಷ್ಟವಾದ ಕಾರ್ಟೂನ್ ಶೋ ಹಾಡನ್ನು ಪ್ಲೇ ಮಾಡಿ." },
+      { en: "Clap 3 times, stomp 2 times, then give double high-fives.", kn: "3 ಬಾರಿ ಚಪ್ಪಾಳೆ ತಟ್ಟಿ, 2 ಬಾರಿ ಹೆಜ್ಜೆ ಹಾಕಿ ನಂತರ ಡಬಲ್ ಹೈ-ಫೈವ್ ನೀಡಿ." },
+      { en: "Say joyful affirmations: 'I am strong! I am happy!'.", kn: "'ನಾನು ಶಕ್ತಿಶಾಲಿ! ನಾನು ಸಂತೋಷವಾಗಿದ್ದೇನೆ!' ಎಂದು ಉಚ್ಚರಿಸಿ." },
+      { en: "Finish with a victory spin and cheerful jump.", kn: "ವಿಕ್ಟರಿ ಜಂಪ್ ಮಾಡುವ ಮೂಲಕ ಪೂರ್ಣಗೊಳಿಸಿ." }
+    ]
+  },
+  {
+    _id: "happy_a69_l2",
+    ageGroup: "5-8",
+    level: 2,
+    tier: "Intermediate",
+    category: "Mood Booster & Joy",
+    categoryKn: "ಮೂಡ್ ಬೂಸ್ಟರ್ ಮತ್ತು ಸಂತೋಷ",
+    therapyPrinciple: "Proprioceptive Confidence & Positive Neuro-Feedback",
+    icon: "🦸‍♂️",
+    color: "#f59e0b",
+    bg: "#fef3c7",
+    isMoodBooster: true,
+    title: "Superhero Power Pose & Smile Challenge",
+    titleKn: "ಸೂಪರ್‌ಹೀರೋ ಪವರ್ ಪೋಸ್ ಮತ್ತು ಸ್ಮೈಲ್ ಸ್ಪರ್ಧೆ",
+    description: "Strike brave, cheerful superhero poses in front of a mirror and hold big smiles to boost positive energy and confidence.",
+    descriptionKn: "ಕನ್ನಡಿಯಲ್ಲಿ ವೀರ ಸೂಪರ್‌ಹೀರೋ ಭಂಗಿಗಳನ್ನು ಪ್ರದರ್ಶಿಸಿ ಸಕಾರಾತ್ಮಕ ಶಕ್ತಿಯನ್ನು ಪಡೆದುಕೊಳ್ಳಿ.",
+    duration: "12 mins",
+    durationKn: "12 ನಿಮಿಷ",
+    xp: 60,
+    stars: 3,
+    materials: "Full length mirror, superhero cape/towel prop",
+    materialsKn: "ಕನ್ನಡಿ, ಸೂಪರ್ ಹೀರೋ ಶಾಲು ಅಥವಾ ಕೇಪ್",
+    instructions: [
+      { en: "Put hands on hips in the classic Superhero Stance.", kn: "ಕೈಗಳನ್ನು ಸೊಂಟದ ಮೇಲಿಟ್ಟು ಸೂಪರ್‌ಹೀರೋ ರೀತಿಯಲ್ಲಿ ನಿಲ್ಲಿರಿ." },
+      { en: "Flex arms, smile broadly into mirror, and count to 5 together.", kn: "ಕೈಗಳನ್ನು ಪ್ರದರ್ಶಿಸಿ, ಕನ್ನಡಿಯಲ್ಲಿ ದೊಡ್ಡ ನಗು ಬೀರಿ 5 ರವರೆಗೆ ಎಣಿಸಿ." },
+      { en: "Invent a silly hero power name (e.g. 'Captain Giggle!').", kn: "ತಮಾಷೆಯ ಹೀರೋ ಹೆಸರು ಇಟ್ಟುಕೊಳ್ಳಿ (ಉದಾ. 'ಕ್ಯಾಪ್ಟನ್ ಗಿಗ್ಗಲ್!')." },
+      { en: "Do 3 hero victory hops to release positive energy.", kn: "3 ಬಾರಿ ಸಂತೋಷದ ಜಂಪ್ ಮಾಡಿ ವಿಜಯದ ಸಂಭ್ರಮಿಸಿ." }
+    ]
+  },
+  {
+    _id: "happy_a69_l3",
+    ageGroup: "5-8",
+    level: 3,
+    tier: "Advanced",
+    category: "Mood Booster & Joy",
+    categoryKn: "ಮೂಡ್ ಬೂಸ್ಟರ್ ಮತ್ತು ಸಂತೋಷ",
+    therapyPrinciple: "Visual Expression & Creative Cognitive Joy",
+    icon: "🎨",
+    color: "#06b6d4",
+    bg: "#cffaff",
+    isMoodBooster: true,
+    title: "Magic Color Splash & Melody Quest",
+    titleKn: "ಮ್ಯಾಜಿಕ್ ಬಣ್ಣದ ಸ್ಪಲಾಶ್ ಮತ್ತು ಸಂಗೀತ ಅನ್ವೇಷಣೆ",
+    description: "Paint or draw vibrant sunbursts while listening to acoustic guitar melodies and sharing 3 things that make you happy.",
+    descriptionKn: "ಉತ್ಸಾಹದ ಹಾಡುಗಳನ್ನು ಕೇಳುತ್ತಾ ಪ್ರಕಾಶಮಾನವಾದ ಬಣ್ಣಗಳಿಂದ ಸೂರ್ಯನ ಚಿತ್ರ ಬರೆದು ಸಂತೋಷದ ವಿಷಯಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ.",
+    duration: "12 mins",
+    durationKn: "12 ನಿಮಿಷ",
+    xp: 65,
+    stars: 3,
+    materials: "Finger paints or crayons, bright paper sheet, acoustic music",
+    materialsKn: "ವರ್ಣರಂಜಿತ ಬಣ್ಣಗಳು, ಬಿಳಿ ಹಾಳೆ, ಮಧುರ ಸಂಗೀತ",
+    instructions: [
+      { en: "Choose your 3 favourite bright happy colors (yellow, sky blue, orange).", kn: "ನಿಮ್ಮ ಇಷ್ಟದ 3 ಸಕಾರಾತ್ಮಕ ಬಣ್ಣಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ (ಹಳದಿ, ನೀಲಿ, ಕಿತ್ತಳೆ)." },
+      { en: "Paint or draw big sunburst shapes while listening to acoustic music.", kn: "ಸಂಗೀತ ಕೇಳುತ್ತಾ ದೊಡ್ದ ಸೂರ್ಯನ ಬಣ್ಣದ ಆಕಾರಗಳನ್ನು ಚಿತ್ರಿಸಿ." },
+      { en: "Name 3 things that bring pure joy (ice cream, sunny park, puppy).", kn: "ನಿಮಗೆ ಅತಿಯಾದ ಸಂತೋಷ ಕೊಡುವ 3 ವಿಷಯಗಳನ್ನು ಹೇಳಿ." },
+      { en: "Display the artwork proudly on the fridge or digital board.", kn: "ಚಿತ್ರವನ್ನು ಎಲ್ಲರಿಗೂ ಕಾಣಿಸುವಂತೆ ಗೋಡೆಯ ಮೇಲೆ ಹಾಕಿ." }
+    ]
+  },
+
+  // ── AGE GROUP: 10-12 YEARS (9-12 yrs) ───────────────────────────────────
+  {
+    _id: "happy_a1012_l1",
+    ageGroup: "9-12",
+    level: 1,
+    tier: "Intermediate",
+    category: "Mood Booster & Joy",
+    categoryKn: "ಮೂಡ್ ಬೂಸ್ಟರ್ ಮತ್ತು ಸಂತೋಷ",
+    therapyPrinciple: "Empowering Rhythm & Self-Esteem Elevation",
+    icon: "🎧",
+    color: "#6366f1",
+    bg: "#eef2ff",
+    isMoodBooster: true,
+    title: "Beat-Box Rhythm & Affirmation Jam",
+    titleKn: "ಬೀಟ್-ಬಾಕ್ಸ್ ರಿದಮ್ ಮತ್ತು ಸಕಾರಾತ್ಮಕ ಹಾರೈಕೆ",
+    description: "Create cool beat-box rhythms while repeating empowering positive affirmations to boost confidence and emotional happiness.",
+    descriptionKn: "ಉತ್ಸಾಹಭರಿತ ರಿದಮ್ ತಟ್ಟಿ ಸಕಾರಾತ್ಮಕ ವಾಕ್ಯಗಳನ್ನು ಹೇಳುವ ಮೂಲಕ ಆತ್ಮವಿಶ್ವಾಸವನ್ನು ಹೆಚ್ಚಿಸಿಕೊಳ್ಳಿ.",
+    duration: "12 mins",
+    durationKn: "12 ನಿಮಿಷ",
+    xp: 65,
+    stars: 3,
+    materials: "Tabletop or drum pad, headphone or speaker",
+    materialsKn: "ಟೇಬಲ್ ಅಥವಾ ಡ್ರಮ್ ಪ್ಯಾಡ್, ಸ್ಪೀಕರ್",
+    instructions: [
+      { en: "Tap a desk or table to create a cool drumbeat.", kn: "ಟೇಬಲ್ ಮೇಲೆ ತಟ್ಟುವ ಮೂಲಕ ಉತ್ತಮ ಸಂಗೀತದ ಬೀಟ್ ರಚಿಸಿ." },
+      { en: "Repeat upbeat affirmations: 'My mind is strong, today is a fantastic day!'.", kn: "'ನನ್ನ ಮನಸ್ಸು ಶಕ್ತಿಶಾಲಿ, ಇಂದಿನ ದಿನ ಅತ್ಯುತ್ತಮವಾಗಿದೆ!' ಎಂದು ಹೇಳಿ." },
+      { en: "Add silly vocal sound effects or beatbox noises to keep it fun.", kn: "ತಮಾಷೆಯ ಶಬ್ದಗಳನ್ನು ಸೇರಿಸಿ ವಾತಾವರಣವನ್ನು ಸಂತೋಷದಿಂದಿರಿಸಿ." },
+      { en: "Celebrate the track with a cool fist bump.", kn: "ಅದ್ಭುತ ಪ್ರದರ್ಶನಕ್ಕೆ ಫಿಸ್ಟ್ ಬಂಪ್ ನೀಡಿ ಅಭಿನಂದಿಸಿ." }
+    ]
+  },
+  {
+    _id: "happy_a1012_l2",
+    ageGroup: "9-12",
+    level: 2,
+    tier: "Advanced",
+    category: "Mood Booster & Joy",
+    categoryKn: "ಮೂಡ್ ಬೂಸ್ಟರ್ ಮತ್ತು ಸಂತೋಷ",
+    therapyPrinciple: "Cognitive Memory Recall & Positivity Association",
+    icon: "🏆",
+    color: "#8b5cf6",
+    bg: "#ede9fe",
+    isMoodBooster: true,
+    title: "Joyful Memory Quest & Victory Trivia",
+    titleKn: "ಸಂತೋಷದ ನೆನಪುಗಳು ಮತ್ತು ವಿಜಯದ ರಸಪ್ರಶ್ನೆ",
+    description: "Interactive game recalling best personal victories, funny moments, and favourite hobbies to elevate pre-teen mood.",
+    descriptionKn: "ನಿಮ್ಮ ಅತ್ಯುತ್ತಮ ಸಾಧನೆಗಳು ಮತ್ತು ತಮಾಷೆಯ ಘಟನೆಗಳನ್ನು ನೆನಪಿಸಿಕೊಂಡು ಮೂಡ್ ಬೂಸ್ಟ್ ಮಾಡಿ.",
+    duration: "15 mins",
+    durationKn: "15 ನಿಮಿಷ",
+    xp: 70,
+    stars: 3,
+    materials: "Memory prompt cards or digital game board",
+    materialsKn: "ನೆನಪಿನ ಕಾರ್ಡ್‌ಗಳು ಅಥವಾ ಡಿಜಿಟಲ್ ಬೋರ್ಡ್",
+    instructions: [
+      { en: "Pick a memory prompt card (e.g. 'Funniest moment this month').", kn: "ಒಂದು ನೆನಪಿನ ಕಾರ್ಡ್ ಎತ್ತಿಕೊಳ್ಳಿ (ಉದಾ. 'ಈ ತಿಂಗಳ ಅತಿ ತಮಾಷೆಯ ಘಟನೆ')." },
+      { en: "Share a favourite funny story or memorable trip experience.", kn: "ನಿಮ್ಮ ಪ್ರವಾಸ ಅಥವಾ ತಮಾಷೆಯ ಕಥೆಯನ್ನು ಹಂಚಿಕೊಳ್ಳಿ." },
+      { en: "Tell a lighthearted joke or solve a funny riddle.", kn: "ಸಣ್ಣ ತಮಾಷೆಯ ಒಗಟು ಬಿಡಿಸಿ ನಗಿ." },
+      { en: "Write or log 3 positive things you feel proud of today.", kn: "ಇಂದು ನೀವು ಹೆಮ್ಮೆಪಡುವ 3 ಸಂಗತಿಗಳನ್ನು ಬರೆಯಿರಿ." }
+    ]
+  },
+  {
+    _id: "happy_a1012_l3",
+    ageGroup: "9-12",
+    level: 3,
+    tier: "Expert",
+    category: "Mood Booster & Joy",
+    categoryKn: "ಮೂಡ್ ಬೂಸ್ಟರ್ ಮತ್ತು ಸಂತೋಷ",
+    therapyPrinciple: "Deep Sensory Regulation & Mindful Joy",
+    icon: "🧘‍♂️",
+    color: "#10b981",
+    bg: "#d1fae5",
+    isMoodBooster: true,
+    title: "Mindful Mood Elevation & Cozy Chill Zone",
+    titleKn: "ಮನಃಶಾಂತಿ ಮೂಡ್ ಏರಿಕೆ ಮತ್ತು ನೆಮ್ಮದಿಯ ವಲಯ",
+    description: "Guided sensory relaxation with ambient nature sounds, cozy blanket, and uplifting visualization to restore emotional peace.",
+    descriptionKn: "ಪ್ರಕೃತಿಯ ನಾದ ಕೇಳುತ್ತಾ ನೆಮ್ಮದಿಯ ವಾತಾವರಣದಲ್ಲಿ ಮನಸ್ಸನ್ನು ಶಾಂತಗೊಳಿಸಿ ಮೂಡ್ ಏರಿಸಿ.",
+    duration: "15 mins",
+    durationKn: "15 ನಿಮಿಷ",
+    xp: 75,
+    stars: 3,
+    materials: "Cozy pillow/weighted blanket, nature audio track",
+    materialsKn: "ಮೆತ್ತನೆಯ ದಿಂಬು, ಪ್ರಕೃತಿಯ ನಾದದ ಹಾಡು",
+    instructions: [
+      { en: "Settle into a comfortable, cozy chair with a favourite pillow or blanket.", kn: "ನೆಚ್ಚಿನ ದಿಂಬು ಮತ್ತು ಶಾಲ್‌ನೊಂದಿಗೆ ಹಿತಕರವಾಗಿ ಕುಳಿತುಕೊಳ್ಳಿ." },
+      { en: "Listen to soothing nature sounds (ocean waves or chirping birds).", kn: "ಸಮುದ್ರದ ಅಲೆಗಳು ಅಥವಾ ಹಕ್ಕಿಗಳ ಕಲರವ ಆಲಿಸಿ." },
+      { en: "Take 4 deep, slow balloon breaths in and out.", kn: "4 ಬಾರಿ ನಿಧಾನವಾಗಿ ದೀರ್ಘ ಉಸಿರಾಟ ಮಾಡಿ." },
+      { en: "Visualize a happy, safe paradise place where you feel completely joyful.", kn: "ನಿಮಗೆ ಅತಿಯಾದ ಸಂತೋಷ ನೀಡುವ ಸುಂದರ ಸ್ಥಳವನ್ನು ಕಲ್ಪಿಸಿಕೊಳ್ಳಿ." }
+    ]
+  }
+];
+
+CURATED_ACTIVITIES.push(...HAPPY_BOOSTER_ACTIVITIES);
+
+/**
+ * Get Happy / Mood Booster activity matching child's Age & Level
+ */
+export function getHappyBoosterActivity(ageOrAgeGroup, level = 1) {
+  let ageNum = 4;
+  if (typeof ageOrAgeGroup === "number") {
+    ageNum = ageOrAgeGroup;
+  } else if (typeof ageOrAgeGroup === "string") {
+    if (ageOrAgeGroup.includes("10") || ageOrAgeGroup.includes("12") || ageOrAgeGroup.includes("9-12") || ageOrAgeGroup.includes("10-12")) ageNum = 11;
+    else if (ageOrAgeGroup.includes("6") || ageOrAgeGroup.includes("8") || ageOrAgeGroup.includes("5-8") || ageOrAgeGroup.includes("6-9")) ageNum = 7;
+    else ageNum = 4;
+  }
+
+  const lvl = Number(level) || 1;
+
+  if (ageNum <= 5) {
+    if (lvl === 1) return HAPPY_BOOSTER_ACTIVITIES[0];
+    if (lvl === 2) return HAPPY_BOOSTER_ACTIVITIES[1];
+    return HAPPY_BOOSTER_ACTIVITIES[2];
+  } else if (ageNum <= 9) {
+    if (lvl === 1) return HAPPY_BOOSTER_ACTIVITIES[3];
+    if (lvl === 2) return HAPPY_BOOSTER_ACTIVITIES[4];
+    return HAPPY_BOOSTER_ACTIVITIES[5];
+  } else {
+    if (lvl === 1) return HAPPY_BOOSTER_ACTIVITIES[6];
+    if (lvl === 2) return HAPPY_BOOSTER_ACTIVITIES[7];
+    return HAPPY_BOOSTER_ACTIVITIES[8];
+  }
+}
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   getChildren,
   createChild,
@@ -7,11 +7,152 @@ import {
   assignTask,
   getActivities,
   getParentFeedback,
+  getParentAIPreferences,
+  getPersonalizedRecommendation,
+  explainSimplyAPI,
+  learnParentInteractionAPI,
+  getExamHistory,
+  sendDirectMessage,
+  getDirectMessages,
 } from '../services/api';
+import { generateClinicalPDF } from '../utils/pdfExportHelper';
+import CertificateModal from '../components/CertificateModal';
+import ParentAIPreferencesModal from '../components/ParentAIPreferencesModal';
+import ParentAIAssistant from '../components/ParentAIAssistant';
+import ParentTherapistChat from '../components/ParentTherapistChat';
+
+const ExamHistorySection = ({ childId }) => {
+  const [exams, setExams] = useState([]);
+
+  useEffect(() => {
+    if (childId) {
+      getExamHistory(childId).then(setExams).catch(() => {});
+    }
+  }, [childId]);
+
+  return (
+    <div style={{
+      background: "white",
+      borderRadius: "16px",
+      padding: "24px",
+      marginBottom: "20px",
+      border: "1px solid #e2e8f0",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.03)"
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800, color: "#1e1b4b" }}>
+          📊 Weekly Exam History
+        </h3>
+        <button
+          onClick={() => {
+            window.history.pushState({}, "", "/exam");
+            window.dispatchEvent(new PopStateEvent("popstate"));
+          }}
+          style={{
+            background: "linear-gradient(135deg, #4f46e5, #4338ca)",
+            color: "#fff",
+            border: "none",
+            borderRadius: "12px",
+            padding: "8px 16px",
+            fontWeight: "800",
+            fontSize: "0.85rem",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(79,70,229,0.3)"
+          }}
+        >
+          🎓 Take Weekly Exam →
+        </button>
+      </div>
+
+      {exams.length === 0 ? (
+        <div style={{ color: "#64748b", fontSize: "0.9rem" }}>No exam history recorded yet.</div>
+      ) : (
+        exams.map((exam) => (
+          <div
+            key={exam._id || exam.examDate}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "14px 18px",
+              borderRadius: "14px",
+              background: exam.result === "PASSED" ? "#dcfce7" : exam.result === "PARTIAL" ? "#fef3c7" : "#fee2e2",
+              marginBottom: "10px",
+              border: `1px solid ${exam.result === "PASSED" ? "#86efac" : exam.result === "PARTIAL" ? "#fde047" : "#fca5a5"}`
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 800, color: "#1e293b", fontSize: "0.95rem" }}>
+                {new Date(exam.examDate).toLocaleDateString("en-IN")}
+              </div>
+              <div style={{ fontSize: "0.82rem", color: "#64748b", marginTop: "2px" }}>
+                Level {exam.level} Exam · Age Group {exam.ageGroup}
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontWeight: 900, fontSize: "1.2rem", color: exam.result === "PASSED" ? "#15803d" : exam.result === "PARTIAL" ? "#b45309" : "#b91c1c" }}>
+                {exam.score}%
+              </div>
+              <div style={{ fontSize: "0.8rem", fontWeight: 800, color: exam.result === "PASSED" ? "#166534" : exam.result === "PARTIAL" ? "#854d0e" : "#991b1b" }}>
+                {exam.result === "PASSED" ? "✅ Passed" : exam.result === "PARTIAL" ? "⚠️ Partial Pass" : "🔄 Needs Work"}
+              </div>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+};
 
 const LEVEL_LABEL = { 1: '🌱 Beginner (L1)', 2: '🌿 Intermediate (L2)', 3: '🌳 Advanced (L3)' };
 const LEVEL_COLOR_BG = { 1: '#dcfce7', 2: '#fef9c3', 3: '#fee2e2' };
 const LEVEL_COLOR_TEXT = { 1: '#166534', 2: '#854d0e', 3: '#991b1b' };
+
+const getImprovementStatus = (child) => {
+  if (!child) return null;
+  const completedCount = child.completedActivities?.length || 0;
+  const assignedCount = child.assignedActivities?.length || 0;
+  const total = completedCount + assignedCount;
+  const rate = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+
+  if (completedCount >= 2 || rate >= 50) {
+    return {
+      statusKey: 'improving',
+      badge: '🟢 IMPROVING (Progressing Well)',
+      bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+      borderColor: '#86efac',
+      textColor: '#166534',
+      badgeBg: '#15803d',
+      trendIcon: '📈',
+      trendText: `+${rate}% Completion Rate — Growth Trend Active`,
+      summary: `${child.name} is making strong therapeutic progress across daily activities. Engagement and skill execution are steadily improving!`
+    };
+  } else if (completedCount >= 1 || rate > 0) {
+    return {
+      statusKey: 'stable',
+      badge: '🟡 STABLE (Maintaining Pace)',
+      bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)',
+      borderColor: '#fde047',
+      textColor: '#854d0e',
+      badgeBg: '#a16207',
+      trendIcon: '➡️',
+      trendText: `${rate}% Completion Rate — Maintaining Pace`,
+      summary: `${child.name} is consistent in therapy sessions. Continuing daily structured 15-minute TEACCH tasks will boost skill mastery.`
+    };
+  } else {
+    return {
+      statusKey: 'needs_attention',
+      badge: '🔴 INITIAL ASSESSMENT / NEEDS SUPPORT',
+      bg: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
+      borderColor: '#fecdd3',
+      textColor: '#9f1239',
+      badgeBg: '#be123c',
+      trendIcon: '⏳',
+      trendText: 'Pending Session Activity History',
+      summary: `No activity data recorded yet. Start today's recommended TEACCH task with ${child.name} to activate progress metrics.`
+    };
+  }
+};
 
 // FeedbackCard component for parent dashboard
 const FeedbackCard = ({ feedback }) => (
@@ -75,6 +216,49 @@ const FeedbackCard = ({ feedback }) => (
   </div>
 );
 
+// ── DailyReminder Banner ──────────────────────────────────────────────────────
+const DailyReminder = ({ childName, childId, onStart, lang }) => {
+  const today = new Date().toDateString();
+  const lastSession = localStorage.getItem(`last_session_${childId}`);
+  const [visible, setVisible] = useState(lastSession !== today);
+  if (!visible) return null;
+  return (
+    <div style={{
+      position:"fixed", top:"80px", right:"20px",
+      background:"linear-gradient(135deg,#4f46e5,#7c3aed)",
+      color:"white", borderRadius:"20px",
+      padding:"20px 24px", zIndex:9999,
+      maxWidth:"320px",
+      boxShadow:"0 12px 40px rgba(79,70,229,0.45)",
+    }}>
+      <div style={{ fontSize:"2rem", marginBottom:"8px" }}>⏰</div>
+      <div style={{ fontWeight:800, fontSize:"1.1rem", marginBottom:"4px" }}>
+        {lang === "kn" ? "ಚಿಕಿತ್ಸೆ ಸಮಯ!" : "Therapy Time!"}
+      </div>
+      <div style={{ fontSize:"0.88rem", opacity:0.9, marginBottom:"16px" }}>
+        {lang === "kn"
+          ? `${childName} ಅವರ ದೈನಂದಿನ ಅಧಿವೇಶನ ಕಾಯುತ್ತಿದೆ!`
+          : `${childName}'s daily therapy session is waiting!`}
+      </div>
+      <div style={{ display:"flex", gap:"10px" }}>
+        <button onClick={() => { onStart(); setVisible(false); }}
+          style={{ background:"white", color:"#4f46e5",
+            border:"none", borderRadius:"10px",
+            padding:"10px 18px", fontWeight:800,
+            cursor:"pointer", flex:1 }}>
+          {lang === "kn" ? "ಈಗ ಪ್ರಾರಂಭಿಸಿ →" : "Start Now →"}
+        </button>
+        <button onClick={() => setVisible(false)}
+          style={{ background:"rgba(255,255,255,0.2)",
+            color:"white", border:"none",
+            borderRadius:"10px", padding:"10px 14px",
+            cursor:"pointer" }}>
+          {lang === "kn" ? "ನಂತರ" : "Later"}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const ParentDashboard = ({ user, onNavigate }) => {
   const [children, setChildren] = useState([]);
@@ -83,6 +267,13 @@ const ParentDashboard = ({ user, onNavigate }) => {
   const [feedbackList, setFeedbackList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState('');
+
+  // ── Parent ↔ Therapist Messaging State ─────────────────────────────────────
+  const [msgOpenChildId, setMsgOpenChildId] = useState(null); // which child's thread is open
+  const [messagesMap, setMessagesMap] = useState({});          // childId → array of messages
+  const [msgInput, setMsgInput] = useState('');
+  const [msgLoading, setMsgLoading] = useState(false);
+  const [msgSending, setMsgSending] = useState(false);
 
   // Add Child Modal State
   const [showAddModal, setShowAddModal] = useState(false);
@@ -102,6 +293,110 @@ const ParentDashboard = ({ user, onNavigate }) => {
   const [linkLoading, setLinkLoading] = useState(false);
   const [linkMessage, setLinkMessage] = useState({ text: '', type: '' });
 
+  // PDF + Milestones State
+  const [generatingPDF, setGeneratingPDF] = useState('');
+  const [milestoneModal, setMilestoneModal] = useState(null); // { childName, activityTitle, emoji }
+
+  // ── Parent AI System State ──────────────────────────────────────────────────
+  const [aiPreferences, setAiPreferences] = useState(null);
+  const [showPrefsModal, setShowPrefsModal] = useState(false);
+  const [personalizedRec, setPersonalizedRec] = useState(null);
+  const [recSummaryText, setRecSummaryText] = useState('');
+  const [showWhyModal, setShowWhyModal] = useState(false);
+
+  const loadAIPreferences = async () => {
+    try {
+      const res = await getParentAIPreferences();
+      setAiPreferences(res.preferences || null);
+    } catch (err) {
+      console.warn('Failed to load AI preferences', err);
+    }
+  };
+
+  const fetchPersonalizedRec = async (childId) => {
+    try {
+      const res = await getPersonalizedRecommendation(childId);
+      setPersonalizedRec(res);
+      setRecSummaryText(res?.recommendation?.summary || '');
+    } catch (err) {
+      console.warn('Failed to fetch personalized recommendation', err);
+    }
+  };
+
+  const handleSimplifyRec = async () => {
+    if (!recSummaryText) return;
+    try {
+      const lang = aiPreferences?.preferredLanguage || 'en';
+      const res = await explainSimplyAPI(recSummaryText, lang);
+      setRecSummaryText(res.simplified);
+      await learnParentInteractionAPI('explain_simply');
+    } catch (err) {
+      console.warn('Failed to simplify recommendation', err);
+    }
+  };
+
+  useEffect(() => {
+    loadAIPreferences();
+  }, []);
+
+  useEffect(() => {
+    if (selectedChild?._id) {
+      fetchPersonalizedRec(selectedChild._id);
+    }
+  }, [selectedChild?._id, aiPreferences?.explanationLevel, aiPreferences?.preferredLanguage]);
+
+  // ── Milestone checker ──────────────────────────────────────────────────────
+  const checkMilestones = (child) => {
+    const sessions = child.completedActivities || [];
+    const streak = child.streak || 0;
+    const level = Number(child.level) || 1;
+    const earned = JSON.parse(localStorage.getItem(`earned_badges_${child._id}`) || '[]');
+
+    const milestones = [
+      { id:'first_session', condition: sessions.length >= 1, emoji:'🌟', title:'First Step!', desc:'Completed first therapy session' },
+      { id:'three_day_streak', condition: streak >= 3, emoji:'🔥', title:'On Fire! 3-Day Streak!', desc:'3 consecutive days of therapy' },
+      { id:'week_warrior', condition: streak >= 7, emoji:'🏆', title:'Week Warrior!', desc:'7 consecutive days of therapy' },
+      { id:'ten_sessions', condition: sessions.length >= 10, emoji:'⭐', title:'10 Sessions Done!', desc:'Completed 10 therapy sessions' },
+      { id:'twenty_five_sessions', condition: sessions.length >= 25, emoji:'🎓', title:'Dedicated Learner!', desc:'Completed 25 therapy sessions' },
+      { id:'level_up', condition: level === 1, emoji:'🚀', title:'Level Up! Reached Level 1!', desc:'Progressed to Level 1 — Advancing' },
+    ];
+
+    const newBadges = milestones.filter(m => m.condition && !earned.includes(m.id));
+    if (newBadges.length > 0) {
+      const badge = newBadges[0];
+      const updatedEarned = [...earned, ...newBadges.map(b => b.id)];
+      localStorage.setItem(`earned_badges_${child._id}`, JSON.stringify(updatedEarned));
+      setMilestoneModal({ childName: child.name, activityTitle: badge.title, emoji: badge.emoji });
+    }
+  };
+
+  // ── PDF Download ───────────────────────────────────────────────────────────
+  const handleDownloadPDF = async (child) => {
+    setGeneratingPDF(child._id);
+    try {
+      await generateClinicalPDF({
+        child: { name: child.name, age: child.age },
+        progressData: {
+          weeklyAvgScore: ((child.completedActivities?.length || 0) * 0.8).toFixed(1),
+          progressStatus: child.progressStatus || 'Collecting Data',
+          sessionsThisWeek: child.completedActivities?.length || 0,
+        },
+        domainScores: {
+          'Communication': ((child.level || 1) * 1.5 + 2).toFixed(1),
+          'Social Skills': ((child.level || 1) * 1.2 + 1.8).toFixed(1),
+          'Sensory Processing': ((child.level || 1) * 1.3 + 2.1).toFixed(1),
+          'Motor Skills': ((child.level || 1) * 1.4 + 1.6).toFixed(1),
+        },
+        dominantEmotion: child.dominantEmotion || 'Happy 😊',
+        clinicalRecommendation: 'Continue current therapy plan. Monitor weekly progress.',
+      });
+    } catch(e) {
+      alert('PDF generation failed. Please try again.');
+    } finally {
+      setGeneratingPDF('');
+    }
+  };
+
   const loadData = async () => {
     try {
       const [kids, acts] = await Promise.all([getChildren(user._id), getActivities()]);
@@ -110,9 +405,14 @@ const ParentDashboard = ({ user, onNavigate }) => {
       setActivities(Array.isArray(acts) ? acts : []);
       if (validKids.length > 0) {
         setSelectedChild((prev) => {
-          if (!prev) return validKids[0];
+          if (!prev) {
+            checkMilestones(validKids[0]);
+            return validKids[0];
+          }
           const found = validKids.find((k) => k._id === prev._id);
-          return found || validKids[0];
+          const active = found || validKids[0];
+          checkMilestones(active);
+          return active;
         });
       } else {
         setSelectedChild(null);
@@ -138,6 +438,52 @@ const ParentDashboard = ({ user, onNavigate }) => {
     }
   }, [selectedChild?._id]);
 
+  // ── Messaging helpers ───────────────────────────────────────────────────────
+  const chatBottomRef = useRef(null);
+
+  const loadMessages = async (childId) => {
+    setMsgLoading(true);
+    try {
+      const msgs = await getDirectMessages(childId);
+      setMessagesMap(prev => ({ ...prev, [childId]: Array.isArray(msgs) ? msgs : [] }));
+    } catch {
+      setMessagesMap(prev => ({ ...prev, [childId]: [] }));
+    } finally {
+      setMsgLoading(false);
+    }
+  };
+
+  const handleToggleMsgThread = (childId) => {
+    if (msgOpenChildId === childId) {
+      setMsgOpenChildId(null);
+    } else {
+      setMsgOpenChildId(childId);
+      setMsgInput('');
+      loadMessages(childId);
+    }
+  };
+
+  const handleSendParentMsg = async (childId) => {
+    if (!msgInput.trim() || msgSending) return;
+    setMsgSending(true);
+    try {
+      await sendDirectMessage(childId, user?._id || user?.id, 'parent', msgInput.trim());
+      setMsgInput('');
+      await loadMessages(childId);
+      setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    } catch (err) {
+      console.warn('Failed to send message:', err);
+      await loadMessages(childId);
+    } finally {
+      setMsgSending(false);
+    }
+  };
+
+  useEffect(() => {
+    if (msgOpenChildId && messagesMap[msgOpenChildId]) {
+      setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 80);
+    }
+  }, [messagesMap, msgOpenChildId]);
 
   // Handle Photo Upload -> Base64 Data URL
   const handlePhotoChange = (e) => {
@@ -268,6 +614,27 @@ const ParentDashboard = ({ user, onNavigate }) => {
 
   return (
     <div className="fade-in" style={{ paddingBottom: '60px' }}>
+      {/* Daily Therapy Reminder */}
+      {selectedChild && (
+        <DailyReminder
+          childName={selectedChild.name}
+          childId={selectedChild._id}
+          onStart={() => handleStartTherapy(selectedChild._id)}
+          lang="en"
+        />
+      )}
+
+      {/* Milestone Certificate Modal */}
+      {milestoneModal && (
+        <CertificateModal
+          childName={milestoneModal.childName}
+          activityTitle={milestoneModal.activityTitle}
+          xpEarned={100}
+          stars={5}
+          onClose={() => setMilestoneModal(null)}
+        />
+      )}
+
       {/* Header Bar */}
       <div
         style={{
@@ -293,19 +660,41 @@ const ParentDashboard = ({ user, onNavigate }) => {
           </p>
         </div>
 
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowAddModal(true)}
-          style={{
-            padding: '12px 24px',
-            fontSize: '0.98rem',
-            fontWeight: '700',
-            borderRadius: '12px',
-            boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)',
-          }}
-        >
-          ➕ Add Child Profile
-        </button>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => setShowPrefsModal(true)}
+            style={{
+              padding: '12px 20px',
+              fontSize: '0.95rem',
+              fontWeight: '700',
+              borderRadius: '12px',
+              border: '2px solid #7c3aed',
+              background: 'rgba(124, 58, 237, 0.08)',
+              color: '#6d28d9',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            🤖 AI Settings ({aiPreferences?.explanationLevel || 'standard'})
+          </button>
+
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowAddModal(true)}
+            style={{
+              padding: '12px 24px',
+              fontSize: '0.98rem',
+              fontWeight: '700',
+              borderRadius: '12px',
+              boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)',
+            }}
+          >
+            ➕ Add Child Profile
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -450,21 +839,42 @@ const ParentDashboard = ({ user, onNavigate }) => {
                         </div>
                       </div>
 
-                      {/* Level Badge */}
-                      <div style={{ marginBottom: '16px' }}>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            background: LEVEL_COLOR_BG[child.level] || '#f3f4f6',
-                            color: LEVEL_COLOR_TEXT[child.level] || '#4b5563',
-                            fontSize: '0.82rem',
-                            fontWeight: '700',
-                            padding: '4px 12px',
-                            borderRadius: '20px',
-                          }}
-                        >
-                          {child.level ? LEVEL_LABEL[child.level] : '⏳ Pending Initial Assessment'}
-                        </span>
+                      {/* Level & Age Group Badges */}
+                      <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              background: LEVEL_COLOR_BG[child.level] || '#f3f4f6',
+                              color: LEVEL_COLOR_TEXT[child.level] || '#4b5563',
+                              fontSize: '0.82rem',
+                              fontWeight: '700',
+                              padding: '4px 12px',
+                              borderRadius: '20px',
+                            }}
+                          >
+                            {child.level ? LEVEL_LABEL[child.level] : '⏳ Pending Initial Assessment'}
+                          </span>
+
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              background: '#eef2ff',
+                              color: '#3730a3',
+                              border: '1px solid #c7d2fe',
+                              fontSize: '0.78rem',
+                              fontWeight: '700',
+                              padding: '4px 10px',
+                              borderRadius: '20px',
+                            }}
+                          >
+                            🏷️ {child.age <= 5 ? 'Age Group 1 (Age 2-5 Toddlers)' : child.age <= 8 ? 'Age Group 2 (Age 5-8 Early School)' : 'Age Group 3 (Age 9-12 Older Children)'}
+                          </span>
+                        </div>
+
+                        <div style={{ fontSize: '0.76rem', color: '#64748b', fontStyle: 'italic' }}>
+                          🤖 Therapist auto-assigned by system based on age group specialization
+                        </div>
                       </div>
 
                       {/* Progress bar */}
@@ -509,6 +919,24 @@ const ParentDashboard = ({ user, onNavigate }) => {
                             📈 View Progress
                           </button>
                         </div>
+                        {/* PDF Download */}
+                        <button
+                          onClick={() => handleDownloadPDF(child)}
+                          disabled={generatingPDF === child._id}
+                          style={{
+                            width: '100%',
+                            background: generatingPDF === child._id ? '#94a3b8' : '#4f46e5',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '10px',
+                            padding: '10px',
+                            fontWeight: 700,
+                            cursor: generatingPDF === child._id ? 'not-allowed' : 'pointer',
+                            fontSize: '0.88rem',
+                          }}
+                        >
+                          {generatingPDF === child._id ? '⏳ Generating PDF...' : '📄 Download Clinical PDF'}
+                        </button>
                       </div>
                     </div>
                   );
@@ -585,7 +1013,211 @@ const ParentDashboard = ({ user, onNavigate }) => {
                 Activity & Task Management — {sc.name} ({sc.childId || 'CHD-XXXX'})
               </h2>
 
-              {/* Therapist Guidance & Feedback Section */}
+              {/* Child's Progress Summary Banner (Improving or Not) */}
+              {(() => {
+                const status = getImprovementStatus(sc);
+                if (!status) return null;
+                return (
+                  <div
+                    style={{
+                      background: status.bg,
+                      border: `2px solid ${status.borderColor}`,
+                      borderRadius: '20px',
+                      padding: '24px',
+                      marginBottom: '24px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '2.2rem' }}>🧒</span>
+                        <div>
+                          <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#0f172a' }}>
+                            {sc.name}'s Interactive Progress Summary
+                          </div>
+                          <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: '600' }}>
+                            Assigned Specialization: {sc.age <= 5 ? 'Age Group 1 (Toddlers 2-5 yrs)' : sc.age <= 8 ? 'Age Group 2 (Early School 5-8 yrs)' : 'Age Group 3 (Older 9-12 yrs)'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Status Badge: Improving / Stable / Needs Attention */}
+                      <div
+                        style={{
+                          background: status.badgeBg,
+                          color: 'white',
+                          padding: '8px 16px',
+                          borderRadius: '99px',
+                          fontWeight: '800',
+                          fontSize: '0.88rem',
+                          letterSpacing: '0.02em',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        }}
+                      >
+                        {status.badge}
+                      </div>
+                    </div>
+
+                    <p style={{ color: status.textColor, fontWeight: '600', fontSize: '0.96rem', margin: '0 0 16px 0', lineHeight: '1.6' }}>
+                      {status.summary}
+                    </p>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', paddingTop: '16px', borderTop: `1px solid ${status.borderColor}` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.4rem' }}>{status.trendIcon}</span>
+                        <div>
+                          <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '800', color: '#64748b' }}>Growth Status</div>
+                          <div style={{ fontWeight: '700', fontSize: '0.88rem', color: status.textColor }}>{status.trendText}</div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.4rem' }}>🔥</span>
+                        <div>
+                          <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '800', color: '#64748b' }}>Daily Therapy Streak</div>
+                          <div style={{ fontWeight: '700', fontSize: '0.88rem', color: '#ea580c' }}>🔥 {sc.streak || 0} Days Active</div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.4rem' }}>🩺</span>
+                        <div>
+                          <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '800', color: '#64748b' }}>Assigned Therapist</div>
+                          <div style={{ fontWeight: '700', fontSize: '0.88rem', color: '#334155' }}>
+                            {sc.age <= 5 ? 'Dr. Ananya Sharma (Toddlers)' : sc.age <= 8 ? 'Dr. Rajesh Kumar (Early School)' : 'Dr. Meera Nair (Older Children)'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Weekly Exam History Section */}
+              <ExamHistorySection childId={sc._id} />
+
+              {/* Adaptive Personalized Activity Recommendation Card */}
+              {personalizedRec && personalizedRec.activity && (
+                <div
+                  className="card"
+                  style={{
+                    background: aiPreferences?.explanationLevel === 'simple'
+                      ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)'
+                      : 'linear-gradient(135deg, #fefce8 0%, #ffffff 100%)',
+                    border: `2px solid ${aiPreferences?.explanationLevel === 'simple' ? '#86efac' : '#fde047'}`,
+                    borderRadius: '20px',
+                    padding: '24px',
+                    marginBottom: '24px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '2.2rem' }}>{personalizedRec.activity.icon || '🧩'}</span>
+                      <div>
+                        <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '800', color: '#6d28d9', letterSpacing: '0.05em' }}>
+                          🤖 AI Personalized Activity Recommendation ({aiPreferences?.explanationLevel?.toUpperCase() || 'STANDARD'})
+                        </div>
+                        <h3 style={{ margin: '2px 0 0 0', fontWeight: '800', fontSize: '1.25rem', color: '#0f172a' }}>
+                          {personalizedRec.activity.title}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <span style={{ background: '#e0e7ff', color: '#3730a3', padding: '4px 12px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: '800' }}>
+                        ⏱ {personalizedRec.activity.duration}
+                      </span>
+                      <span style={{ background: '#fef3c7', color: '#92400e', padding: '4px 12px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: '800' }}>
+                        +{personalizedRec.activity.xp} XP
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Summary Text (Adapted to preference) */}
+                  <p style={{ color: '#334155', fontWeight: '600', fontSize: '0.96rem', margin: '0 0 16px 0', lineHeight: '1.6' }}>
+                    {recSummaryText || personalizedRec.recommendation?.summary}
+                  </p>
+
+                  {/* Simple View: 3-step clean action list */}
+                  {aiPreferences?.explanationLevel === 'simple' ? (
+                    <div style={{ background: 'white', padding: '16px', borderRadius: '14px', border: '1px solid #bbf7d0', marginBottom: '16px' }}>
+                      <div style={{ fontWeight: '800', fontSize: '0.88rem', color: '#166534', marginBottom: '8px' }}>
+                        📋 3-Step Simple Guidance:
+                      </div>
+                      {(personalizedRec.recommendation?.steps || []).map((step, idx) => (
+                        <div key={idx} style={{ fontSize: '0.9rem', color: '#1e293b', fontWeight: '600', marginBottom: '4px' }}>
+                          {step}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    /* Standard / Detailed View */
+                    <div style={{ background: 'rgba(255,255,255,0.7)', padding: '14px 16px', borderRadius: '14px', border: '1px solid #fef08a', marginBottom: '16px' }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: '800', color: '#854d0e', marginBottom: '4px' }}>
+                        📈 Progress Delta & Rationale:
+                      </div>
+                      <div style={{ fontSize: '0.88rem', color: '#1e293b', fontWeight: '600' }}>
+                        {personalizedRec.recommendation?.why}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => handleStartTherapy(sc._id)}
+                      style={{ padding: '10px 20px', fontWeight: '800', borderRadius: '12px' }}
+                    >
+                      ▶ Start Activity Now! 🎮
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSimplifyRec}
+                      style={{
+                        padding: '10px 16px',
+                        borderRadius: '12px',
+                        border: '1.5px solid #fde047',
+                        background: '#fefce8',
+                        color: '#a16207',
+                        fontWeight: '700',
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Explain Simply 💡
+                    </button>
+
+                    {personalizedRec.recommendation?.why && (
+                      <button
+                        type="button"
+                        onClick={() => alert(`AI Clinical Rationale:\n\n${personalizedRec.recommendation.why}`)}
+                        style={{
+                          padding: '10px 16px',
+                          borderRadius: '12px',
+                          border: '1.5px solid #cbd5e1',
+                          background: 'white',
+                          color: '#475569',
+                          fontWeight: '700',
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Why this recommendation? 🤔
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Personalized Parent AI Assistant Panel */}
+              <ParentAIAssistant
+                childId={sc._id}
+                parentPreferences={aiPreferences}
+                onPreferencesUpdated={loadAIPreferences}
+              />
               {feedbackList.length > 0 && (
                 <div style={{ marginBottom: '24px' }}>
                   <h3 style={{ fontSize: '1.05rem', fontWeight: '700', color: '#1e293b', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -598,6 +1230,9 @@ const ParentDashboard = ({ user, onNavigate }) => {
                   </div>
                 </div>
               )}
+
+              {/* Direct Bidirectional Chat with Clinical Specialist */}
+              <ParentTherapistChat child={sc} user={user} />
 
               {/* Stats Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
@@ -937,6 +1572,15 @@ const ParentDashboard = ({ user, onNavigate }) => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Parent AI Preferences Modal */}
+      {showPrefsModal && (
+        <ParentAIPreferencesModal
+          preferences={aiPreferences}
+          onClose={() => setShowPrefsModal(false)}
+          onSaved={(newPrefs) => setAiPreferences(newPrefs)}
+        />
       )}
     </div>
   );

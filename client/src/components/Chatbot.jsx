@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { sendChatMessage } from '../services/api';
+import { sendChatMessage, getChatStatus, saveChatApiKey } from '../services/api';
 import { speak } from '../utils/speechHelper';
 
 const QUICK_CHIPS = [
+  "What activities suit Level 2?",
+  "My child had a meltdown. What do I do?",
+  "How do I do Mirror Play correctly?",
+  "What is ABA therapy?",
+  "How long should sessions be?",
   "🧘 How to handle sensory meltdowns?",
   "💬 Tips for non-verbal communication",
-  "🧩 Best therapy games for Level 2",
-  "🌙 Bedtime calming routine",
-  "🍎 Helping with sensory picky eating",
-  "🌿 Understanding stimming behavior"
+  "🍎 Helping with sensory picky eating"
 ];
 
 const Chatbot = () => {
@@ -17,12 +19,30 @@ const Chatbot = () => {
     {
       id: "init_1",
       sender: "bot",
-      text: "👋 **Hello! I am your AI Autism Clinical Assistant.**\n\nI can help you with evidence-based sensory strategies, ABA routines, communication techniques, and therapy game recommendations.\n\nWhat would you like support with today?"
+      text: "👋 **Hello! I am your AI Autism Clinical Assistant.**\n\nI provide evidence-based sensory strategies, ABA routines, speech therapy techniques, and game recommendations.\n\nAsk me any question below!",
+      model: "AutismAssist AI"
     }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [speakingId, setSpeakingId] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
+  
+  // AI Provider & Key Management
+  const [selectedProvider, setSelectedProvider] = useState(
+    localStorage.getItem("autism_ai_provider") || "gemini"
+  );
+  const [apiKeyInput, setApiKeyInput] = useState(
+    localStorage.getItem("autism_ai_key") || ""
+  );
+  const [aiStatus, setAiStatus] = useState({
+    configured: false,
+    activeProvider: "none",
+    activeModel: "Clinical Knowledge Base"
+  });
+  const [savingKey, setSavingKey] = useState(false);
+  const [saveStatusMsg, setSaveStatusMsg] = useState("");
+
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -32,8 +52,49 @@ const Chatbot = () => {
   useEffect(() => {
     if (isOpen) {
       scrollToBottom();
+      fetchStatus();
     }
   }, [messages, isOpen]);
+
+  const fetchStatus = async () => {
+    try {
+      const status = await getChatStatus();
+      setAiStatus(status);
+    } catch (e) {
+      console.warn("Could not check AI status:", e);
+    }
+  };
+
+  const handleSaveKey = async (e) => {
+    if (e) e.preventDefault();
+    if (!apiKeyInput.trim()) {
+      setSaveStatusMsg("Please enter a valid API key.");
+      return;
+    }
+    setSavingKey(true);
+    setSaveStatusMsg("");
+    try {
+      localStorage.setItem("autism_ai_key", apiKeyInput.trim());
+      localStorage.setItem("autism_ai_provider", selectedProvider);
+
+      const res = await saveChatApiKey(selectedProvider, apiKeyInput.trim());
+      setSaveStatusMsg(res.message || "Key saved! Real AI is now active.");
+      fetchStatus();
+      setTimeout(() => {
+        setShowSettings(false);
+        setSaveStatusMsg("");
+      }, 1500);
+    } catch (err) {
+      // Even if server write fails (e.g., read-only env), it's saved in localStorage & will be passed in requests
+      setSaveStatusMsg("Saved to browser! Real AI will be used for your chats.");
+      setTimeout(() => {
+        setShowSettings(false);
+        setSaveStatusMsg("");
+      }, 1500);
+    } finally {
+      setSavingKey(false);
+    }
+  };
 
   const handleSend = async (userText) => {
     const textToSend = (userText || input).trim();
@@ -45,12 +106,25 @@ const Chatbot = () => {
     setLoading(true);
 
     try {
-      const res = await sendChatMessage(textToSend);
+      // Build previous turns history (last 8 turns)
+      const chatHistory = messages
+        .filter((m) => m.id !== "init_1")
+        .slice(-8)
+        .map((m) => ({
+          role: m.sender === "user" ? "user" : "assistant",
+          text: m.text,
+        }));
+
+      const activeKey = apiKeyInput.trim() || localStorage.getItem("autism_ai_key") || null;
+      const res = await sendChatMessage(textToSend, chatHistory, activeKey, selectedProvider);
+
       const botMsg = {
         id: `b_${Date.now()}`,
         sender: "bot",
-        text: res.reply || "I am here to support your child's therapy journey. Please try asking about sensory diets or games!",
-        source: res.source
+        text: res.reply || "I am here to support your child's therapy journey. Feel free to ask about sensory diets or games!",
+        source: res.source,
+        model: res.model || (res.source === "gemini" ? "Google Gemini" : res.source === "groq" ? "Groq Llama 3.3" : "Clinical KB"),
+        needsApiKey: res.needsApiKey
       };
       setMessages((prev) => [...prev, botMsg]);
     } catch (err) {
@@ -59,7 +133,8 @@ const Chatbot = () => {
         {
           id: `b_err_${Date.now()}`,
           sender: "bot",
-          text: "I'm having a brief connection delay, but remember: during sensory meltdowns, reduce bright lights and offer deep pressure hugs."
+          text: "🌟 **Therapy Insight:** When sensory meltdowns happen, gently reduce lighting, minimize verbal demands, and offer deep pressure joint compressions or weighted hugs.",
+          model: "Local Clinical Safety Rule"
         }
       ]);
     } finally {
@@ -82,6 +157,8 @@ const Chatbot = () => {
     });
   };
 
+  const isRealAi = aiStatus.configured || !!apiKeyInput.trim();
+
   return (
     <div style={styles.container}>
       {isOpen && (
@@ -90,15 +167,39 @@ const Chatbot = () => {
           <div style={styles.header}>
             <div style={styles.headerLeft}>
               <div style={styles.avatarWrap}>
-                <span style={{ fontSize: '1.4rem' }}>🤖</span>
-                <span style={styles.onlineDot} />
+                <span style={{ fontSize: '1.3rem' }}>🤖</span>
+                <span style={{
+                  ...styles.onlineDot,
+                  background: isRealAi ? '#22c55e' : '#eab308'
+                }} />
               </div>
               <div>
                 <h3 style={styles.headerTitle}>AI Autism Companion</h3>
-                <p style={styles.headerStatus}>Clinical Behavioral AI &bull; Active</p>
+                <p style={styles.headerStatus}>
+                  {isRealAi ? (
+                    <span style={{ color: '#86efac', fontWeight: '700' }}>
+                      ✨ Real AI Active ({aiStatus.activeModel || selectedProvider})
+                    </span>
+                  ) : (
+                    <span style={{ color: '#fde047', cursor: 'pointer' }} onClick={() => setShowSettings(true)}>
+                      ⚙️ Setup Real AI Key
+                    </span>
+                  )}
+                </p>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <button
+                onClick={() => setShowSettings((prev) => !prev)}
+                title="AI Settings & API Key"
+                style={{
+                  ...styles.actionBtn,
+                  background: showSettings ? 'rgba(255,255,255,0.2)' : 'transparent',
+                  borderRadius: '6px'
+                }}
+              >
+                ⚙️
+              </button>
               <button
                 onClick={() => setMessages([messages[0]])}
                 title="Clear Chat"
@@ -109,6 +210,111 @@ const Chatbot = () => {
               <button style={styles.closeBtn} onClick={() => setIsOpen(false)}>×</button>
             </div>
           </div>
+
+          {/* AI Settings Drawer */}
+          {showSettings && (
+            <div style={styles.settingsPanel}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontWeight: '800', fontSize: '0.85rem', color: '#1e293b' }}>
+                  ⚡ Connect Real AI Model
+                </span>
+                <button
+                  onClick={() => setShowSettings(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontWeight: 'bold' }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <label style={{ fontSize: '0.74rem', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '4px' }}>
+                Select AI Engine:
+              </label>
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+                {[
+                  { id: 'gemini', name: 'Google Gemini (Free)', badge: 'Recommended' },
+                  { id: 'groq', name: 'Groq Llama 3.3', badge: 'Ultra Fast' },
+                  { id: 'openai', name: 'OpenAI GPT-4o', badge: 'Pro' }
+                ].map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setSelectedProvider(p.id)}
+                    style={{
+                      flex: 1,
+                      padding: '6px 4px',
+                      borderRadius: '8px',
+                      border: `1.5px solid ${selectedProvider === p.id ? '#4F6EF7' : '#cbd5e1'}`,
+                      background: selectedProvider === p.id ? '#eff6ff' : '#ffffff',
+                      color: selectedProvider === p.id ? '#1d4ed8' : '#334155',
+                      fontSize: '0.7rem',
+                      fontWeight: '700',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+
+              <form onSubmit={handleSaveKey}>
+                <label style={{ fontSize: '0.74rem', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '4px' }}>
+                  {selectedProvider.toUpperCase()} API Key:
+                </label>
+                <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+                  <input
+                    type="password"
+                    placeholder={`Paste ${selectedProvider} API key...`}
+                    value={apiKeyInput}
+                    onChange={(e) => setApiKeyInput(e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: '6px 10px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.8rem',
+                      fontFamily: 'monospace'
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={savingKey}
+                    style={{
+                      background: '#4F6EF7',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '6px 12px',
+                      fontSize: '0.75rem',
+                      fontWeight: '700',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {savingKey ? 'Saving…' : 'Activate'}
+                  </button>
+                </div>
+              </form>
+
+              {selectedProvider === 'gemini' && (
+                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                  Don't have a key?{' '}
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: '#2563eb', fontWeight: '700', textDecoration: 'underline' }}
+                  >
+                    Get free Google Gemini API Key (10 secs) ↗
+                  </a>
+                </div>
+              )}
+
+              {saveStatusMsg && (
+                <p style={{ margin: '6px 0 0 0', fontSize: '0.74rem', color: '#16a34a', fontWeight: '700' }}>
+                  ✓ {saveStatusMsg}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Quick Suggestion Chips */}
           <div style={styles.chipsRow}>
@@ -139,14 +345,43 @@ const Chatbot = () => {
                   <div style={{ whiteSpace: 'pre-line', lineHeight: '1.5', fontSize: '0.88rem' }}>
                     {m.text}
                   </div>
+
+                  {/* Bot Footer Pill */}
                   {m.sender === 'bot' && (
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
+                      <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: '700' }}>
+                        ✨ {m.model || "AI Clinical Assistant"}
+                      </span>
                       <button
                         onClick={() => handleSpeakText(m.id, m.text)}
                         style={styles.speakBtn}
                         title="Read aloud"
                       >
                         {speakingId === m.id ? '🔊 Speaking...' : '🗣️ Listen'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Connect Key Prompt if response asked for it */}
+                  {m.needsApiKey && !isRealAi && (
+                    <div style={{ marginTop: '8px' }}>
+                      <button
+                        onClick={() => setShowSettings(true)}
+                        style={{
+                          background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '6px 10px',
+                          fontSize: '0.74rem',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        ⚙️ Click to activate Real Google Gemini AI (Free)
                       </button>
                     </div>
                   )}
@@ -157,8 +392,10 @@ const Chatbot = () => {
             {loading && (
               <div style={{ ...styles.messageWrap, justifyContent: 'flex-start' }}>
                 <div style={styles.botMessage}>
-                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center', padding: '4px 0' }}>
-                    <span style={{ fontSize: '0.8rem', color: '#4F6EF7', fontWeight: '700' }}>AI is analyzing clinical guidance...</span>
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center', padding: '4px 0' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#4F6EF7', fontWeight: '700' }}>
+                      {isRealAi ? 'Real AI is formulating response...' : 'Consulting clinical knowledge base...'}
+                    </span>
                     <span style={styles.typingDot} />
                     <span style={{ ...styles.typingDot, animationDelay: '0.2s' }} />
                     <span style={{ ...styles.typingDot, animationDelay: '0.4s' }} />
@@ -179,7 +416,7 @@ const Chatbot = () => {
           >
             <input
               type="text"
-              placeholder="Ask about meltdowns, speech, games..."
+              placeholder="Ask anything about ASD, meltdowns, routines..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               style={styles.input}
@@ -213,6 +450,7 @@ const Chatbot = () => {
     </div>
   );
 };
+
 
 const styles = {
   container: {
@@ -314,6 +552,11 @@ const styles = {
     color: '#94a3b8',
     cursor: 'pointer',
     lineHeight: '1',
+  },
+  settingsPanel: {
+    padding: '12px 14px',
+    background: '#f8fafc',
+    borderBottom: '1.5px solid #e2e8f0',
   },
   chipsRow: {
     display: 'flex',

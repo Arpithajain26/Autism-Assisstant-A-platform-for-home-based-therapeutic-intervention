@@ -4,8 +4,12 @@ const {
   getActivities, 
   createActivity, 
   getRecommendations,
-  logSession
+  logSession,
+  getHappyBooster
 } = require('../controllers/activityController');
+
+// @route   GET /api/activities/happy-booster
+router.get('/happy-booster', getHappyBooster);
 
 // @route   GET /api/activities/recommendations
 // Placed before /:id (if any) to prevent it from being treated as an id

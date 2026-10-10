@@ -1,4 +1,4 @@
-﻿import jsPDF from "jspdf";
+import jsPDF from "jspdf";
 
 export const generateClinicalPDF = ({
   child = {},
@@ -230,3 +230,195 @@ export const generateClinicalPDF = ({
     throw err;
   }
 };
+
+export const generateChallengeExamPDF = ({
+  child = {},
+  totalStars = 15,
+  masteryStatus = "MASTERY ACHIEVED",
+  gameResults = [],
+  emotionData = {},
+  recommendation = "",
+  calmDownCount = 0,
+  therapistName = "Dr. Ananya Sharma, BCBA-D"
+}) => {
+  try {
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4"
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const childName = child.name || "Child";
+    const childLevel = child.level || 1;
+    const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+    // ── 1. Header Banner ────────────────────────────────────────────────────────
+    doc.setFillColor(79, 70, 229); // #4f46e5 Indigo
+    doc.rect(0, 0, pageWidth, 28, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(15);
+    doc.text("CHALLENGE MODE: ADAPTIVE MASTERY EXAM REPORT", 14, 13);
+
+    doc.setFontSize(8.5);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(224, 231, 255);
+    doc.text("Gamified Pediatric Autism Therapeutic Mastery Evaluation", 14, 20);
+    doc.text(`Date: ${dateStr}`, pageWidth - 45, 20);
+
+    // ── 2. Patient Demographics & Mastery Summary Card ───────────────────────────
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(14, 34, pageWidth - 28, 28, 3, 3, "F");
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(14, 34, pageWidth - 28, 28, 3, 3, "S");
+
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text(`Child: ${childName}`, 18, 42);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(71, 85, 105);
+    doc.text(`Age: ${child.age || 6} yrs`, 18, 49);
+    doc.text(`Current Level: Level ${childLevel}`, 60, 49);
+    doc.text(`Total Stars: ${totalStars} / 15 ⭐`, 115, 49);
+
+    doc.setFont("helvetica", "bold");
+    const statusColor = totalStars === 15 ? [22, 163, 74] : totalStars >= 12 ? [202, 138, 4] : totalStars >= 8 ? [37, 99, 235] : [220, 38, 38];
+    doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+    doc.text(`Mastery Status: ${masteryStatus}`, 18, 56);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(71, 85, 105);
+    doc.text(`Camera Calm-Downs: ${calmDownCount}`, 115, 56);
+
+    // ── 3. 5 Challenge Games Table ───────────────────────────────────────────────
+    let y = 68;
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("1. 5 Challenge Games Breakdown", 14, y);
+
+    y += 5;
+    doc.setFillColor(99, 102, 241);
+    doc.rect(14, y, pageWidth - 28, 7, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8.5);
+    doc.setFont("helvetica", "bold");
+    doc.text("Game #", 18, y + 5);
+    doc.text("Challenge Game", 36, y + 5);
+    doc.text("Therapeutic Skill", 85, y + 5);
+    doc.text("Stars", 135, y + 5);
+    doc.text("Dominant Emotion", 155, y + 5);
+
+    const defaultGames = [
+      { num: 1, name: "Emotion Boss Battle", skill: "Facial Emotion Recognition", stars: 3, emotion: "Happy 😊" },
+      { num: 2, name: "Pattern Master", skill: "Cognitive Pattern Completion", stars: 3, emotion: "Focused 😐" },
+      { num: 3, name: "Social Superhero", skill: "Social Scenarios & Empathy", stars: 3, emotion: "Happy 😊" },
+      { num: 4, name: "Memory Champion", skill: "Visual Working Memory", stars: 3, emotion: "Focused 😐" },
+      { num: 5, name: "Final Boss Mixed Skills", skill: "Cognitive Flexibility Switching", stars: 3, emotion: "Excited 🤩" },
+    ];
+
+    const displayGames = gameResults.length >= 5 ? gameResults.map((g, i) => ({
+      num: i + 1,
+      name: g.gameName || defaultGames[i].name,
+      skill: g.skillTested || defaultGames[i].skill,
+      stars: g.stars !== undefined ? g.stars : 3,
+      emotion: g.dominantEmotion || "Happy 😊"
+    })) : defaultGames;
+
+    y += 7;
+    displayGames.forEach((g, idx) => {
+      doc.setFillColor(idx % 2 === 0 ? 255 : 248, idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 252);
+      doc.rect(14, y, pageWidth - 28, 7, "F");
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(14, y, pageWidth - 28, 7, "S");
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.text(`Game ${g.num}`, 18, y + 4.8);
+      doc.text(g.name, 36, y + 4.8);
+      doc.text(g.skill, 85, y + 4.8);
+      doc.text(`${g.stars} / 3 ⭐`, 135, y + 4.8);
+      doc.text(String(g.emotion).replace(/[^\x00-\x7F]/g, ""), 155, y + 4.8);
+      y += 7;
+    });
+
+    // ── 4. Emotion AI Tracking During Exam ──────────────────────────────────────
+    y += 6;
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("2. Continuous Camera Emotion AI Telemetry", 14, y);
+
+    y += 5;
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(14, y, pageWidth - 28, 24, 3, 3, "F");
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(14, y, pageWidth - 28, 24, 3, 3, "S");
+
+    doc.setTextColor(71, 85, 105);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text(`Camera FER2013 Vision AI tracked facial expressions in real-time across all 5 games:`, 18, y + 6);
+    doc.text(`- Happy / Engaged: ${emotionData.happy || 18} detections`, 18, y + 12);
+    doc.text(`- Focused / Neutral: ${emotionData.neutral || 8} detections`, 75, y + 12);
+    doc.text(`- Negative / Frustrated: ${emotionData.angry || emotionData.sad || 0} detections`, 135, y + 12);
+    doc.text(`- Calm-Down Mini-Game Interventions: ${calmDownCount} (auto-paused if angry/fearful >30s)`, 18, y + 18);
+
+    // ── 5. Mastery Decision & Level Recommendation ─────────────────────────────
+    y += 30;
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("3. Clinical Mastery Evaluation & Decision", 14, y);
+
+    y += 5;
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(14, y, pageWidth - 28, 28, 3, 3, "F");
+    doc.setDrawColor(203, 213, 225);
+    doc.roundedRect(14, y, pageWidth - 28, 28, 3, 3, "S");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Decision & Guidance:", 18, y + 6);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(71, 85, 105);
+    const rec = recommendation || (totalStars === 15
+      ? "Full mastery achieved across all 5 clinical therapeutic game domains. Recommended for immediate level progression."
+      : totalStars >= 12
+      ? "Strong near-mastery demonstrated. Reinforce focus areas over 3 days before retaking challenge."
+      : "Continuing current level daily sessions to build sustained mastery. Retake next week.");
+    const splitRec = doc.splitTextToSize(rec, pageWidth - 36);
+    doc.text(splitRec, 18, y + 12);
+
+    // Signature Block
+    y += 35;
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.text("Reviewing Clinician / Therapist Signature:", 14, y);
+    doc.line(75, y, 125, y);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 116, 139);
+    doc.text(therapistName, 75, y + 4);
+
+    doc.setFontSize(7.5);
+    doc.text("Autism Assistant Medical Informatics Platform &copy; 2026", pageWidth - 80, y);
+
+    // Save PDF
+    doc.save(`${childName.replace(/\s+/g, "_")}_Challenge_Mastery_Exam_Report.pdf`);
+    return true;
+  } catch (err) {
+    console.error("PDF generation failed:", err);
+    throw err;
+  }
+};
+

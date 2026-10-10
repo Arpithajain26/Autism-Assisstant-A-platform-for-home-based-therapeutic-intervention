@@ -225,6 +225,22 @@ exports.submitAssessment = async (req, res) => {
       completedAt: new Date(),
     });
 
+    // Notify assigned therapist if child has therapistId
+    if (child.therapistId) {
+      try {
+        const Feedback = require("../models/Feedback");
+        await Feedback.create({
+          child: child._id,
+          therapist: child.therapistId,
+          parent: child.parentId,
+          type: "assessment_alert",
+          message: `🔔 New child assigned — ${child.name}, Age ${child.age}, Level ${level}. Q-CHAT-10 score: ${scores.reduce((a, b) => a + b, 0)}/30. Please review assessment scores and confirm or adjust support level.`,
+          isRead: false,
+        });
+      } catch (fbErr) {
+        console.warn("Therapist notification error:", fbErr.message);
+      }
+    }
 
     return res.status(200).json({
       level,

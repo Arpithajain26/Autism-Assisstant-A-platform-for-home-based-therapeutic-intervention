@@ -72,6 +72,20 @@ const playSound = (type, lang = "en") => {
         oscNode.start(ctx.currentTime + idx * 0.08);
         oscNode.stop(ctx.currentTime + idx * 0.08 + 0.2);
       });
+    } else if (type === "chime" || type === "calm") {
+      const chimeNotes = [523.25, 659.25, 783.99, 1046.50];
+      chimeNotes.forEach((freq, idx) => {
+        const oscNode = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        oscNode.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        oscNode.type = "sine";
+        oscNode.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.06);
+        gainNode.gain.setValueAtTime(0.04, ctx.currentTime + idx * 0.06);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.06 + 0.85);
+        oscNode.start(ctx.currentTime + idx * 0.06);
+        oscNode.stop(ctx.currentTime + idx * 0.06 + 0.85);
+      });
     }
   } catch (e) {
     console.warn("Audio Context not supported/blocked", e);
@@ -1898,6 +1912,1560 @@ function GameC12({ age, lang, onComplete }) {
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+// MORAL GAME 1: The Sharing Tree (Kindness & Turn-Taking)
+// ─────────────────────────────────────────────────────────────
+function GameMoralSharing({ age, lang, onComplete }) {
+  const [round, setRound] = useState(1);
+  const [sharedCount, setSharedCount] = useState(0);
+  const [hearts, setHearts] = useState([]);
+  const [finished, setFinished] = useState(false);
+
+  const roundsData = [
+    {
+      round: 1,
+      titleEn: "Share Apples with Hungry Bunny 🐰",
+      titleKn: "ಹಸಿದ ಮೊಲದೊಂದಿಗೆ ಸೇಬು ಹಂಚಿಕೊಳ್ಳಿ 🐰",
+      giver: { name: "Squirrel 🐿️", has: 4, item: "🍎" },
+      receiver: { name: "Bunny 🐰", needed: 2 },
+      targetShare: 2,
+      moralEn: "When we share our food, no friend stays hungry!",
+      moralKn: "ನಾವು ಹಂಚಿಕೊಂಡಾಗ ಯಾವುದೇ ಸ್ನೇಹಿತ ಹಸಿದಿರುವುದಿಲ್ಲ!",
+    },
+    {
+      round: 2,
+      titleEn: "Share Crayons to Color the Rainbow 🌈",
+      titleKn: "ಕಾಮನಬಿಲ್ಲು ಬಣ್ಣಿಸಲು ಕ್ರೇಯಾನ್ ಹಂಚಿಕೊಳ್ಳಿ 🌈",
+      giver: { name: "Owl 🦉", has: 4, item: "🖍️" },
+      receiver: { name: "Bear 🐻", needed: 2 },
+      targetShare: 2,
+      moralEn: "Sharing our toys makes playtime twice as fun!",
+      moralKn: "ಆಟಿಕೆಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳುವುದು ಆಟವನ್ನು ಹೆಚ್ಚು ಮೋಜು ಮಾಡುತ್ತದೆ!",
+    },
+    {
+      round: 3,
+      titleEn: "Share Flowers for Forest Bouquet 🌸",
+      titleKn: "ಹೂಗುಚ್ಛಕ್ಕಾಗಿ ಹೂಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ 🌸",
+      giver: { name: "Deer 🦌", has: 4, item: "🌼" },
+      receiver: { name: "Fox 🦊", needed: 2 },
+      targetShare: 2,
+      moralEn: "Kindness is a seed that blossoms into true friendship!",
+      moralKn: "ದಯೆಯು ನಿಜವಾದ ಸ್ನೇಹವಾಗಿ ಅರಳುವ ಬೀಜವಾಗಿದೆ!",
+    },
+  ];
+
+  const currentRound = roundsData[round - 1] || roundsData[0];
+
+  const triggerHeart = (e) => {
+    const id = Date.now() + Math.random();
+    setHearts((prev) => [...prev, { id, left: 40 + Math.random() * 20 }]);
+    setTimeout(() => {
+      setHearts((prev) => prev.filter((h) => h.id !== id));
+    }, 1200);
+  };
+
+  const handleShareItem = () => {
+    if (sharedCount >= currentRound.targetShare) return;
+    playSound("pop");
+    triggerHeart();
+    const nextShared = sharedCount + 1;
+    setSharedCount(nextShared);
+
+    if (nextShared === currentRound.targetShare) {
+      playSound("success");
+      setTimeout(() => {
+        if (round < 3) {
+          setRound((r) => r + 1);
+          setSharedCount(0);
+        } else {
+          setFinished(true);
+          playSound("win");
+        }
+      }, 1200);
+    }
+  };
+
+  if (finished) {
+    return (
+      <div style={{ textAlign: "center", color: "white", maxWidth: "600px", padding: "20px" }}>
+        <Confetti />
+        <div style={{ fontSize: "4.5rem", marginBottom: "10px", animation: "bounceGently 1s infinite" }}>🌳✨</div>
+        <h2 style={{ fontSize: "2.2rem", fontWeight: "900", color: "#facc15", marginBottom: "8px" }}>
+          {lang === "en" ? "The Sharing Tree is Blooming!" : "ಹಂಚಿಕೊಳ್ಳುವ ಮರ ಅರಳಿದೆ!"}
+        </h2>
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.3))",
+            border: "2px solid #f59e0b",
+            borderRadius: "20px",
+            padding: "20px",
+            margin: "20px 0",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+          }}
+        >
+          <div style={{ fontSize: "1.4rem", marginBottom: "6px" }}>📜 <strong>Moral of the Story:</strong></div>
+          <p style={{ fontSize: "1.15rem", lineHeight: "1.6", color: "#fef08a", margin: 0, fontWeight: "700" }}>
+            {lang === "en"
+              ? "🌟 When we share and take turns, we make the world a warmer and happier place for all our friends!"
+              : "🌟 ನಾವು ಹಂಚಿಕೊಂಡಾಗ ಮತ್ತು ಸರದಿ ತೆಗೆದುಕೊಂಡಾಗ, ಪ್ರತಿಯೊಬ್ಬರಿಗೂ ಜಗತ್ತು ಸಂತೋಷದ ಸ್ಥಳವಾಗುತ್ತದೆ!"}
+          </p>
+        </div>
+        <button
+          onClick={() => onComplete(3, "Happy")}
+          style={{
+            padding: "14px 36px",
+            fontSize: "1.1rem",
+            fontWeight: "900",
+            borderRadius: "16px",
+            border: "none",
+            background: "linear-gradient(135deg, #10b981, #059669)",
+            color: "white",
+            cursor: "pointer",
+            boxShadow: "0 6px 20px rgba(16,185,129,0.4)",
+          }}
+        >
+          ⭐ {lang === "en" ? "Finish & Collect 3 Stars!" : "ಮುಗಿಸಿ 3 ನಕ್ಷತ್ರ ಪಡೆಯಿರಿ!"}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ textAlign: "center", color: "white", width: "100%", maxWidth: "750px", position: "relative" }}>
+      {/* Floating hearts */}
+      {hearts.map((h) => (
+        <div
+          key={h.id}
+          style={{
+            position: "absolute",
+            bottom: "40%",
+            left: `${h.left}%`,
+            fontSize: "2rem",
+            animation: "float 1.2s ease-out forwards",
+            pointerEvents: "none",
+          }}
+        >
+          💖
+        </div>
+      ))}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <span style={{ background: "#334155", padding: "6px 14px", borderRadius: "99px", fontSize: "0.85rem", fontWeight: "800" }}>
+          Round {round} of 3 🌳
+        </span>
+        <span style={{ color: "#facc15", fontWeight: "800", fontSize: "0.95rem" }}>
+          Moral: {lang === "en" ? "Sharing brings friendship!" : "ಹಂಚಿಕೆ ಸ್ನೇಹವನ್ನು ತರುತ್ತದೆ!"}
+        </span>
+      </div>
+
+      <h2 style={{ fontSize: "1.9rem", fontWeight: "900", margin: "0 0 6px" }}>
+        {lang === "en" ? currentRound.titleEn : currentRound.titleKn}
+      </h2>
+      <p style={{ color: "#94a3b8", fontSize: "1.05rem", margin: "0 0 24px" }}>
+        {lang === "en"
+          ? `Click ${currentRound.giver.item} to share with ${currentRound.receiver.name}! (${sharedCount} / ${currentRound.targetShare} shared)`
+          : `${currentRound.giver.item} ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ ಹಂಚಿಕೊಳ್ಳಿ! (${sharedCount} / ${currentRound.targetShare})`}
+      </p>
+
+      {/* Sharing Arena */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #1e293b, #0f172a)",
+          border: "2px solid #334155",
+          borderRadius: "24px",
+          padding: "30px 20px",
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "20px",
+          margin: "20px 0",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+        }}
+      >
+        {/* Giver Character */}
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "4.5rem", marginBottom: "4px" }}>{currentRound.giver.name.split(" ")[1]}</div>
+          <div style={{ fontWeight: "800", fontSize: "1.05rem", color: "#e2e8f0" }}>{currentRound.giver.name}</div>
+          <div style={{ color: "#94a3b8", fontSize: "0.85rem", marginTop: "4px" }}>
+            Remaining: {currentRound.giver.has - sharedCount}
+          </div>
+        </div>
+
+        {/* Share Action Arrow & Items */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+          <div style={{ fontSize: "2rem" }}>➡️ 🤝 ➡️</div>
+          <button
+            onClick={handleShareItem}
+            disabled={sharedCount >= currentRound.targetShare}
+            style={{
+              background: sharedCount >= currentRound.targetShare ? "#64748b" : "linear-gradient(135deg, #f59e0b, #d97706)",
+              color: "white",
+              border: "none",
+              padding: "14px 28px",
+              borderRadius: "16px",
+              fontSize: "1.3rem",
+              fontWeight: "900",
+              cursor: sharedCount >= currentRound.targetShare ? "default" : "pointer",
+              boxShadow: "0 6px 20px rgba(245,158,11,0.4)",
+              transform: sharedCount >= currentRound.targetShare ? "none" : "scale(1.05)",
+              transition: "all 0.15s ease",
+            }}
+          >
+            {sharedCount >= currentRound.targetShare
+              ? "✅ Perfectly Shared!"
+              : `Tap to Share ${currentRound.giver.item}`}
+          </button>
+        </div>
+
+        {/* Receiver Character */}
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              fontSize: "4.5rem",
+              marginBottom: "4px",
+              animation: sharedCount > 0 ? "bounceGently 0.8s infinite" : "none",
+            }}
+          >
+            {sharedCount > 0 ? "🥰" : currentRound.receiver.name.split(" ")[1]}
+          </div>
+          <div style={{ fontWeight: "800", fontSize: "1.05rem", color: "#e2e8f0" }}>{currentRound.receiver.name}</div>
+          <div style={{ color: sharedCount >= currentRound.targetShare ? "#4ade80" : "#fbbf24", fontSize: "0.85rem", marginTop: "4px" }}>
+            Received: {sharedCount} / {currentRound.targetShare} {currentRound.giver.item}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// MORAL GAME 2: The Helping Hands Quest (Empathy & Everyday Heroes)
+// ─────────────────────────────────────────────────────────────
+function GameMoralHelping({ age, lang, onComplete }) {
+  const [scenarioIdx, setScenarioIdx] = useState(0);
+  const [feedback, setFeedback] = useState(null); // 'correct' | 'wrong'
+  const [kindnessPoints, setKindnessPoints] = useState(0);
+  const [finished, setFinished] = useState(false);
+
+  const scenarios = [
+    {
+      titleEn: "Nina dropped her puzzle pieces! 🧩",
+      titleKn: "ನೀನಾ ಪಝಲ್ ತುಂಡುಗಳನ್ನು ಕೆಳಗೆ ಹಾಕಿದಳು! 🧩",
+      descEn: "Nina is on the floor looking sad because her puzzle got scattered.",
+      descKn: "ನೀನಾ ನೆಲದ ಮೇಲೆ ದುಃಖದಿಂದ ಕುಳಿತಿದ್ದಾಳೆ.",
+      emoji: "😢",
+      resolvedEmoji: "😊",
+      choices: [
+        {
+          textEn: "Walk away and say it's her fault",
+          textKn: "ಹೋಗಿ ಅವಳದೇ ತಪ್ಪು ಎಂದು ಹೇಳಿ",
+          correct: false,
+          hint: "Think how you would feel if you dropped something!",
+        },
+        {
+          textEn: "Kneel down & say 'Don't worry, let me help you pick them up!' 🤝",
+          textKn: "'ಚಿಂತೆ ಬೇಡ, ನಾನು ಸಹಾಯ ಮಾಡುತ್ತೇನೆ!' ಎಂದು ಹೇಳಿ 🤝",
+          correct: true,
+          outcome: "Nina smiles warmly: 'Thank you so much! You are so kind!'",
+        },
+      ],
+      moral: "Helping someone clean up turns tears into smiles!",
+    },
+    {
+      titleEn: "Sam is sitting alone at recess 🥺",
+      titleKn: "ಸ್ಯಾಮ್ ಒಬ್ಬನೇ ಕುಳಿತಿದ್ದಾನೆ 🥺",
+      descEn: "All the other kids are playing tag, and Sam is sitting alone on the bench.",
+      descKn: "ಉಳಿದ ಮಕ್ಕಳು ಆಡುತ್ತಿದ್ದಾರೆ, ಸ್ಯಾಮ್ ಮಾತ್ರ ಒಬ್ಬನೇ ಕುಳಿತಿದ್ದಾನೆ.",
+      emoji: "🥺",
+      resolvedEmoji: "😄",
+      choices: [
+        {
+          textEn: "Smile & say 'Hi Sam! Do you want to play catch with me?' ⚽",
+          textKn: "'ಹಾಯ್ ಸ್ಯಾಮ್! ನನ್ನ ಜೊತೆ ಆಡಲು ಬರುತ್ತೀಯಾ?' ಎಂದು ಕೇಳಿ ⚽",
+          correct: true,
+          outcome: "Sam's face lights up: 'Yes! I would love that!'",
+        },
+        {
+          textEn: "Ignore him and play only with other kids",
+          textKn: "ಅವನನ್ನು ನಿರ್ಲಕ್ಷಿಸಿ",
+          correct: false,
+          hint: "Including a lonely friend makes everyone feel loved.",
+        },
+      ],
+      moral: "Inviting someone who is alone makes you a true friend!",
+    },
+    {
+      titleEn: "Grandma has heavy grocery bags 🛍️",
+      titleKn: "ಅಜ್ಜಿಯ ಬಳಿ ಭಾರವಾದ ಚೀಲಗಳಿವೆ 🛍️",
+      descEn: "Grandma is carrying bags and trying to open the entrance door.",
+      descKn: "ಅಜ್ಜಿ ಚೀಲಗಳನ್ನು ಹೊತ್ತು ಬಾಗಿಲು ತೆರೆಯಲು ಪ್ರಯತ್ನಿಸುತ್ತಿದ್ದಾರೆ.",
+      emoji: "👵",
+      resolvedEmoji: "👵💖",
+      choices: [
+        {
+          textEn: "Run inside first to watch cartoons",
+          textKn: "ಕಾರ್ಟೂನ್ ನೋಡಲು ಒಳಗೆ ಓಡಿಹೋಗಿ",
+          correct: false,
+          hint: "A superhero always holds the door for elders.",
+        },
+        {
+          textEn: "Hold the door open and carry the small bread bag 🚪🍞",
+          textKn: "ಬಾಗಿಲನ್ನು ಹಿಡಿದು ಸಹಾಯ ಮಾಡಿ 🚪🍞",
+          correct: true,
+          outcome: "Grandma beams: 'Bless you child, what a wonderful helper!'",
+        },
+      ],
+      moral: "Small helpful deeds show respect and deep love!",
+    },
+  ];
+
+  const current = scenarios[scenarioIdx] || scenarios[0];
+
+  const handleChoice = (isCorrect) => {
+    if (isCorrect) {
+      playSound("success");
+      setFeedback("correct");
+      setKindnessPoints((p) => p + 1);
+
+      setTimeout(() => {
+        setFeedback(null);
+        if (scenarioIdx < scenarios.length - 1) {
+          setScenarioIdx((s) => s + 1);
+        } else {
+          setFinished(true);
+          playSound("win");
+        }
+      }, 1400);
+    } else {
+      playSound("error");
+      setFeedback("wrong");
+    }
+  };
+
+  if (finished) {
+    return (
+      <div style={{ textAlign: "center", color: "white", maxWidth: "600px", padding: "20px" }}>
+        <Confetti />
+        <div style={{ fontSize: "4.5rem", marginBottom: "10px", animation: "bounceGently 1s infinite" }}>🦸‍♂️🏅</div>
+        <h2 style={{ fontSize: "2.2rem", fontWeight: "900", color: "#facc15", marginBottom: "8px" }}>
+          {lang === "en" ? "Kindness Superhero Badge Earned!" : "ದಯಾಪರ ಹೀರೋ ಬ್ಯಾಡ್ಜ್ ಲಭಿಸಿದೆ!"}
+        </h2>
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(79,70,229,0.3), rgba(67,56,202,0.4))",
+            border: "2px solid #818cf8",
+            borderRadius: "20px",
+            padding: "20px",
+            margin: "20px 0",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+          }}
+        >
+          <div style={{ fontSize: "1.4rem", marginBottom: "6px" }}>📜 <strong>Moral of the Story:</strong></div>
+          <p style={{ fontSize: "1.15rem", lineHeight: "1.6", color: "#e0e7ff", margin: 0, fontWeight: "700" }}>
+            {lang === "en"
+              ? "🌟 Small acts of kindness and helping hands have the power to turn anyone's day from sad into sunny!"
+              : "🌟 ಸಣ್ಣ ಸಹಾಯ ಮತ್ತು ದಯೆಯು ಯಾವುದೇ ವ್ಯಕ್ತಿಯ ದಿನವನ್ನು ಸಂತೋಷಕರವಾಗಿ ಬದಲಾಯಿಸುವ ಶಕ್ತಿ ಹೊಂದಿದೆ!"}
+          </p>
+        </div>
+        <button
+          onClick={() => onComplete(3, "Happy")}
+          style={{
+            padding: "14px 36px",
+            fontSize: "1.1rem",
+            fontWeight: "900",
+            borderRadius: "16px",
+            border: "none",
+            background: "linear-gradient(135deg, #4f46e5, #4338ca)",
+            color: "white",
+            cursor: "pointer",
+            boxShadow: "0 6px 20px rgba(79,70,229,0.4)",
+          }}
+        >
+          ⭐ {lang === "en" ? "Finish & Collect 3 Stars!" : "ಮುಗಿಸಿ 3 ನಕ್ಷತ್ರ ಪಡೆಯಿರಿ!"}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ textAlign: "center", color: "white", width: "100%", maxWidth: "750px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <span style={{ background: "#334155", padding: "6px 14px", borderRadius: "99px", fontSize: "0.85rem", fontWeight: "800" }}>
+          Scenario {scenarioIdx + 1} of {scenarios.length} 🤝
+        </span>
+        <span style={{ color: "#38bdf8", fontWeight: "800", fontSize: "0.95rem" }}>
+          Kindness Meter: {Math.round(((scenarioIdx + (feedback === "correct" ? 1 : 0)) / scenarios.length) * 100)}% 🌟
+        </span>
+      </div>
+
+      <div
+        style={{
+          background: "linear-gradient(135deg, #1e293b, #0f172a)",
+          border: "2px solid #334155",
+          borderRadius: "24px",
+          padding: "28px",
+          marginBottom: "24px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+        }}
+      >
+        <div style={{ fontSize: "4.5rem", marginBottom: "8px" }}>
+          {feedback === "correct" ? current.resolvedEmoji : current.emoji}
+        </div>
+        <h2 style={{ fontSize: "1.8rem", fontWeight: "900", color: "#f8fafc", margin: "0 0 8px" }}>
+          {lang === "en" ? current.titleEn : current.titleKn}
+        </h2>
+        <p style={{ color: "#94a3b8", fontSize: "1.05rem", margin: "0 0 16px", lineHeight: "1.5" }}>
+          {lang === "en" ? current.descEn : current.descKn}
+        </p>
+
+        {feedback === "correct" && (
+          <div style={{ background: "rgba(16,185,129,0.2)", border: "1px solid #10b981", borderRadius: "14px", padding: "12px", color: "#34d399", fontWeight: "800", fontSize: "1.05rem", animation: "bounceGently 0.5s" }}>
+            ✨ {current.choices.find((c) => c.correct)?.outcome || "Great choice!"}
+          </div>
+        )}
+
+        {feedback === "wrong" && (
+          <div style={{ background: "rgba(239,68,68,0.2)", border: "1px solid #ef4444", borderRadius: "14px", padding: "12px", color: "#f87171", fontWeight: "700", fontSize: "0.95rem" }}>
+            💡 Hint: {current.choices.find((c) => !c.correct)?.hint || "Try thinking about the kindest choice!"}
+          </div>
+        )}
+      </div>
+
+      {/* Choice Buttons */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+        {current.choices.map((ch, i) => (
+          <button
+            key={i}
+            onClick={() => handleChoice(ch.correct)}
+            disabled={feedback === "correct"}
+            style={{
+              padding: "16px 24px",
+              borderRadius: "18px",
+              border: "1.5px solid #475569",
+              background: feedback === "correct" && ch.correct ? "linear-gradient(135deg, #059669, #10b981)" : "#1e293b",
+              color: "white",
+              fontSize: "1.1rem",
+              fontWeight: "800",
+              cursor: feedback === "correct" ? "default" : "pointer",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.25)",
+              textAlign: "left",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <span style={{ fontSize: "1.3rem" }}>{ch.correct ? "🌟" : "👉"}</span>
+            <span>{lang === "en" ? ch.textEn : ch.textKn}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// RELAXATION GAME 1 (Level 1 / Age 2–5): The Gentle Butterfly Garden 🦋🌸
+// ─────────────────────────────────────────────────────────────
+function GameRelaxationButterfly({ age, lang, onComplete }) {
+  const [bloomed, setBloomed] = useState([]);
+  const [breathePhase, setBreathePhase] = useState("in");
+  const [butterflyPos, setButterflyPos] = useState({ x: 50, y: 35 });
+  const [sparkles, setSparkles] = useState([]);
+  const [finished, setFinished] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBreathePhase((prev) => (prev === "in" ? "out" : "in"));
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const flowers = [
+    { id: 1, nameEn: "Pink Lotus", nameKn: "ಗುಲಾಬಿ ಕಮಲ", emoji: "🪷", color: "#f472b6", bg: "rgba(244, 114, 182, 0.2)", x: 18, y: 70 },
+    { id: 2, nameEn: "Golden Sunflower", nameKn: "ಸೂರ್ಯಕಾಂತಿ", emoji: "🌻", color: "#facc15", bg: "rgba(250, 204, 21, 0.2)", x: 38, y: 65 },
+    { id: 3, nameEn: "Lavender Orchid", nameKn: "ಲ್ಯಾವೆಂಡರ್", emoji: "🪻", color: "#c084fc", bg: "rgba(192, 132, 252, 0.2)", x: 62, y: 65 },
+    { id: 4, nameEn: "Gentle Daisy", nameKn: "ಡೈಸಿ ಹೂವು", emoji: "🌼", color: "#60a5fa", bg: "rgba(96, 165, 250, 0.2)", x: 82, y: 70 },
+  ];
+
+  const handleWaterFlower = (flower) => {
+    if (bloomed.includes(flower.id)) return;
+    playSound("chime");
+    const next = [...bloomed, flower.id];
+    setBloomed(next);
+    setButterflyPos({ x: flower.x, y: flower.y - 18 });
+
+    const newSparkle = { id: Date.now(), x: flower.x, y: flower.y };
+    setSparkles((prev) => [...prev, newSparkle]);
+    setTimeout(() => {
+      setSparkles((prev) => prev.filter((s) => s.id !== newSparkle.id));
+    }, 1500);
+
+    if (next.length === flowers.length) {
+      playSound("win");
+      setTimeout(() => setFinished(true), 1200);
+    }
+  };
+
+  if (finished) {
+    return (
+      <div style={{ textAlign: "center", color: "white", maxWidth: "600px", padding: "20px" }}>
+        <Confetti />
+        <div style={{ fontSize: "5rem", marginBottom: "8px", animation: "bounceGently 1s infinite" }}>🦋🌸✨</div>
+        <h2 style={{ fontSize: "2.2rem", fontWeight: "900", color: "#f472b6", marginBottom: "8px" }}>
+          {lang === "en" ? "The Garden is Peaceful & Blooming!" : "ಶಾಂತಿಯುತ ಉದ್ಯಾನ ಅರಳಿದೆ!"}
+        </h2>
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(244,114,182,0.25), rgba(192,132,252,0.25))",
+            border: "2px solid #f472b6",
+            borderRadius: "20px",
+            padding: "20px",
+            margin: "20px 0",
+            boxShadow: "0 8px 24px rgba(244,114,182,0.3)",
+          }}
+        >
+          <div style={{ fontSize: "1.3rem", marginBottom: "6px" }}>📜 <strong>Moral of the Story:</strong></div>
+          <p style={{ fontSize: "1.15rem", lineHeight: "1.6", color: "#fdf2f8", margin: 0, fontWeight: "700" }}>
+            {lang === "en"
+              ? "🌸 Patience is like a blooming flower. When we take slow, gentle breaths and stay gentle, peace blossoms all around us!"
+              : "🌸 ತಾಳ್ಮೆಯು ಅರಳುವ ಹೂವಿನಂತೆ. ನಾವು ನಿಧಾನವಾಗಿ ದೀರ್ಘ ಉಸಿರಾಡಿದಾಗ, ಶಾಂತಿ ನಮ್ಮ ಸುತ್ತಲೂ ಅರಳುತ್ತದೆ!"}
+          </p>
+        </div>
+        <button
+          onClick={() => onComplete(3, "Calm")}
+          style={{
+            padding: "14px 36px",
+            fontSize: "1.1rem",
+            fontWeight: "900",
+            borderRadius: "16px",
+            border: "none",
+            background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
+            color: "white",
+            cursor: "pointer",
+            boxShadow: "0 6px 20px rgba(236,72,153,0.4)",
+          }}
+        >
+          ⭐ {lang === "en" ? "Finish & Collect 3 Stars!" : "ಮುಗಿಸಿ 3 ನಕ್ಷತ್ರ ಪಡೆಯಿರಿ!"}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ textAlign: "center", color: "white", width: "100%", maxWidth: "800px", userSelect: "none" }}>
+      {/* Visual Breathing Guide */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, rgba(236,72,153,0.15), rgba(139,92,246,0.15))",
+          border: "1.5px solid rgba(244,114,182,0.4)",
+          borderRadius: "20px",
+          padding: "14px 20px",
+          marginBottom: "20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "16px",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "2.4rem",
+            transition: "transform 3.8s ease-in-out",
+            transform: breathePhase === "in" ? "scale(1.35)" : "scale(0.85)",
+            filter: "drop-shadow(0 0 10px rgba(244,114,182,0.8))",
+          }}
+        >
+          🌸
+        </div>
+        <div style={{ textAlign: "left" }}>
+          <div style={{ fontSize: "1.05rem", fontWeight: "900", color: "#f472b6" }}>
+            {breathePhase === "in"
+              ? (lang === "en" ? "Breathe In Slowly... 🌬️ (Smell the flower)" : "ನಿಧಾನವಾಗಿ ದೀರ್ಘ ಉಸಿರೆಳೆದುಕೊಳ್ಳಿ... 🌬️")
+              : (lang === "en" ? "Breathe Out Softly... 🌾 (Blow the dandelion)" : "ನಿಧಾನವಾಗಿ ಉಸಿರು ಹೊರಹಾಕಿ... 🌾")}
+          </div>
+          <div style={{ fontSize: "0.85rem", color: "#e2e8f0", opacity: 0.85 }}>
+            {lang === "en" ? "Relax your shoulders and tap a gentle dewdrop below" : "ನಿಮ್ಮ ಭುಜಗಳನ್ನು ಸಡಿಲಗೊಳಿಸಿ ಮತ್ತು ಕೆಳಗಿನ ಹೂವನ್ನು ಮುಟ್ಟಿ"}
+          </div>
+        </div>
+      </div>
+
+      {/* Garden Meadow */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "320px",
+          background: "linear-gradient(180deg, #1e1b4b 0%, #1e293b 55%, #064e3b 100%)",
+          borderRadius: "24px",
+          border: "2px solid #334155",
+          overflow: "hidden",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+          marginBottom: "16px",
+        }}
+      >
+        {[10, 30, 50, 70, 90].map((left, idx) => (
+          <div
+            key={idx}
+            style={{
+              position: "absolute",
+              top: `${15 + (idx % 3) * 20}%`,
+              left: `${left}%`,
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.4)",
+              boxShadow: "0 0 8px #fff",
+              animation: `float ${2.5 + idx * 0.4}s ease-in-out infinite`,
+            }}
+          />
+        ))}
+
+        {/* The Animated Butterfly */}
+        <div
+          style={{
+            position: "absolute",
+            left: `${butterflyPos.x}%`,
+            top: `${butterflyPos.y}%`,
+            transform: "translate(-50%, -50%)",
+            fontSize: "3.2rem",
+            transition: "left 1s cubic-bezier(0.2, 0.8, 0.2, 1), top 1s cubic-bezier(0.2, 0.8, 0.2, 1)",
+            zIndex: 10,
+            cursor: "pointer",
+            filter: "drop-shadow(0 0 14px rgba(244,114,182,0.9))",
+          }}
+          onClick={() => {
+            playSound("calm");
+            setButterflyPos((prev) => ({
+              x: Math.max(15, Math.min(85, prev.x + (Math.random() - 0.5) * 25)),
+              y: Math.max(20, Math.min(60, prev.y + (Math.random() - 0.5) * 20)),
+            }));
+          }}
+        >
+          🦋
+        </div>
+
+        {/* Sparkles */}
+        {sparkles.map((sp) => (
+          <div
+            key={sp.id}
+            style={{
+              position: "absolute",
+              left: `${sp.x}%`,
+              top: `${sp.y - 15}%`,
+              transform: "translate(-50%, -50%)",
+              fontSize: "1.8rem",
+              animation: "bounceGently 0.8s ease-out",
+              pointerEvents: "none",
+            }}
+          >
+            ✨✨✨
+          </div>
+        ))}
+
+        {/* 4 Meadow Flowers */}
+        {flowers.map((f) => {
+          const isBloomed = bloomed.includes(f.id);
+          return (
+            <div
+              key={f.id}
+              onClick={() => handleWaterFlower(f)}
+              style={{
+                position: "absolute",
+                left: `${f.x}%`,
+                top: `${f.y}%`,
+                transform: "translate(-50%, -50%)",
+                cursor: isBloomed ? "default" : "pointer",
+                textAlign: "center",
+                transition: "transform 0.3s",
+              }}
+            >
+              {!isBloomed && (
+                <div
+                  style={{
+                    fontSize: "1.6rem",
+                    animation: "bounceGently 1.5s infinite",
+                    marginBottom: "4px",
+                    filter: "drop-shadow(0 0 8px #67e8f9)",
+                  }}
+                >
+                  💧
+                </div>
+              )}
+
+              <div
+                style={{
+                  fontSize: isBloomed ? "4rem" : "2.6rem",
+                  transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  filter: isBloomed ? `drop-shadow(0 0 16px ${f.color})` : "grayscale(0.6)",
+                  opacity: isBloomed ? 1 : 0.7,
+                }}
+              >
+                {isBloomed ? f.emoji : "🌱"}
+              </div>
+
+              <div
+                style={{
+                  background: isBloomed ? f.bg : "rgba(255,255,255,0.1)",
+                  color: isBloomed ? f.color : "#94a3b8",
+                  padding: "4px 10px",
+                  borderRadius: "12px",
+                  fontSize: "0.78rem",
+                  fontWeight: "800",
+                  marginTop: "6px",
+                  border: isBloomed ? `1px solid ${f.color}` : "1px dashed #64748b",
+                }}
+              >
+                {isBloomed ? (lang === "en" ? "Bloomed ✨" : "ಅರಳಿದೆ ✨") : (lang === "en" ? "Tap Dew 💧" : "ಮುಟ್ಟಿ 💧")}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ color: "#94a3b8", fontSize: "0.9rem" }}>
+        {lang === "en"
+          ? `Gently tap each droplet to help the garden bloom (${bloomed.length} / 4)`
+          : `ಉದ್ಯಾನ ಅರಳಿಸಲು ಪ್ರತಿಯೊಂದು ಹನಿಯನ್ನು ಮುಟ್ಟಿ (${bloomed.length} / 4)`}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// RELAXATION GAME 2 (Level 2 / Age 5–8): Ocean of Calm & Little Turtle 🐢🌊
+// ─────────────────────────────────────────────────────────────
+function GameRelaxationOceanTurtle({ age, lang, onComplete }) {
+  const [clearedWorries, setClearedWorries] = useState([]);
+  const [affirmation, setAffirmation] = useState(null);
+  const [waveBreath, setWaveBreath] = useState("in");
+  const [finished, setFinished] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setWaveBreath((w) => (w === "in" ? "out" : "in"));
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const worries = [
+    {
+      id: "w1",
+      cloudTextEn: "Loud Noises 📢",
+      cloudTextKn: "ದೊಡ್ಡ ಶಬ್ದಗಳು 📢",
+      transformEmoji: "🐬",
+      transformTextEn: "Gentle Dolphin",
+      transformTextKn: "ಸ್ನೇಹಿ ಡಾಲ್ಫಿನ್",
+      affirmationEn: "When sounds feel loud, I can cover my ears or ask for quiet.",
+      affirmationKn: "ಶಬ್ದ ದೊಡ್ಡದಾದಾಗ, ನಾನು ಕಿವಿ ಮುಚ್ಚಿಕೊಳ್ಳಬಹುದು ಅಥವಾ ಶಾಂತಿಗೆ ಕೇಳಬಹುದು.",
+    },
+    {
+      id: "w2",
+      cloudTextEn: "Feeling Rushed ⏰",
+      cloudTextKn: "ಆತುರ ಅನಿಸುವುದು ⏰",
+      transformEmoji: "⭐",
+      transformTextEn: "Golden Sea Star",
+      transformTextKn: "ಬಂಗಾರದ ನಕ್ಷತ್ರಮೀನು",
+      affirmationEn: "There is no rush. I can take my time, one calm step at a time.",
+      affirmationKn: "ಆತುರವಿಲ್ಲ. ನಾನು ನಿಧಾನವಾಗಿ, ಒಂದೊಂದಾಗಿ ಮಾಡಬಹುದು.",
+    },
+    {
+      id: "w3",
+      cloudTextEn: "Frustration 😤",
+      cloudTextKn: "ಕೋಪ ಮತ್ತು ಹತಾಶೆ 😤",
+      transformEmoji: "🪸",
+      transformTextEn: "Peaceful Coral",
+      transformTextKn: "ಶಾಂತ ಹವಳ",
+      affirmationEn: "Frustration is like a big wave. Slow breaths help it gently wash away.",
+      affirmationKn: "ಕೋಪವು ಅಲೆಯಂತೆ. ನಿಧಾನ ಉಸಿರಾಟ ಅದನ್ನು ಶಾಂತಗೊಳಿಸುತ್ತದೆ.",
+    },
+    {
+      id: "w4",
+      cloudTextEn: "Feeling Worried 😟",
+      cloudTextKn: "ಆತಂಕ ಮತ್ತು ಭಯ 😟",
+      transformEmoji: "🐠",
+      transformTextEn: "Glowing Clownfish",
+      transformTextKn: "ಕಾಂತಿಯುತ ಮೀನು",
+      affirmationEn: "I am safe and supported. Calmness is always inside me.",
+      affirmationKn: "ನಾನು ಸುರಕ್ಷಿತವಾಗಿದ್ದೇನೆ. ಶಾಂತಿ ಸದಾ ನನ್ನ ಒಳಗಿದೆ.",
+    },
+  ];
+
+  const handleClearWorry = (item) => {
+    if (clearedWorries.includes(item.id)) return;
+    playSound("chime");
+    const next = [...clearedWorries, item.id];
+    setClearedWorries(next);
+    setAffirmation(lang === "en" ? item.affirmationEn : item.affirmationKn);
+
+    if (next.length === worries.length) {
+      playSound("win");
+      setTimeout(() => setFinished(true), 1500);
+    }
+  };
+
+  if (finished) {
+    return (
+      <div style={{ textAlign: "center", color: "white", maxWidth: "600px", padding: "20px" }}>
+        <Confetti />
+        <div style={{ fontSize: "5rem", marginBottom: "8px", animation: "bounceGently 1s infinite" }}>🐢💙🌊</div>
+        <h2 style={{ fontSize: "2.2rem", fontWeight: "900", color: "#38bdf8", marginBottom: "8px" }}>
+          {lang === "en" ? "Little Turtle Reached Mama Turtle!" : "ಪುಟ್ಟ ಆಮೆ ಅಮ್ಮನ ಬಳಿ ತಲುಪಿದೆ!"}
+        </h2>
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(56,189,248,0.25), rgba(14,165,233,0.3))",
+            border: "2px solid #38bdf8",
+            borderRadius: "20px",
+            padding: "20px",
+            margin: "20px 0",
+            boxShadow: "0 8px 24px rgba(56,189,248,0.3)",
+          }}
+        >
+          <div style={{ fontSize: "1.3rem", marginBottom: "6px" }}>📜 <strong>Moral of the Story:</strong></div>
+          <p style={{ fontSize: "1.15rem", lineHeight: "1.6", color: "#e0f2fe", margin: 0, fontWeight: "700" }}>
+            {lang === "en"
+              ? "🌊 Even the biggest waves will pass. When we take calm breaths and stay patient, we can swim peacefully through any storm!"
+              : "🌊 ದೊಡ್ಡ ಅಲೆಗಳೂ ಕಳೆದುಹೋಗುತ್ತವೆ. ನಾವು ಶಾಂತವಾಗಿ ಉಸಿರಾಡಿದಾಗ, ಎಲ್ಲವನ್ನೂ ಶಾಂತಿಯಿಂದ ಎದುರಿಸಬಹುದು!"}
+          </p>
+        </div>
+        <button
+          onClick={() => onComplete(3, "Calm")}
+          style={{
+            padding: "14px 36px",
+            fontSize: "1.1rem",
+            fontWeight: "900",
+            borderRadius: "16px",
+            border: "none",
+            background: "linear-gradient(135deg, #0284c7, #0d9488)",
+            color: "white",
+            cursor: "pointer",
+            boxShadow: "0 6px 20px rgba(2,132,199,0.4)",
+          }}
+        >
+          ⭐ {lang === "en" ? "Finish & Collect 3 Stars!" : "ಮುಗಿಸಿ 3 ನಕ್ಷತ್ರ ಪಡೆಯಿರಿ!"}
+        </button>
+      </div>
+    );
+  }
+
+  const progressPercent = Math.round((clearedWorries.length / worries.length) * 100);
+
+  return (
+    <div style={{ textAlign: "center", color: "white", width: "100%", maxWidth: "800px", userSelect: "none" }}>
+      {/* Wave Tide Breathing Bar */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, rgba(2,132,199,0.25), rgba(13,148,136,0.2))",
+          border: "1.5px solid #0284c7",
+          borderRadius: "20px",
+          padding: "14px 20px",
+          marginBottom: "16px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "10px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ fontSize: "1.8rem" }}>🌊</div>
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontWeight: "900", color: "#38bdf8", fontSize: "0.95rem" }}>
+              {waveBreath === "in"
+                ? (lang === "en" ? "Ocean Inhale 🌊 (Wave Rises)" : "ಉಸಿರೆಳೆದುಕೊಳ್ಳಿ 🌊 (ಅಲೆ ಏರುತ್ತದೆ)")
+                : (lang === "en" ? "Ocean Exhale 🌊 (Wave Recedes)" : "ಉಸಿರು ಹೊರಹಾಕಿ 🌊 (ಅಲೆ ಇಳಿಯುತ್ತದೆ)")}
+            </div>
+            <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
+              {lang === "en" ? "Breathe rhythmically with the sea tide" : "ಸಮುದ್ರದ ಅಲೆಯೊಂದಿಗೆ ಶಾಂತವಾಗಿ ಉಸಿರಾಡಿ"}
+            </div>
+          </div>
+        </div>
+        <div style={{ background: "#0f172a", padding: "6px 14px", borderRadius: "12px", fontSize: "0.85rem", fontWeight: "800", color: "#38bdf8" }}>
+          Turtle Journey: {progressPercent}% 🐢
+        </div>
+      </div>
+
+      {/* Underwater Serene Reef */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "280px",
+          background: "radial-gradient(circle at 50% 30%, #0369a1 0%, #0c4a6e 60%, #082f49 100%)",
+          borderRadius: "24px",
+          border: "2px solid #0284c7",
+          overflow: "hidden",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+          marginBottom: "16px",
+          padding: "20px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <div style={{ position: "relative", height: "40px", borderBottom: "2px dashed rgba(255,255,255,0.2)" }}>
+          <div
+            style={{
+              position: "absolute",
+              left: `${10 + progressPercent * 0.75}%`,
+              top: "-8px",
+              fontSize: "2.4rem",
+              transition: "left 1s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              filter: "drop-shadow(0 0 10px rgba(56,189,248,0.8))",
+            }}
+          >
+            🐢
+          </div>
+          <div
+            style={{
+              position: "absolute",
+              right: "4%",
+              top: "-12px",
+              fontSize: "2.6rem",
+              filter: "drop-shadow(0 0 12px rgba(52,211,153,0.8))",
+            }}
+          >
+            🐢💖
+          </div>
+        </div>
+
+        {/* 4 Worry Bubbles Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "12px",
+            zIndex: 5,
+          }}
+        >
+          {worries.map((w) => {
+            const isCleared = clearedWorries.includes(w.id);
+            return (
+              <div
+                key={w.id}
+                onClick={() => handleClearWorry(w)}
+                style={{
+                  background: isCleared
+                    ? "linear-gradient(135deg, rgba(16,185,129,0.3), rgba(6,95,70,0.4))"
+                    : "linear-gradient(135deg, rgba(30,41,59,0.85), rgba(15,23,42,0.9))",
+                  border: isCleared ? "1.5px solid #34d399" : "1.5px solid rgba(255,255,255,0.15)",
+                  borderRadius: "16px",
+                  padding: "12px 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  cursor: isCleared ? "default" : "pointer",
+                  transition: "all 0.3s ease",
+                  boxShadow: isCleared ? "0 4px 16px rgba(16,185,129,0.3)" : "none",
+                }}
+              >
+                <div style={{ fontSize: "2rem", transition: "transform 0.3s" }}>
+                  {isCleared ? w.transformEmoji : "💭"}
+                </div>
+                <div style={{ textAlign: "left", flex: 1 }}>
+                  <div style={{ fontWeight: "800", fontSize: "0.95rem", color: isCleared ? "#34d399" : "#e2e8f0" }}>
+                    {isCleared
+                      ? (lang === "en" ? w.transformTextEn : w.transformTextKn)
+                      : (lang === "en" ? w.cloudTextEn : w.cloudTextKn)}
+                  </div>
+                  <div style={{ fontSize: "0.75rem", color: isCleared ? "#a7f3d0" : "#94a3b8" }}>
+                    {isCleared
+                      ? (lang === "en" ? "Transformed to Peace ✨" : "ಶಾಂತಿಯಾಯಿತು ✨")
+                      : (lang === "en" ? "Tap to Calm Down 🌊" : "ಶಾಂತಗೊಳಿಸಲು ಮುಟ್ಟಿ 🌊")}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {affirmation && (
+        <div
+          style={{
+            background: "rgba(16,185,129,0.2)",
+            border: "1px solid #10b981",
+            borderRadius: "14px",
+            padding: "10px 16px",
+            color: "#6ee7b7",
+            fontWeight: "700",
+            fontSize: "0.95rem",
+            animation: "bounceGently 0.5s ease",
+            marginBottom: "10px",
+          }}
+        >
+          💬 "{affirmation}"
+        </div>
+      )}
+
+      <div style={{ color: "#94a3b8", fontSize: "0.85rem" }}>
+        {lang === "en"
+          ? "Tap any stormy feeling bubble to dissolve it into friendly sea creatures"
+          : "ಅಲೆಯ ಗುಳ್ಳೆಯನ್ನು ಮುಟ್ಟಿ ಸಮುದ್ರ ಜೀವಿಗಳನ್ನಾಗಿ ಪರಿವರ್ತಿಸಿ"}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// RELAXATION GAME 3 (Level 3 / Age 9–12): Sky of Gratitude & Mindful Stargazer 🌌✨
+// ─────────────────────────────────────────────────────────────
+function GameRelaxationStargazer({ age, lang, onComplete }) {
+  const [constellationIdx, setConstellationIdx] = useState(0);
+  const [connectedStars, setConnectedStars] = useState([]);
+  const [boxBreath, setBoxBreath] = useState(1);
+  const [finished, setFinished] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setBoxBreath((b) => (b % 4) + 1);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const constellations = [
+    {
+      id: "c1",
+      titleEn: "Constellation of Gratitude 💖",
+      titleKn: "ಕೃತಜ್ಞತೆಯ ನಕ್ಷತ್ರಪುಂಜ 💖",
+      shape: "Heart",
+      stars: [
+        { id: 1, x: 30, y: 35, label: "1" },
+        { id: 2, x: 50, y: 25, label: "2" },
+        { id: 3, x: 70, y: 35, label: "3" },
+        { id: 4, x: 50, y: 70, label: "4" },
+      ],
+      meaningEn: "I am deeply grateful for the family, friends, and helpers who love and care for me.",
+      meaningKn: "ನನ್ನನ್ನು ಪ್ರೀತಿಸುವ ಕುಟುಂಬ ಮತ್ತು ಸ್ನೇಹಿತರಿಗೆ ನಾನು ಸದಾ ಕೃತಜ್ಞನಾಗಿದ್ದೇನೆ.",
+    },
+    {
+      id: "c2",
+      titleEn: "Constellation of Inner Strength 🛡️",
+      titleKn: "ಆಂತರಿಕ ಶಕ್ತಿಯ ನಕ್ಷತ್ರಪುಂಜ 🛡️",
+      shape: "Shield",
+      stars: [
+        { id: 1, x: 35, y: 30, label: "1" },
+        { id: 2, x: 65, y: 30, label: "2" },
+        { id: 3, x: 65, y: 65, label: "3" },
+        { id: 4, x: 35, y: 65, label: "4" },
+      ],
+      meaningEn: "I am patient with myself. I have the quiet inner courage to handle challenges.",
+      meaningKn: "ನನಗೆ ನನ್ನ ಮೇಲೆ ನಂಬಿಕೆಯಿದೆ. ಸವಾಲುಗಳನ್ನು ಎದುರಿಸುವ ಧೈರ್ಯ ನನ್ನಲ್ಲಿದೆ.",
+    },
+    {
+      id: "c3",
+      titleEn: "Constellation of Peaceful Wings 🕊️",
+      titleKn: "ಶಾಂತಿಯುತ ರೆಕ್ಕೆಗಳ ನಕ್ಷತ್ರಪುಂಜ 🕊️",
+      shape: "Dove",
+      stars: [
+        { id: 1, x: 25, y: 45, label: "1" },
+        { id: 2, x: 50, y: 30, label: "2" },
+        { id: 3, x: 75, y: 45, label: "3" },
+        { id: 4, x: 50, y: 65, label: "4" },
+      ],
+      meaningEn: "Tonight my thoughts are quiet and rested. Tomorrow is full of light and possibility.",
+      meaningKn: "ಈ ರಾತ್ರಿ ನನ್ನ ಮನಸ್ಸು ಶಾಂತವಾಗಿದೆ. ನಾಳೆಯ ದಿನ ಅದ್ಭುತವಾಗಿರಲಿದೆ.",
+    },
+  ];
+
+  const current = constellations[constellationIdx] || constellations[0];
+
+  const handleStarClick = (starId) => {
+    if (connectedStars.includes(starId)) return;
+    const expected = connectedStars.length + 1;
+    if (starId !== expected) return;
+
+    playSound("chime");
+    const next = [...connectedStars, starId];
+    setConnectedStars(next);
+
+    if (next.length === current.stars.length) {
+      playSound("success");
+      setTimeout(() => {
+        if (constellationIdx < constellations.length - 1) {
+          setConstellationIdx((c) => c + 1);
+          setConnectedStars([]);
+        } else {
+          setFinished(true);
+          playSound("win");
+        }
+      }, 1500);
+    }
+  };
+
+  const breathLabels = {
+    1: { en: "Inhale (4s) 🌌", kn: "ಉಸಿರೆಳೆದುಕೊಳ್ಳಿ (4s) 🌌" },
+    2: { en: "Hold Calmly (4s) 🌙", kn: "ಹಿಡಿದುಕೊಳ್ಳಿ (4s) 🌙" },
+    3: { en: "Exhale Slowly (4s) 🕊️", kn: "ಹೊರಹಾಕಿ (4s) 🕊️" },
+    4: { en: "Rest in Peace (4s) ✨", kn: "ಶಾಂತವಾಗಿರಿ (4s) ✨" },
+  };
+
+  if (finished) {
+    return (
+      <div style={{ textAlign: "center", color: "white", maxWidth: "600px", padding: "20px" }}>
+        <Confetti />
+        <div style={{ fontSize: "5rem", marginBottom: "8px", animation: "bounceGently 1s infinite" }}>🌌✨🕊️</div>
+        <h2 style={{ fontSize: "2.2rem", fontWeight: "900", color: "#facc15", marginBottom: "8px" }}>
+          {lang === "en" ? "The Constellations of Peace are Lit!" : "ಶಾಂತಿಯ ನಕ್ಷತ್ರಪುಂಜಗಳು ಬೆಳಗಿವೆ!"}
+        </h2>
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(79,70,229,0.25), rgba(124,58,237,0.3))",
+            border: "2px solid #a855f7",
+            borderRadius: "20px",
+            padding: "20px",
+            margin: "20px 0",
+            boxShadow: "0 8px 24px rgba(168,85,247,0.3)",
+          }}
+        >
+          <div style={{ fontSize: "1.3rem", marginBottom: "6px" }}>📜 <strong>Moral of the Story:</strong></div>
+          <p style={{ fontSize: "1.15rem", lineHeight: "1.6", color: "#f3e8ff", margin: 0, fontWeight: "700" }}>
+            {lang === "en"
+              ? "✨ Even in the darkest night, finding things to be grateful for lights up our entire universe with hope and peace!"
+              : "✨ ಕತ್ತಲೆಯಲ್ಲೂ ನಾವು ಕೃತಜ್ಞರಾಗಿರುವ ವಿಷಯಗಳು ನಮ್ಮ ಜಗತ್ತನ್ನು ಶಾಂತಿ ಮತ್ತು ಭರವಸೆಯಿಂದ ಬೆಳಗಿಸುತ್ತವೆ!"}
+          </p>
+        </div>
+        <button
+          onClick={() => onComplete(3, "Calm")}
+          style={{
+            padding: "14px 36px",
+            fontSize: "1.1rem",
+            fontWeight: "900",
+            borderRadius: "16px",
+            border: "none",
+            background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+            color: "white",
+            cursor: "pointer",
+            boxShadow: "0 6px 20px rgba(124,58,237,0.4)",
+          }}
+        >
+          ⭐ {lang === "en" ? "Finish & Collect 3 Stars!" : "ಮುಗಿಸಿ 3 ನಕ್ಷತ್ರ ಪಡೆಯಿರಿ!"}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ textAlign: "center", color: "white", width: "100%", maxWidth: "800px", userSelect: "none" }}>
+      {/* Box Breathing Header */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #1e1b4b, #312e81)",
+          border: "1.5px solid #6366f1",
+          borderRadius: "20px",
+          padding: "14px 20px",
+          marginBottom: "16px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "10px",
+        }}
+      >
+        <div style={{ textAlign: "left" }}>
+          <div style={{ fontWeight: "900", color: "#c7d2fe", fontSize: "0.95rem" }}>
+            {lang === "en" ? current.titleEn : current.titleKn}
+          </div>
+          <div style={{ fontSize: "0.8rem", color: "#a5b4fc" }}>
+            Constellation {constellationIdx + 1} of {constellations.length}
+          </div>
+        </div>
+        <div
+          style={{
+            background: "rgba(255,255,255,0.15)",
+            padding: "8px 16px",
+            borderRadius: "14px",
+            fontWeight: "900",
+            fontSize: "0.9rem",
+            color: "#facc15",
+            border: "1px solid rgba(250,204,21,0.4)",
+          }}
+        >
+          🧘 {lang === "en" ? breathLabels[boxBreath].en : breathLabels[boxBreath].kn}
+        </div>
+      </div>
+
+      {/* Cosmic Sky Board */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "300px",
+          background: "radial-gradient(ellipse at 50% 20%, #1e1b4b 0%, #0f172a 70%, #020617 100%)",
+          borderRadius: "24px",
+          border: "2px solid #4338ca",
+          overflow: "hidden",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
+          marginBottom: "16px",
+        }}
+      >
+        {[15, 28, 42, 60, 75, 88].map((left, idx) => (
+          <div
+            key={idx}
+            style={{
+              position: "absolute",
+              top: `${20 + (idx % 4) * 20}%`,
+              left: `${left}%`,
+              width: "4px",
+              height: "4px",
+              borderRadius: "50%",
+              background: "#fff",
+              opacity: 0.5,
+              animation: "sparkleGlow 2s infinite ease-in-out",
+            }}
+          />
+        ))}
+
+        {/* Constellation Stars */}
+        {current.stars.map((st) => {
+          const isConnected = connectedStars.includes(st.id);
+          const isNext = st.id === connectedStars.length + 1;
+          return (
+            <div
+              key={st.id}
+              onClick={() => handleStarClick(st.id)}
+              style={{
+                position: "absolute",
+                left: `${st.x}%`,
+                top: `${st.y}%`,
+                transform: "translate(-50%, -50%)",
+                width: isConnected ? "48px" : "42px",
+                height: isConnected ? "48px" : "42px",
+                borderRadius: "50%",
+                background: isConnected
+                  ? "radial-gradient(circle, #facc15 0%, #eab308 100%)"
+                  : isNext
+                  ? "radial-gradient(circle, #818cf8 0%, #4f46e5 100%)"
+                  : "rgba(255,255,255,0.15)",
+                border: isConnected ? "2px solid #fff" : isNext ? "2px solid #a5b4fc" : "1px solid #475569",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: isNext ? "pointer" : "default",
+                boxShadow: isConnected
+                  ? "0 0 20px #facc15"
+                  : isNext
+                  ? "0 0 16px rgba(129,140,248,0.8)"
+                  : "none",
+                animation: isNext ? "bounceGently 1.2s infinite" : "none",
+                transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                zIndex: 10,
+              }}
+            >
+              <span style={{ fontSize: "1.1rem", fontWeight: "900", color: isConnected ? "#1e1b4b" : "#fff" }}>
+                {isConnected ? "★" : st.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div
+        style={{
+          background: "rgba(79,70,229,0.2)",
+          border: "1px solid #6366f1",
+          borderRadius: "14px",
+          padding: "10px 16px",
+          color: "#e0e7ff",
+          fontSize: "0.92rem",
+          fontWeight: "600",
+          marginBottom: "10px",
+        }}
+      >
+        ✨ {lang === "en" ? current.meaningEn : current.meaningKn}
+      </div>
+
+      <div style={{ color: "#94a3b8", fontSize: "0.85rem" }}>
+        {lang === "en"
+          ? `Tap star #${connectedStars.length + 1} to connect the constellation lines (${connectedStars.length} / ${current.stars.length})`
+          : `ನಕ್ಷತ್ರ #${connectedStars.length + 1} ಮುಟ್ಟಿ ನಕ್ಷತ್ರಪುಂಜವನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ (${connectedStars.length} / ${current.stars.length})`}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// RELAXATION GAME 4 (Adaptive All Levels / All Ages): The Zen Stone Garden 🪨🎋
+// ─────────────────────────────────────────────────────────────
+function GameRelaxationZenStones({ age, lang, onComplete }) {
+  const [stacked, setStacked] = useState([]);
+  const [sandRipples, setSandRipples] = useState([]);
+  const [finished, setFinished] = useState(false);
+
+  const stones = [
+    { id: 1, nameEn: "Smooth River Slate", nameKn: "ನದಿಯ ಕಪ್ಪು ಶಿಲೆ", color: "#475569", width: 180, height: 42, emoji: "🪨" },
+    { id: 2, nameEn: "Serene Jade Stone", nameKn: "ಶಾಂತ ಜೇಡ್ ಹರಳು", color: "#059669", width: 145, height: 38, emoji: "🟢" },
+    { id: 3, nameEn: "Rose Quartz Pebble", nameKn: "ಗುಲಾಬಿ ಕ್ವಾರ್ಟ್ಸ್", color: "#db2777", width: 110, height: 34, emoji: "🌸" },
+    { id: 4, nameEn: "Golden Amber Cap", nameKn: "ಚಿನ್ನದ ಅಂಬರ್ ಕಲ್ಲು", color: "#d97706", width: 75, height: 30, emoji: "🟡" },
+  ];
+
+  const handleStackStone = (stone) => {
+    if (stacked.includes(stone.id)) return;
+    const nextExpected = stacked.length + 1;
+    if (stone.id !== nextExpected) return;
+
+    playSound("chime");
+    const next = [...stacked, stone.id];
+    setStacked(next);
+
+    if (next.length === stones.length) {
+      playSound("win");
+      setTimeout(() => setFinished(true), 1400);
+    }
+  };
+
+  const handleSandClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    playSound("click");
+    const newRip = { id: Date.now(), x, y };
+    setSandRipples((prev) => [...prev.slice(-3), newRip]);
+  };
+
+  if (finished) {
+    return (
+      <div style={{ textAlign: "center", color: "white", maxWidth: "600px", padding: "20px" }}>
+        <Confetti />
+        <div style={{ fontSize: "5rem", marginBottom: "8px", animation: "bounceGently 1s infinite" }}>🪨🎋✨</div>
+        <h2 style={{ fontSize: "2.2rem", fontWeight: "900", color: "#34d399", marginBottom: "8px" }}>
+          {lang === "en" ? "Perfect Balance & Inner Peace!" : "ಪರಿಪೂರ್ಣ ಸಮತೋಲನ ಮತ್ತು ಆಂತರಿಕ ಶಾಂತಿ!"}
+        </h2>
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(5,150,105,0.25), rgba(16,185,129,0.3))",
+            border: "2px solid #10b981",
+            borderRadius: "20px",
+            padding: "20px",
+            margin: "20px 0",
+            boxShadow: "0 8px 24px rgba(16,185,129,0.3)",
+          }}
+        >
+          <div style={{ fontSize: "1.3rem", marginBottom: "6px" }}>📜 <strong>Moral of the Story:</strong></div>
+          <p style={{ fontSize: "1.15rem", lineHeight: "1.6", color: "#d1fae5", margin: 0, fontWeight: "700" }}>
+            {lang === "en"
+              ? "🎋 Balance comes from a quiet heart. When we move gently and with care, everything in our life finds its peaceful place!"
+              : "🎋 ಸಮತೋಲನವು ಶಾಂತ ಹೃದಯದಿಂದ ಬರುತ್ತದೆ. ನಾವು ನಿಧಾನವಾಗಿ ಮತ್ತು ಎಚ್ಚರಿಕೆಯಿಂದ ಸಾಗಿದಾಗ ಎಲ್ಲವೂ ಸರಿಹೋಗುತ್ತದೆ!"}
+          </p>
+        </div>
+        <button
+          onClick={() => onComplete(3, "Calm")}
+          style={{
+            padding: "14px 36px",
+            fontSize: "1.1rem",
+            fontWeight: "900",
+            borderRadius: "16px",
+            border: "none",
+            background: "linear-gradient(135deg, #059669, #0d9488)",
+            color: "white",
+            cursor: "pointer",
+            boxShadow: "0 6px 20px rgba(5,150,105,0.4)",
+          }}
+        >
+          ⭐ {lang === "en" ? "Finish & Collect 3 Stars!" : "ಮುಗಿಸಿ 3 ನಕ್ಷತ್ರ ಪಡೆಯಿರಿ!"}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ textAlign: "center", color: "white", width: "100%", maxWidth: "800px", userSelect: "none" }}>
+      {/* Zen Header */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #064e3b, #0f766e)",
+          border: "1.5px solid #10b981",
+          borderRadius: "20px",
+          padding: "12px 20px",
+          marginBottom: "16px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "10px",
+        }}
+      >
+        <div style={{ textAlign: "left" }}>
+          <div style={{ fontWeight: "900", color: "#a7f3d0", fontSize: "0.95rem" }}>
+            {lang === "en" ? "The Zen Stone Garden 🎋" : "ಝೆನ್ ಕಲ್ಲಿನ ಉದ್ಯಾನ 🎋"}
+          </div>
+          <div style={{ fontSize: "0.8rem", color: "#d1fae5" }}>
+            {lang === "en" ? "Stack stones gently in sequence to create a balance cairn" : "ಸಮತೋಲನ ಸೃಷ್ಟಿಸಲು ಕಲ್ಲುಗಳನ್ನು ಜೋಡಿಸಿ"}
+          </div>
+        </div>
+        <div style={{ background: "rgba(0,0,0,0.3)", padding: "6px 14px", borderRadius: "12px", fontSize: "0.85rem", fontWeight: "800", color: "#34d399" }}>
+          Balanced: {stacked.length} / {stones.length} 🪨
+        </div>
+      </div>
+
+      {/* Main Altar Area */}
+      <div
+        style={{
+          display: "flex",
+          gap: "16px",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          marginBottom: "16px",
+        }}
+      >
+        {/* Cairn Stacking Altar */}
+        <div
+          style={{
+            flex: "1 1 340px",
+            height: "260px",
+            background: "linear-gradient(180deg, #1e293b 0%, #0f172a 100%)",
+            borderRadius: "20px",
+            border: "2px solid #334155",
+            padding: "20px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.4)",
+            position: "relative",
+          }}
+        >
+          {/* Base Pedestal */}
+          <div
+            style={{
+              width: "220px",
+              height: "18px",
+              background: "#334155",
+              borderRadius: "10px",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
+            }}
+          />
+
+          {/* Stacked Stones */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "38px",
+              display: "flex",
+              flexDirection: "column-reverse",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            {stones.map((st) => {
+              if (!stacked.includes(st.id)) return null;
+              return (
+                <div
+                  key={st.id}
+                  style={{
+                    width: `${st.width}px`,
+                    height: `${st.height}px`,
+                    background: `linear-gradient(135deg, ${st.color}, #1e293b)`,
+                    borderRadius: "50px",
+                    border: "2px solid rgba(255,255,255,0.3)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+                    animation: "bounceGently 0.5s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontWeight: "800",
+                    fontSize: "0.8rem",
+                  }}
+                >
+                  {st.emoji}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Sand Ripple Garden */}
+        <div
+          onClick={handleSandClick}
+          style={{
+            flex: "1 1 300px",
+            height: "260px",
+            background: "radial-gradient(circle, #fde68a 0%, #d97706 80%, #92400e 100%)",
+            borderRadius: "20px",
+            border: "2px solid #f59e0b",
+            position: "relative",
+            overflow: "hidden",
+            cursor: "pointer",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: "10px",
+              left: "14px",
+              background: "rgba(0,0,0,0.3)",
+              color: "#fff",
+              padding: "4px 10px",
+              borderRadius: "8px",
+              fontSize: "0.75rem",
+              fontWeight: "700",
+            }}
+          >
+            🎋 {lang === "en" ? "Click to rake sand ripples" : "ಮರಳಿನಲ್ಲಿ ಅಲೆಗಳನ್ನು ಸೃಷ್ಟಿಸಿ"}
+          </div>
+
+          {sandRipples.map((rip) => (
+            <div
+              key={rip.id}
+              style={{
+                position: "absolute",
+                left: `${rip.x}px`,
+                top: `${rip.y}px`,
+                transform: "translate(-50%, -50%)",
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                border: "2px solid rgba(255,255,255,0.7)",
+                animation: "sparkleGlow 1s ease-out",
+                pointerEvents: "none",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Available Stones Picker */}
+      <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+        {stones.map((st) => {
+          const isStacked = stacked.includes(st.id);
+          const isNext = st.id === stacked.length + 1;
+          return (
+            <button
+              key={st.id}
+              onClick={() => handleStackStone(st)}
+              disabled={isStacked || !isNext}
+              style={{
+                background: isStacked ? "#334155" : isNext ? "linear-gradient(135deg, #059669, #10b981)" : "#1e293b",
+                color: isStacked ? "#94a3b8" : "white",
+                border: isNext ? "2px solid #34d399" : "1px solid #475569",
+                borderRadius: "14px",
+                padding: "10px 16px",
+                cursor: isNext ? "pointer" : "not-allowed",
+                fontWeight: "800",
+                fontSize: "0.9rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: isNext ? "0 4px 15px rgba(16,185,129,0.35)" : "none",
+                transform: isNext ? "scale(1.03)" : "scale(1)",
+                transition: "all 0.2s",
+              }}
+            >
+              <span>{st.emoji}</span>
+              <span>{lang === "en" ? st.nameEn : st.nameKn}</span>
+              {isStacked && <span>✅</span>}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────────────────────────
    Launcher Core Component
    ───────────────────────────────────────────────────────────── */
@@ -1980,6 +3548,102 @@ export default function Games({ user }) {
   };
 
   const GAMES_LIST = [
+    // 🧘 Special Relaxation & Moral Story Games (Age & Level Adapted)
+    {
+      id: "r1",
+      level: 1,
+      targetAgeGroup: "2-5",
+      title: "The Gentle Butterfly Garden",
+      titleKn: "ಕೋಮಲ ಚಿಟ್ಟೆ ಉದ್ಯಾನ",
+      category: "Relaxation & Moral",
+      icon: "🦋",
+      component: GameRelaxationButterfly,
+      difficulty: 1,
+      moral: "Patience is like a blooming flower. When we take slow deep breaths and stay gentle, peace blossoms all around us! 🌸",
+      moralKn: "ತಾಳ್ಮೆಯು ಅರಳುವ ಹೂವಿನಂತೆ. ನಾವು ನಿಧಾನವಾಗಿ ದೀರ್ಘ ಉಸಿರಾಡಿದಾಗ, ಶಾಂತಿ ನಮ್ಮ ಸುತ್ತಲೂ ಅರಳುತ್ತದೆ! 🌸",
+      isRelaxationGame: true,
+      isMoralGame: true,
+      ageLabel: "👶 Ages 2–5 (Toddler)",
+    },
+    {
+      id: "r2",
+      level: 2,
+      targetAgeGroup: "5-8",
+      title: "The Ocean of Calm & Little Turtle",
+      titleKn: "ಶಾಂತ ಸಮುದ್ರ ಮತ್ತು ಪುಟ್ಟ ಆಮೆ",
+      category: "Relaxation & Moral",
+      icon: "🐢",
+      component: GameRelaxationOceanTurtle,
+      difficulty: 2,
+      moral: "Even the biggest waves will pass. When we take calm breaths and stay patient, we can swim peacefully through any storm! 🌊",
+      moralKn: "ದೊಡ್ಡ ಅಲೆಗಳೂ ಕಳೆದುಹೋಗುತ್ತವೆ. ನಾವು ಶಾಂತವಾಗಿ ಉಸಿರಾಡಿದಾಗ, ಎಲ್ಲವನ್ನೂ ಶಾಂತಿಯಿಂದ ಎದುರಿಸಬಹುದು! 🌊",
+      isRelaxationGame: true,
+      isMoralGame: true,
+      ageLabel: "🎒 Ages 5–8 (School)",
+    },
+    {
+      id: "r3",
+      level: 3,
+      targetAgeGroup: "9-12",
+      title: "Sky of Gratitude & Mindful Stargazer",
+      titleKn: "ಕೃತಜ್ಞತೆಯ ಆಕಾಶ ಮತ್ತು ನಕ್ಷತ್ರ ವೀಕ್ಷಕ",
+      category: "Relaxation & Moral",
+      icon: "🌌",
+      component: GameRelaxationStargazer,
+      difficulty: 3,
+      moral: "Even in the darkest night, finding things to be grateful for lights up our entire universe with hope and peace! ✨",
+      moralKn: "ಕತ್ತಲೆಯಲ್ಲೂ ನಾವು ಕೃತಜ್ಞರಾಗಿರುವ ವಿಷಯಗಳು ನಮ್ಮ ಜಗತ್ತನ್ನು ಶಾಂತಿ ಮತ್ತು ಭರವಸೆಯಿಂದ ಬೆಳಗಿಸುತ್ತವೆ! ✨",
+      isRelaxationGame: true,
+      isMoralGame: true,
+      ageLabel: "🚀 Ages 9–12 (Pre-teen)",
+    },
+    {
+      id: "r4",
+      level: 1,
+      targetAgeGroup: "All",
+      title: "The Zen Stone Garden",
+      titleKn: "ಝೆನ್ ಕಲ್ಲಿನ ಉದ್ಯಾನ",
+      category: "Relaxation & Moral",
+      icon: "🪨",
+      component: GameRelaxationZenStones,
+      difficulty: 1,
+      moral: "Balance comes from a quiet heart. When we move gently and with care, everything finds its peaceful place! 🎋",
+      moralKn: "ಸಮತೋಲನವು ಶಾಂತ ಹೃದಯದಿಂದ ಬರುತ್ತದೆ. ನಾವು ನಿಧಾನವಾಗಿ ಮತ್ತು ಎಚ್ಚರಿಕೆಯಿಂದ ಸಾಗಿದಾಗ ಎಲ್ಲವೂ ಸರಿಹೋಗುತ್ತದೆ! 🎋",
+      isRelaxationGame: true,
+      isMoralGame: true,
+      ageLabel: "🌱 All Ages & Levels",
+    },
+
+    // 🌟 Special Moral & Values Story Games (Age & Level Adapted)
+    {
+      id: "m1",
+      level: 1,
+      title: "The Sharing Tree",
+      titleKn: "ಹಂಚಿಕೊಳ್ಳುವ ಮರ",
+      category: "Moral & Values",
+      icon: "🌳",
+      component: GameMoralSharing,
+      difficulty: 1,
+      moral: "When we share and take turns, we make the world a warmer and happier place for all our friends! 🍎",
+      moralKn: "ನಾವು ಹಂಚಿಕೊಂಡಾಗ ಮತ್ತು ಸರದಿ ತೆಗೆದುಕೊಂಡಾಗ, ಪ್ರತಿಯೊಬ್ಬರಿಗೂ ಜಗತ್ತು ಸಂತೋಷದ ಸ್ಥಳವಾಗುತ್ತದೆ! 🍎",
+      isMoralGame: true,
+      ageLabel: "👶 Ages 2–5 (Toddler)",
+    },
+    {
+      id: "m2",
+      level: 2,
+      title: "The Helping Hands Quest",
+      titleKn: "ಸಹಾಯ ಮಾಡುವ ಕೈಗಳು",
+      category: "Moral & Values",
+      icon: "🤝",
+      component: GameMoralHelping,
+      difficulty: 2,
+      moral: "Small acts of kindness and helping hands have the power to turn anyone's day from sad into sunny! 🦸‍♂️",
+      moralKn: "ಸಣ್ಣ ಸಹಾಯ ಮತ್ತು ದಯೆಯು ಯಾವುದೇ ವ್ಯಕ್ತಿಯ ದಿನವನ್ನು ಸಂತೋಷಕರವಾಗಿ ಬದಲಾಯಿಸುವ ಶಕ್ತಿ ಹೊಂದಿದೆ! 🦸‍♂️",
+      isMoralGame: true,
+      ageLabel: "🎒 Ages 5–8 (School)",
+    },
+
     // Level 1
     { id: "a1", level: 1, title: "Mirror Play", titleKn: "ಕನ್ನಡಿ ಆಟ", category: "Social", icon: "🪞", component: GameA1, difficulty: 1 },
     { id: "a2", level: 1, title: "Sorting Shapes", titleKn: "ಆಕಾರ ವಿಂಗಡಣೆ", category: "Cognitive", icon: "📐", component: GameA2, difficulty: 2 },
@@ -2024,6 +3688,8 @@ export default function Games({ user }) {
   ];
 
   const filteredGames = GAMES_LIST.filter(g => {
+    if (activeLevel === "Relaxation") return g.isRelaxationGame;
+    if (activeLevel === "Moral") return g.isMoralGame;
     if (activeLevel === "All") return true;
     return `Level ${g.level}` === activeLevel;
   });
@@ -2096,10 +3762,14 @@ export default function Games({ user }) {
 
         {/* Filter bar */}
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
-          {["All", "Level 1", "Level 2", "Level 3"].map(level => {
+          {["All", "Relaxation", "Moral", "Level 1", "Level 2", "Level 3"].map(level => {
             const isActive = activeLevel === level;
             let tabLabel = "⭐ Show All";
-            if (level.startsWith("Level ")) {
+            if (level === "Relaxation") {
+              tabLabel = "🧘 Relaxation & Calm (4 Games)";
+            } else if (level === "Moral") {
+              tabLabel = "🌟 Moral & Values Stories";
+            } else if (level.startsWith("Level ")) {
               const lvlNum = parseInt(level.replace("Level ", ""), 10);
               const tierCfg = getAgeLevelConfig(effectiveAge, lvlNum);
               tabLabel = `${tierCfg.emoji} ${tierCfg.label} (Level ${lvlNum})`;
@@ -2109,14 +3779,32 @@ export default function Games({ user }) {
                 key={level}
                 onClick={() => { playSound("click"); setActiveLevel(level); }}
                 style={{
-                  background: isActive ? "#4F6EF7" : "white",
-                  color: isActive ? "white" : "#475569",
-                  border: isActive ? "none" : "1px solid #e2e8f0",
+                  background: isActive
+                    ? (level === "Relaxation"
+                        ? "linear-gradient(135deg, #059669, #0d9488)"
+                        : level === "Moral"
+                        ? "linear-gradient(135deg, #f59e0b, #ec4899)"
+                        : "#4F6EF7")
+                    : "white",
+                  color: isActive
+                    ? "white"
+                    : (level === "Relaxation"
+                        ? "#059669"
+                        : level === "Moral"
+                        ? "#d97706"
+                        : "#475569"),
+                  border: isActive
+                    ? "none"
+                    : (level === "Relaxation"
+                        ? "1.5px solid #10b981"
+                        : level === "Moral"
+                        ? "1.5px solid #f59e0b"
+                        : "1px solid #e2e8f0"),
                   padding: "10px 20px",
                   borderRadius: "20px",
                   fontWeight: "bold",
                   cursor: "pointer",
-                  boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
+                  boxShadow: isActive ? "0 4px 12px rgba(0,0,0,0.15)" : "0 2px 5px rgba(0,0,0,0.05)",
                   transition: "all 0.2s"
                 }}
               >
@@ -2145,11 +3833,16 @@ export default function Games({ user }) {
               borderRadius: "16px",
               padding: "20px",
               boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
-              border: "1px solid #e2e8f0",
+              border: game.isRelaxationGame
+                ? "2px solid #34d399"
+                : game.isMoralGame
+                ? "2px solid #fbbf24"
+                : "1px solid #e2e8f0",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              transition: "transform 0.2s, box-shadow 0.2s"
+              transition: "transform 0.2s, box-shadow 0.2s",
+              position: "relative"
             }}
             onMouseEnter={e => {
               e.currentTarget.style.transform = "translateY(-4px)";
@@ -2161,18 +3854,46 @@ export default function Games({ user }) {
             }}
           >
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                <span style={{
-                  background: tierCfg.bgColor,
-                  color: tierCfg.textColor,
-                  padding: "4px 10px",
-                  borderRadius: "12px",
-                  fontSize: "0.75rem",
-                  fontWeight: "bold"
-                }}>
-                  {tierCfg.emoji} {tierCfg.label} (L{game.level})
-                </span>
-                <span style={{ color: "#94a3b8", fontSize: "0.8rem", fontWeight: "bold", textTransform: "uppercase" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "6px" }}>
+                <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                  <span style={{
+                    background: game.isRelaxationGame
+                      ? "linear-gradient(135deg, #059669, #0ea5e9)"
+                      : game.isMoralGame
+                      ? "linear-gradient(135deg, #f59e0b, #ec4899)"
+                      : tierCfg.bgColor,
+                    color: (game.isRelaxationGame || game.isMoralGame) ? "white" : tierCfg.textColor,
+                    padding: "4px 10px",
+                    borderRadius: "12px",
+                    fontSize: "0.75rem",
+                    fontWeight: "bold",
+                    boxShadow: game.isRelaxationGame
+                      ? "0 2px 8px rgba(5,150,105,0.3)"
+                      : game.isMoralGame
+                      ? "0 2px 8px rgba(245,158,11,0.3)"
+                      : "none"
+                  }}>
+                    {game.isRelaxationGame
+                      ? "🧘 Relaxation & Moral"
+                      : game.isMoralGame
+                      ? "🌟 Moral Story"
+                      : `${tierCfg.emoji} ${tierCfg.label} (L${game.level})`}
+                  </span>
+                  {game.ageLabel && (
+                    <span style={{
+                      background: "#f1f5f9",
+                      color: "#475569",
+                      border: "1px solid #cbd5e1",
+                      padding: "3px 8px",
+                      borderRadius: "10px",
+                      fontSize: "0.72rem",
+                      fontWeight: "700"
+                    }}>
+                      {game.ageLabel}
+                    </span>
+                  )}
+                </div>
+                <span style={{ color: game.isRelaxationGame ? "#059669" : game.isMoralGame ? "#d97706" : "#94a3b8", fontSize: "0.8rem", fontWeight: "bold", textTransform: "uppercase" }}>
                   {game.category}
                 </span>
               </div>
@@ -2354,11 +4075,31 @@ export default function Games({ user }) {
                 <h2 style={{ fontSize: "2rem", fontWeight: "800", color: "#10b981", marginBottom: "10px" }}>
                   🎉 Awesome Work!
                 </h2>
-                <p style={{ color: "#94a3b8", fontSize: "0.95rem", margin: "0 0 20px 0" }}>
+                <p style={{ color: "#94a3b8", fontSize: "0.95rem", margin: "0 0 16px 0" }}>
                   Session successfully logged to your dashboard database.
                 </p>
 
-                <div style={{ display: "flex", justifyContent: "center", gap: "5px", fontSize: "2.2rem", margin: "20px 0" }}>
+                {/* Golden Moral Scroll Takeaway */}
+                {activeGame?.moral && (
+                  <div style={{
+                    background: "linear-gradient(135deg, rgba(245,158,11,0.18), rgba(234,179,8,0.08))",
+                    border: "1.5px solid #f59e0b",
+                    borderRadius: "14px",
+                    padding: "14px",
+                    margin: "0 0 18px 0",
+                    textAlign: "center",
+                    boxShadow: "0 4px 15px rgba(245,158,11,0.2)"
+                  }}>
+                    <div style={{ fontSize: "0.78rem", fontWeight: "900", color: "#fbbf24", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>
+                      ✨ Moral Takeaway ✨
+                    </div>
+                    <div style={{ fontSize: "0.92rem", color: "#fef3c7", fontStyle: "italic", lineHeight: "1.4" }}>
+                      "{activeGame.moral}"
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: "flex", justifyContent: "center", gap: "5px", fontSize: "2.2rem", margin: "16px 0" }}>
                   {Array.from({ length: 3 }).map((_, i) => (
                     <span key={i} style={{ color: i < gameResult.score ? "#f59e0b" : "#475569" }}>⭐</span>
                   ))}
@@ -2415,10 +4156,25 @@ export default function Games({ user }) {
         <ActivityRatingModal
           childId={storedChild?._id || user?.childId || user?._id || "anonymous_child"}
           childName={storedChild?.name || user?.name || "Super Star"}
+          childAge={storedChild?.age || 4}
+          childLevel={storedChild?.level || 1}
           activityId={activeGameId}
           activityTitle={activeGame.title}
-          initialScore={gameResult.score >= 3 ? 90 : gameResult.score >= 2 ? 65 : 40}
-          onComplete={() => { setShowGameRating(false); setShowCert(true); }}
+          detectedEmotion={gameResult?.emotion || currentEmotion || "Happy"}
+          emotionConfidence={88}
+          initialScore={gameResult?.score >= 3 ? 90 : gameResult?.score >= 2 ? 65 : 40}
+          onComplete={(ratingData) => {
+            setShowGameRating(false);
+            if (ratingData && ratingData.launchHappyActivity) {
+              if (onNavigate) {
+                onNavigate("/activities", { state: { happyActivity: ratingData.launchHappyActivity } });
+              } else {
+                window.location.href = "/activities";
+              }
+              return;
+            }
+            setShowCert(true);
+          }}
           onCancel={() => { setShowGameRating(false); setShowCert(true); }}
         />
       )}

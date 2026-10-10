@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { getActivities as fetchApiActivities, logSession as apiLogSession } from "../services/api";
+import { getActivities as fetchApiActivities, logSession as apiLogSession, logEmotionSession } from "../services/api";
 import EmotionDetector from "../components/EmotionDetector";
 import InteractiveGameZone from "../components/InteractiveGameZone";
 import CertificateModal from "../components/CertificateModal";
 import ActivityRatingModal from "../components/ActivityRatingModal";
+import StudentProfileModal from "../components/StudentProfileModal";
+import MasteryExamModal from "../components/MasteryExamModal";
+import FunnyBreakModal from "../components/FunnyBreakModal";
+import HappinessGames from "../components/HappinessGames";
+import { SessionEmotionLog } from "../utils/EmotionStateManager";
+import { speak } from "../utils/gameAudio";
 import { getAgeLevelConfig, getAgeGroup } from "../utils/ageLevelMapping";
 import { CURATED_ACTIVITIES } from "../data/curatedActivities";
 
@@ -158,10 +164,40 @@ export default function Activities({ user }) {
   const [gameDone, setGameDone] = useState(false);
   const [recentCertificate, setRecentCertificate] = useState(null);
   const [showRatingModal, setShowRatingModal] = useState(null);
+  const [showStudentProfileModal, setShowStudentProfileModal] = useState(false);
+  const [showMasteryExamModal, setShowMasteryExamModal] = useState(false);
+  const [sadSeconds, setSadSeconds] = useState(0);
+  const [showFunnyBreakModal, setShowFunnyBreakModal] = useState(false);
+  const [showExamPrompt, setShowExamPrompt] = useState(false);
+
+  // ── Happiness Games Emotion Trigger Overlay State ──
+  const [showHappinessOverlay, setShowHappinessOverlay] = useState(false);
+  const [happinessTriggerEmotion, setHappinessTriggerEmotion] = useState("sad");
+  const [happinessScoreDrop, setHappinessScoreDrop] = useState(false);
+  const [interventionCount, setInterventionCount] = useState(0);
+  const [sessionOverGently, setSessionOverGently] = useState(false);
+  const [consecutiveLowScores, setConsecutiveLowScores] = useState(0);
+  const sessionEmotionLogRef = useRef(null);
 
   useEffect(() => {
     // Keep activities strictly aligned with the curated 45-activity dataset
     setActivities(CURATED_ACTIVITIES);
+    
+    // Check if exam is due
+    try {
+      const storedChild = JSON.parse(localStorage.getItem("currentChild") || "{}");
+      const streak = Number(localStorage.getItem(`streak_${storedChild._id}`) || "7");
+      const sessionsCount = Number(localStorage.getItem(`session_count_${storedChild._id}`) || "7");
+      
+      const isDue = (streak >= 7 && !storedChild.examTakenThisWeek) || 
+                    (sessionsCount % 20 === 0 && sessionsCount > 0) || 
+                    Boolean(storedChild.examTriggeredByTherapist) ||
+                    (new Date().getDay() === 0);
+      
+      if (isDue) {
+        setShowExamPrompt(true);
+      }
+    } catch(e) {}
   }, []);
 
   useEffect(() => {
@@ -176,6 +212,54 @@ export default function Activities({ user }) {
     return () => clearInterval(timer);
   }, [activeSession, timerSeconds]);
 
+  // Real-time Emotion Trigger Logic for Happiness Games System:
+  // - Angry / Frustrated > 20s -> trigger happiness game (Easy Win or Drum Beat)
+  // - Fearful > 20s -> trigger calm game (Floating Stars or Bubble Garden)
+  // - Sad > 30s -> trigger engagement game (Virtual Pet or Silly Animals)
+  // - Max 2 interventions per session; then gentle rest
+  useEffect(() => {
+    if (!activeSession || showHappinessOverlay) {
+      setSadSeconds(0);
+      return;
+    }
+    const emoLower = (currentEmotion || "").toLowerCase();
+    const isAngry = emoLower.includes("angry") || emoLower.includes("frustrated");
+    const isFearful = emoLower.includes("fear") || emoLower.includes("anxious");
+    const isSad = emoLower.includes("sad");
+
+    if (isAngry || isFearful || isSad) {
+      const interval = setInterval(() => {
+        setSadSeconds(prev => {
+          const nextVal = prev + 1;
+          const threshold = isSad ? 30 : 20;
+
+          if (nextVal >= threshold && !showHappinessOverlay) {
+            if (interventionCount >= 2) {
+              // End session gracefully after 2 interventions
+              setSessionOverGently(true);
+              speak(language === "kn" ? "ಇಂದು ಅದ್ಭುತ ಪ್ರಯತ್ನ! ನಾಳೆ ಮತ್ತೆ ಆಡೋಣ!" : "Great effort today! Let us rest and try again tomorrow!", language);
+              return 0;
+            }
+
+            setHappinessTriggerEmotion(isAngry ? "angry" : isFearful ? "fearful" : "sad");
+            setHappinessScoreDrop(false);
+            setShowHappinessOverlay(true);
+            setInterventionCount(c => c + 1);
+
+            if (sessionEmotionLogRef.current) {
+              sessionEmotionLogRef.current.openIntervention(activeSession.title, 1);
+            }
+            return 0;
+          }
+          return nextVal;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    } else {
+      setSadSeconds(0);
+    }
+  }, [activeSession, currentEmotion, showHappinessOverlay, interventionCount, language]);
+
   const handleStartSession = (act) => {
     setActiveSession(act);
     setSessionScore(null);
@@ -183,6 +267,10 @@ export default function Activities({ user }) {
     setCurrentStep(0);
     setCompletedStep(null);
     setGameDone(false);
+    setSadSeconds(0);
+    setInterventionCount(0);
+    setConsecutiveLowScores(0);
+    sessionEmotionLogRef.current = new SessionEmotionLog(child._id, `session_${Date.now()}`);
     const minsMatch = (act.duration || "").match(/\d+/);
     setTimerSeconds((minsMatch ? parseInt(minsMatch[0], 10) : 10) * 60);
   };
@@ -195,6 +283,20 @@ export default function Activities({ user }) {
     try {
       await apiLogSession({ childId: child._id, activityId: activeSession._id, score: sessionScore, emotion: detectedEmotion, confidence: emotionConfidence || 0, duration: durationMins, completedAt: new Date() });
     } catch (e) { console.warn("Session log failed", e); }
+
+    // Save detailed Session Emotion Log to MongoDB
+    try {
+      if (sessionEmotionLogRef.current) {
+        sessionEmotionLogRef.current.recordEmotion(detectedEmotion, emotionConfidence || 85);
+        const report = sessionEmotionLogRef.current.buildReport();
+        await logEmotionSession({
+          ...report,
+          activityId: activeSession._id,
+          activityTitle: activeSession.title,
+          activitiesCausingNegative: interventionCount > 0 ? [activeSession.title] : [],
+        });
+      }
+    } catch (e) { console.warn("Emotion session log failed", e); }
 
     if (!completedActivities.includes(activeSession._id)) {
       setCompletedActivities(prev => [...prev, activeSession._id]);
@@ -211,9 +313,12 @@ export default function Activities({ user }) {
     setShowRatingModal({
       childId: child._id,
       childName: child.name,
-      childPhoto: child.profilePhoto,
+      childAge: child.age,
+      childLevel: child.level || 1,
       activityId: activeSession._id,
       activityTitle: activeSession.title,
+      detectedEmotion: detectedEmotion,
+      emotionConfidence: emotionConfidence || 85,
       xpEarned: activeSession.xp || 50,
       stars: sessionScore,
       initialScore: sessionScore === "⭐⭐⭐" ? 90 : sessionScore === "⭐⭐" ? 65 : 40,
@@ -221,22 +326,50 @@ export default function Activities({ user }) {
     setActiveSession(null);
   };
 
+  const handleCompleteFunnyBreak = (nextHappyActivity) => {
+    setShowFunnyBreakModal(false);
+    setSadSeconds(0);
+    setCurrentEmotion("Happy");
+    setTotalXP(prev => prev + 50);
+    if (nextHappyActivity) {
+      setAssignedNextHappyActivity(nextHappyActivity);
+      // Auto-launch the next assigned happy activity for seamless transition
+      handleStartSession(nextHappyActivity);
+    }
+  };
+
   const handleRatingComplete = (ratingData) => {
     const pending = showRatingModal;
     setShowRatingModal(null);
+    if (ratingData && ratingData.launchHappyActivity) {
+      handleStartSession(ratingData.launchHappyActivity);
+      return;
+    }
+    if (assignedNextHappyActivity) {
+      const nextAct = assignedNextHappyActivity;
+      setAssignedNextHappyActivity(null);
+      handleStartSession(nextAct);
+      return;
+    }
     // Now show the certificate
     setRecentCertificate({
-      childName: pending.childName,
-      childPhoto: pending.childPhoto,
-      activityTitle: pending.activityTitle,
-      xpEarned: pending.xpEarned,
-      stars: pending.stars,
+      childName: pending?.childName || child.name,
+      childPhoto: pending?.childPhoto || child.profilePhoto,
+      activityTitle: pending?.activityTitle || "Activity",
+      xpEarned: pending?.xpEarned || 50,
+      stars: pending?.stars || "⭐⭐⭐",
     });
   };
 
   const handleRatingSkip = () => {
     const pending = showRatingModal;
     setShowRatingModal(null);
+    if (assignedNextHappyActivity) {
+      const nextAct = assignedNextHappyActivity;
+      setAssignedNextHappyActivity(null);
+      handleStartSession(nextAct);
+      return;
+    }
     // Show the certificate even if they skip rating
     setRecentCertificate({
       childName: pending.childName,
@@ -378,6 +511,76 @@ export default function Activities({ user }) {
               }}>
                 {levelConfig.label} {levelConfig.emoji}
               </div>
+
+              {/* Student Profile (Heatmap & Streaks) Button */}
+              <button
+                className="bounce-btn"
+                onClick={() => setShowStudentProfileModal(true)}
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.25)",
+                  color: "#fff",
+                  border: "2px solid rgba(255, 255, 255, 0.6)",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontWeight: "900",
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                  backdropFilter: "blur(6px)",
+                  transition: "all 0.2s",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                }}
+              >
+                🔥 {language === "en" ? "Streaks & Heatmap" : "ಸಾಧನೆಯ ನಕ್ಷೆ"}
+              </button>
+
+              {/* Challenge Mode Button */}
+              <button
+                className="bounce-btn"
+                onClick={() => navigate("/challenge-mode")}
+                style={{
+                  background: "linear-gradient(135deg, #10b981, #059669)",
+                  color: "#fff",
+                  border: "2px solid rgba(255, 255, 255, 0.9)",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontWeight: "900",
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  boxShadow: "0 4px 14px rgba(16, 185, 129, 0.4)"
+                }}
+              >
+                🏆 {language === "en" ? "Challenge Mode" : "ಸವಾಲು ಮೋಡ್"}
+              </button>
+
+              {/* Mastery Exam Button */}
+              <button
+                className="bounce-btn"
+                onClick={() => setShowMasteryExamModal(true)}
+                style={{
+                  background: "linear-gradient(135deg, #f59e0b, #ef4444)",
+                  color: "#fff",
+                  border: "2px solid rgba(255, 255, 255, 0.8)",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontWeight: "900",
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  boxShadow: "0 4px 14px rgba(239, 68, 68, 0.4)"
+                }}
+              >
+                🎓 {language === "en" ? "Mastery Exam" : "ಅಂತಿಮ ಪರೀಕ್ಷೆ"}
+              </button>
 
               {/* Language Toggle */}
               <button
@@ -845,16 +1048,53 @@ export default function Activities({ user }) {
                     borderRadius: "14px",
                     padding: "10px 14px",
                     display: "flex",
-                    alignItems: "center",
+                    flexDirection: "column",
                     gap: "8px",
                     border: "1px solid #e5e7eb"
                   }}>
-                    <span style={{ fontSize: "0.78rem", fontWeight: "800", color: "#4b5563" }}>😊 Mood Radar:</span>
-                    <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "6px" }}>
-                      <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: EMOTIONS[currentEmotionIdx].color, boxShadow: `0 0 8px ${EMOTIONS[currentEmotionIdx].color}` }} />
-                      <span style={{ fontWeight: "900", color: EMOTIONS[currentEmotionIdx].color, fontSize: "0.85rem" }}>
-                        {currentEmotion ? `${currentEmotion}` : `${EMOTIONS[currentEmotionIdx].name}`}
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ fontSize: "0.78rem", fontWeight: "800", color: "#4b5563" }}>😊 Mood Radar:</span>
+                      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: EMOTIONS[currentEmotionIdx].color, boxShadow: `0 0 8px ${EMOTIONS[currentEmotionIdx].color}` }} />
+                        <span style={{ fontWeight: "900", color: EMOTIONS[currentEmotionIdx].color, fontSize: "0.85rem" }}>
+                          {currentEmotion ? `${currentEmotion}` : `${EMOTIONS[currentEmotionIdx].name}`}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Continuous Sad Detector Bar */}
+                    <div style={{
+                      background: sadSeconds > 0 ? "#fef2f2" : "#f0fdf4",
+                      border: sadSeconds > 0 ? "1px solid #fca5a5" : "1px solid #bbf7d0",
+                      borderRadius: "10px",
+                      padding: "6px 10px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      fontSize: "0.75rem",
+                      fontWeight: "800"
+                    }}>
+                      <span style={{ color: sadSeconds > 0 ? "#b91c1c" : "#15803d" }}>
+                        {sadSeconds > 0 ? `⏳ Sad Monitoring: ${sadSeconds}s / 60s` : "✅ Mood Steady"}
                       </span>
+                      <button
+                        onClick={() => {
+                          setSadSeconds(60);
+                          setShowFunnyBreakModal(true);
+                        }}
+                        style={{
+                          background: "#ef4444",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "8px",
+                          padding: "3px 8px",
+                          fontSize: "0.7rem",
+                          fontWeight: "800",
+                          cursor: "pointer"
+                        }}
+                      >
+                        🧪 Trigger 1-Min Sad Break
+                      </button>
                     </div>
                   </div>
 
@@ -969,9 +1209,13 @@ export default function Activities({ user }) {
         <ActivityRatingModal
           childId={showRatingModal.childId}
           childName={showRatingModal.childName}
+          childAge={showRatingModal.childAge}
+          childLevel={showRatingModal.childLevel}
           activityId={showRatingModal.activityId}
           activityTitle={showRatingModal.activityTitle}
           initialScore={showRatingModal.initialScore}
+          detectedEmotion={showRatingModal.detectedEmotion}
+          emotionConfidence={showRatingModal.emotionConfidence}
           onComplete={handleRatingComplete}
           onCancel={handleRatingSkip}
         />
@@ -986,6 +1230,171 @@ export default function Activities({ user }) {
           stars={recentCertificate.stars}
           onClose={() => setRecentCertificate(null)}
         />
+      )}
+
+      {showStudentProfileModal && (
+        <StudentProfileModal
+          open={showStudentProfileModal}
+          onClose={() => setShowStudentProfileModal(false)}
+          childId={child._id}
+          childName={child.name}
+          childAge={child.age}
+          childLevel={child.level}
+          xp={totalXP}
+        />
+      )}
+
+      {showMasteryExamModal && (
+        <MasteryExamModal
+          open={showMasteryExamModal}
+          onClose={() => setShowMasteryExamModal(false)}
+          childId={child._id}
+          childName={child.name}
+          childAge={child.age}
+          childLevel={child.level}
+        />
+      )}
+
+      {showFunnyBreakModal && (
+        <FunnyBreakModal
+          open={showFunnyBreakModal}
+          onClose={() => setShowFunnyBreakModal(false)}
+          childAge={child.age}
+          childLevel={child.level}
+          onCompleteFunnyBreak={handleCompleteFunnyBreak}
+          language={language}
+        />
+      )}
+
+      {/* ─── HAPPINESS GAMES OVERLAY (Emotion-Responsive Intervention) ─── */}
+      <HappinessGames
+        open={showHappinessOverlay}
+        onClose={(resolved) => {
+          setShowHappinessOverlay(false);
+          if (resolved) {
+            setCurrentEmotion("Happy");
+            setSadSeconds(0);
+          } else {
+            if (interventionCount >= 2) {
+              setSessionOverGently(true);
+              setActiveSession(null);
+            }
+          }
+        }}
+        triggerEmotion={happinessTriggerEmotion}
+        triggeredByScore={happinessScoreDrop}
+        childAge={child.age}
+        childName={child.name}
+        language={language}
+        onEmotionCheck={(gameId, resolved) => {
+          if (sessionEmotionLogRef.current) {
+            sessionEmotionLogRef.current.closeIntervention(0, resolved);
+          }
+        }}
+      />
+
+      {/* Gentle Session Over Modal if 2 interventions fail */}
+      {sessionOverGently && (
+        <div style={{
+          position: "fixed", inset: 0,
+          background: "rgba(15, 23, 42, 0.8)",
+          backdropFilter: "blur(8px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 99999, padding: "20px"
+        }}>
+          <div style={{
+            background: "#ffffff", borderRadius: "28px", padding: "36px",
+            maxWidth: "460px", width: "100%", textAlign: "center",
+            boxShadow: "0 25px 60px rgba(0,0,0,0.3)"
+          }}>
+            <div style={{ fontSize: "4.5rem", marginBottom: "12px" }}>🌟</div>
+            <h2 style={{ fontSize: "1.6rem", fontWeight: "900", color: "#1e1b4b", margin: "0 0 10px" }}>
+              {language === "kn" ? "ಅದ್ಭುತ ಪ್ರಯತ್ನ!" : "Great Effort Today!"}
+            </h2>
+            <p style={{ color: "#475569", fontSize: "1.05rem", lineHeight: "1.6", marginBottom: "24px" }}>
+              {language === "kn"
+                ? "ನೀವು ಇಂದು ತುಂಬಾ ಕಷ್ಟಪಟ್ಟು ಆಡಿದ್ದೀರಿ! ಸ್ವಲ್ಪ ವಿಶ್ರಾಂತಿ ಪಡೆಯೋಣ ಮತ್ತು ನಾಳೆ ಮತ್ತೆ ಹೊಸ ಆಟಗಳನ್ನು ಆಡೋಣ!"
+                : "You did wonderful practice today! Let us rest and try again tomorrow! 😊"}
+            </p>
+            <button
+              onClick={() => setSessionOverGently(false)}
+              style={{
+                background: "linear-gradient(135deg, #10b981, #059669)",
+                color: "#fff", border: "none", padding: "14px 32px",
+                borderRadius: "20px", fontWeight: "900", fontSize: "1rem",
+                cursor: "pointer", boxShadow: "0 6px 18px rgba(16,185,129,0.4)"
+              }}
+            >
+              {language === "kn" ? "ಖಂಡಿತ! ನಾಳೆ ಭೇಟಿಯಾಗೋಣ 🌟" : "See You Tomorrow! 🌟"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── CHALLENGE MODE UNLOCKED MODAL (7-Day Streak Trigger) ─── */}
+      {showExamPrompt && (
+        <div style={{
+          position: "fixed", inset: 0,
+          background: "rgba(15, 23, 42, 0.8)",
+          backdropFilter: "blur(10px)",
+          display: "flex", alignItems: "center",
+          justifyContent: "center", zIndex: 99999,
+          padding: "20px"
+        }}>
+          <div style={{
+            background: "linear-gradient(145deg, #ffffff 0%, #fdf4ff 50%, #eff6ff 100%)",
+            borderRadius: "32px",
+            padding: "36px 30px", maxWidth: "520px", width: "100%",
+            textAlign: "center",
+            boxShadow: "0 25px 60px rgba(79, 70, 229, 0.35)",
+            border: "3px solid #f59e0b"
+          }}>
+            <div style={{ fontSize: "4.5rem", marginBottom: "8px" }}>🏆</div>
+            <div style={{
+              background: "linear-gradient(90deg, #f59e0b, #ef4444)",
+              color: "#fff", padding: "6px 20px", borderRadius: "99px",
+              fontWeight: 900, fontSize: "0.95rem", display: "inline-block",
+              marginBottom: "14px"
+            }}>
+              {language === "kn" ? "ಸವಾಲು ದಿನ ಪ್ರಾರಂಭವಾಗಿದೆ!" : "🏆 CHALLENGE MODE UNLOCKED!"}
+            </div>
+            <h2 style={{ margin: "0 0 10px", fontSize: "1.6rem", color: "#1e1b4b", fontWeight: "900" }}>
+              {language === "kn" ? "ನೀವು 7 ದಿನಗಳಿಂದ ತರಬೇತಿ ಪಡೆದಿದ್ದೀರಿ!" : "You have been practicing for 7 days!"}
+            </h2>
+            <p style={{ color: "#475569", fontSize: "1.05rem", lineHeight: "1.6", marginBottom: "24px", whiteSpace: "pre-line" }}>
+              {language === "kn"
+                ? "ನಿಮ್ಮ ಸೂಪರ್‌ಹೀರೋ ಶಕ್ತಿಗಳನ್ನು ತೋರಿಸುವ ಸಮಯ ಬಂದಿದೆ!\n5 ಚಾಲೆಂಜ್ ಆಟಗಳು ನಿಮಗಾಗಿ ಕಾಯುತ್ತಿವೆ!\nಎಲ್ಲವನ್ನೂ ಗೆಲ್ಲಲು ಸಿದ್ಧರೇ?"
+                : "Time to show your superpowers!\n5 Challenge Games await you!\nCan you beat them all?"}
+            </p>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+              <button
+                onClick={() => {
+                  setShowExamPrompt(false);
+                  navigate("/challenge-mode");
+                }}
+                style={{
+                  background: "linear-gradient(135deg, #10b981, #059669)",
+                  color: "#fff", border: "none", borderRadius: "22px",
+                  padding: "16px 32px", fontWeight: "900", fontSize: "1.1rem",
+                  cursor: "pointer", boxShadow: "0 8px 24px rgba(16,185,129,0.45)"
+                }}
+              >
+                {language === "kn" ? "ಸವಾಲು ಸ್ವೀಕರಿಸಿ! →" : "Accept Challenge! →"}
+              </button>
+              <button
+                onClick={() => setShowExamPrompt(false)}
+                style={{
+                  background: "#f1f5f9", color: "#64748b",
+                  border: "1px solid #cbd5e1", borderRadius: "22px",
+                  padding: "16px 24px", fontWeight: "700", fontSize: "1rem",
+                  cursor: "pointer"
+                }}
+              >
+                {language === "kn" ? "ನಂತರ ಆಡುವೆ" : "Play Later"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

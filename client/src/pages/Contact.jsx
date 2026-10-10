@@ -209,27 +209,91 @@ function ContactBody() {
             </h3>
 
             <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
-              {[
-                { icon:"✉️", label: t("contact_email_label"), value:"autismassistant0@gmail.com" },
-                { icon:"⏰", label: t("contact_hours_label"), value: t("contact_hours_val") },
-                { icon:"📍", label:"Location", value:"Bangalore, Karnataka, India" },
-              ].map((item, i) => (
-                <div key={i} style={{ display:"flex", gap:14, alignItems:"flex-start" }}>
-                  <div style={{
-                    width:42, height:42, borderRadius:10,
-                    background:"var(--primary-light)", display:"flex",
-                    alignItems:"center", justifyContent:"center", fontSize:"1.1rem", flexShrink:0,
-                  }}>
-                    {item.icon}
+              <div style={{ display:"flex", gap:14, alignItems:"flex-start" }}>
+                <div style={{
+                  width:42, height:42, borderRadius:10,
+                  background:"var(--primary-light)", display:"flex",
+                  alignItems:"center", justifyContent:"center", fontSize:"1.1rem", flexShrink:0,
+                }}>
+                  ✉️
+                </div>
+                <div>
+                  <div style={{ fontSize:".78rem", fontWeight:700, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:".8px", marginBottom:3 }}>
+                    {t("contact_email_label")}
                   </div>
-                  <div>
-                    <div style={{ fontSize:".78rem", fontWeight:700, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:".8px", marginBottom:3 }}>
-                      {item.label}
-                    </div>
-                    <div style={{ fontWeight:600, color:"var(--text)", fontSize:".95rem" }}>{item.value}</div>
+                  <a
+                    href="mailto:autismassistant0@gmail.com"
+                    style={{ fontWeight:700, color:"var(--primary)", fontSize:".95rem", textDecoration:"none" }}
+                  >
+                    autismassistant0@gmail.com
+                  </a>
+                </div>
+              </div>
+
+              <div style={{ display:"flex", gap:14, alignItems:"flex-start" }}>
+                <div style={{
+                  width:42, height:42, borderRadius:10,
+                  background:"var(--primary-light)", display:"flex",
+                  alignItems:"center", justifyContent:"center", fontSize:"1.1rem", flexShrink:0,
+                }}>
+                  📞
+                </div>
+                <div>
+                  <div style={{ fontSize:".78rem", fontWeight:700, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:".8px", marginBottom:6 }}>
+                    Direct Support Helpline
+                  </div>
+                  <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+                    {[
+                      { num: "8792008746", label: "+91 87920 08746" },
+                      { num: "8310665702", label: "+91 83106 65702" },
+                      { num: "8050132187", label: "+91 80501 32187" },
+                      { num: "8830264796", label: "+91 88302 64796" },
+                    ].map((p, idx) => (
+                      <a
+                        key={idx}
+                        href={`tel:${p.num}`}
+                        style={{ fontWeight:600, color:"var(--text)", fontSize:".92rem", textDecoration:"none" }}
+                        onMouseEnter={e => e.currentTarget.style.color = "var(--primary)"}
+                        onMouseLeave={e => e.currentTarget.style.color = "var(--text)"}
+                      >
+                        {p.label}
+                      </a>
+                    ))}
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div style={{ display:"flex", gap:14, alignItems:"flex-start" }}>
+                <div style={{
+                  width:42, height:42, borderRadius:10,
+                  background:"var(--primary-light)", display:"flex",
+                  alignItems:"center", justifyContent:"center", fontSize:"1.1rem", flexShrink:0,
+                }}>
+                  ⏰
+                </div>
+                <div>
+                  <div style={{ fontSize:".78rem", fontWeight:700, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:".8px", marginBottom:3 }}>
+                    {t("contact_hours_label")}
+                  </div>
+                  <div style={{ fontWeight:600, color:"var(--text)", fontSize:".95rem" }}>{t("contact_hours_val")}</div>
+                </div>
+              </div>
+
+              <div style={{ display:"flex", gap:14, alignItems:"flex-start" }}>
+                <div style={{
+                  width:42, height:42, borderRadius:10,
+                  background:"var(--primary-light)", display:"flex",
+                  alignItems:"center", justifyContent:"center", fontSize:"1.1rem", flexShrink:0,
+                }}>
+                  📍
+                </div>
+                <div>
+                  <div style={{ fontSize:".78rem", fontWeight:700, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:".8px", marginBottom:3 }}>
+                    Location
+                  </div>
+                  <div style={{ fontWeight:600, color:"var(--text)", fontSize:".95rem" }}>Bangalore, Karnataka, India</div>
+                </div>
+              </div>
             </div>
           </div>
 

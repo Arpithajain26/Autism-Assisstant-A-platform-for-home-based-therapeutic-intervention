@@ -40,7 +40,7 @@ const Login = () => {
           }}>🧩</div>
           <h1 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '4px' }}>Welcome Back</h1>
           <p style={{ color: 'var(--text-light)', fontSize: '0.95rem' }}>
-            Log in to your parent dashboard
+            Log in to your account
           </p>
         </div>
 

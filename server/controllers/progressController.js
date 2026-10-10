@@ -175,3 +175,59 @@ exports.getWeeklyTrend = async (req, res) => {
     res.status(500).json({ error: err.message || 'Failed to compute weekly trend' });
   }
 };
+
+// @desc    Get friendly community leaderboard & child ranking
+// @route   GET /api/progress/leaderboard
+exports.getLeaderboard = async (req, res) => {
+  try {
+    const { childId } = req.query;
+    const children = await Child.find().select('name age level streak completedActivities profilePhoto').lean();
+
+    // Compute XP and stats for each child
+    const scoredKids = children.map(c => {
+      const activitiesDone = (c.completedActivities?.length || 0);
+      const streakDays = c.streak || 0;
+      // XP formula: base 100 for enrollment + 50 per completed activity + 30 per streak day
+      const xp = 100 + (activitiesDone * 50) + (streakDays * 30);
+      return {
+        _id: c._id,
+        name: c.name || "Student",
+        age: c.age || 5,
+        level: c.level || 1,
+        activitiesDone,
+        streak: streakDays,
+        xp,
+        profilePhoto: c.profilePhoto || null,
+        badgeTitle: xp >= 500 ? "Super Champion 🏆" : xp >= 300 ? "Star Explorer 🌟" : xp >= 150 ? "Rising Star 🚀" : "Enrolled Hero 🌱"
+      };
+    });
+
+    // Sort descending by XP
+    scoredKids.sort((a, b) => b.xp - a.xp);
+
+    // Assign rank
+    const leaderboard = scoredKids.map((k, idx) => ({
+      ...k,
+      rank: idx + 1
+    }));
+
+    // Find current child's rank if provided
+    let currentChildRank = null;
+    if (childId) {
+      const found = leaderboard.find(k => String(k._id) === String(childId));
+      if (found) {
+        currentChildRank = found;
+      }
+    }
+
+    res.json({
+      leaderboard: leaderboard.slice(0, 20),
+      totalParticipants: leaderboard.length,
+      currentChildRank: currentChildRank || (leaderboard.length > 0 ? leaderboard[0] : null)
+    });
+  } catch (err) {
+    console.error("Leaderboard error:", err);
+    res.status(500).json({ error: "Failed to load leaderboard" });
+  }
+};
+
