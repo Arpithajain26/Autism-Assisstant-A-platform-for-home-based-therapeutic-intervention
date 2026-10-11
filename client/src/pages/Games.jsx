@@ -3466,6 +3466,529 @@ function GameRelaxationZenStones({ age, lang, onComplete }) {
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+// RELAXATION GAME 5: Cosmic Star Jar 🫙✨ (Deep Calming & Starlight Swirls)
+// ─────────────────────────────────────────────────────────────
+function GameCosmicStarJar({ age, lang, onComplete }) {
+  const [stars, setStars] = useState([
+    { id: 1, x: 50, y: 50, color: "#38bdf8", size: 28, glow: "#0284c7", pulse: 1.2 },
+    { id: 2, x: 35, y: 40, color: "#f472b6", size: 24, glow: "#db2777", pulse: 1.1 },
+    { id: 3, x: 65, y: 60, color: "#facc15", size: 26, glow: "#ca8a04", pulse: 1.3 },
+  ]);
+  const [swirlPhase, setSwirlPhase] = useState(0);
+  const [jarGlow, setJarGlow] = useState(false);
+  const [finished, setFinished] = useState(false);
+
+  // Gentle swirling animation
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSwirlPhase(p => (p + 1) % 360);
+    }, 50);
+    return () => clearInterval(timer);
+  }, []);
+
+  const addStar = (e) => {
+    if (finished) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.max(15, Math.min(85, ((e.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(20, Math.min(80, ((e.clientY - rect.top) / rect.height) * 100));
+
+    const starPalettes = [
+      { color: "#a78bfa", glow: "#7c3aed" },
+      { color: "#34d399", glow: "#059669" },
+      { color: "#38bdf8", glow: "#0284c7" },
+      { color: "#fb7185", glow: "#e11d48" },
+      { color: "#fde047", glow: "#eab308" },
+    ];
+    const picked = starPalettes[Math.floor(Math.random() * starPalettes.length)];
+
+    playSound("chime");
+    const newStar = {
+      id: Date.now() + Math.random(),
+      x,
+      y,
+      color: picked.color,
+      size: Math.floor(Math.random() * 12) + 20,
+      glow: picked.glow,
+      pulse: 1.0 + Math.random() * 0.4
+    };
+
+    setStars(prev => {
+      const updated = [...prev, newStar];
+      if (updated.length >= 10 && !finished) {
+        setFinished(true);
+        setJarGlow(true);
+        playSound("win");
+        setTimeout(() => onComplete(3, "Calm & Happy"), 1800);
+      }
+      return updated;
+    });
+  };
+
+  const shakeJar = () => {
+    playSound("calm");
+    setStars(prev => prev.map(s => ({
+      ...s,
+      x: Math.max(18, Math.min(82, s.x + (Math.random() * 26 - 13))),
+      y: Math.max(22, Math.min(78, s.y + (Math.random() * 26 - 13)))
+    })));
+  };
+
+  return (
+    <div style={{
+      textAlign: "center",
+      padding: "24px",
+      background: "radial-gradient(circle at 50% 40%, #0f172a 0%, #020617 100%)",
+      borderRadius: "28px",
+      color: "white",
+      maxWidth: "680px",
+      margin: "0 auto",
+      boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
+      border: "1px solid rgba(56, 189, 248, 0.2)"
+    }}>
+      <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(56, 189, 248, 0.15)", border: "1px solid #38bdf8", padding: "6px 18px", borderRadius: "999px", marginBottom: "12px", color: "#7dd3fc", fontWeight: "800", fontSize: "0.85rem" }}>
+        <span>🫙✨</span>
+        <span>{lang === "en" ? "Gentle Starlight Sensory Jar" : "ಶಾಂತ ನಕ್ಷತ್ರ ಬೆಳಕಿನ ಜಾಡಿ"}</span>
+      </div>
+
+      <h2 style={{ fontSize: "1.6rem", fontWeight: "900", margin: "6px 0 10px", background: "linear-gradient(to right, #7dd3fc, #c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+        {lang === "en" ? "Cosmic Star Jar" : "ಕಾಸ್ಮಿಕ್ ನಕ್ಷತ್ರ ಜಾಡಿ"}
+      </h2>
+      <p style={{ color: "#94a3b8", fontSize: "0.95rem", maxWidth: "520px", margin: "0 auto 16px" }}>
+        {lang === "en"
+          ? "Tap inside the jar to catch glowing wishing stars! Listen to the soothing chime and watch the gentle starlight dance."
+          : "ಹೊಳೆಯುವ ನಕ್ಷತ್ರಗಳನ್ನು ಹಿಡಿಯಲು ಜಾಡಿಯೊಳಗೆ ಮುಟ್ಟಿ! ಶಾಂತ ಸಂಗೀತವನ್ನು ಆನಂದಿಸಿ."}
+      </p>
+
+      {/* The Cosmic Glass Jar */}
+      <div
+        onClick={addStar}
+        style={{
+          position: "relative",
+          width: "300px",
+          height: "380px",
+          margin: "0 auto 20px",
+          background: "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(56,189,248,0.12) 100%)",
+          borderRadius: "60px 60px 80px 80px",
+          border: jarGlow ? "4px solid #facc15" : "3px solid rgba(148, 163, 184, 0.4)",
+          boxShadow: jarGlow ? "0 0 50px rgba(250, 204, 21, 0.5), inset 0 0 30px rgba(56, 189, 248, 0.4)" : "0 15px 40px rgba(0,0,0,0.5), inset 0 0 25px rgba(255,255,255,0.05)",
+          cursor: "pointer",
+          overflow: "hidden",
+          backdropFilter: "blur(4px)",
+          transition: "all 0.5s ease"
+        }}
+      >
+        {/* Jar Lid / Rim */}
+        <div style={{
+          position: "absolute",
+          top: "0",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "160px",
+          height: "24px",
+          background: "linear-gradient(90deg, #64748b, #cbd5e1, #64748b)",
+          borderRadius: "0 0 16px 16px",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+          zIndex: 5
+        }} />
+
+        {/* Stars floating inside */}
+        {stars.map((s, idx) => {
+          const wobbleX = Math.sin((swirlPhase + idx * 30) * Math.PI / 180) * 8;
+          const wobbleY = Math.cos((swirlPhase + idx * 30) * Math.PI / 180) * 8;
+          return (
+            <div
+              key={s.id}
+              style={{
+                position: "absolute",
+                left: `${s.x}%`,
+                top: `${s.y}%`,
+                transform: `translate(-50%, -50%) translate(${wobbleX}px, ${wobbleY}px)`,
+                fontSize: `${s.size}px`,
+                filter: `drop-shadow(0 0 12px ${s.glow})`,
+                transition: "transform 0.1s linear",
+                userSelect: "none"
+              }}
+            >
+              ⭐
+            </div>
+          );
+        })}
+
+        {/* Jar Glow & Instruction prompt */}
+        <div style={{
+          position: "absolute",
+          bottom: "16px",
+          left: "0",
+          right: "0",
+          fontSize: "0.82rem",
+          color: "#94a3b8",
+          fontWeight: "700",
+          pointerEvents: "none"
+        }}>
+          {finished
+            ? (lang === "en" ? "🌟 Full of Warmth & Peace! 🌟" : "🌟 ಶಾಂತಿಯಿಂದ ತುಂಬಿದೆ! 🌟")
+            : (lang === "en" ? `✨ ${stars.length}/10 Stars Collected ✨` : `✨ ${stars.length}/10 ನಕ್ಷತ್ರಗಳು ✨`)}
+        </div>
+      </div>
+
+      {/* Control Buttons */}
+      <div style={{ display: "flex", justifyContent: "center", gap: "12px", flexWrap: "wrap" }}>
+        <button
+          onClick={shakeJar}
+          style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            color: "white",
+            padding: "10px 20px",
+            borderRadius: "16px",
+            fontWeight: "700",
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            transition: "all 0.2s"
+          }}
+        >
+          <span>🌀</span>
+          <span>{lang === "en" ? "Gentle Swirl" : "ಶಾಂತ ತಿರುವು"}</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// RELAXATION GAME 6: Magic Rain Garden 🌧️🌱 (Soothing Soundscape & Raindrops)
+// ─────────────────────────────────────────────────────────────
+function GameMagicRainGarden({ age, lang, onComplete }) {
+  const [drops, setDrops] = useState([]);
+  const [sprouts, setSprouts] = useState([
+    { id: 1, type: "🌱", stage: 1, x: 20 },
+    { id: 2, type: "🌿", stage: 1, x: 50 },
+    { id: 3, type: "🌸", stage: 1, x: 80 },
+  ]);
+  const [wateredCount, setWateredCount] = useState(0);
+  const [isDone, setIsDone] = useState(false);
+
+  const plantEvolutions = {
+    "🌱": ["🌱", "🌿", "🌻", "🌟🌻"],
+    "🌿": ["🌿", "🍃", "🌷", "✨🌷"],
+    "🌸": ["🌱", "🌸", "🌺", "🌈🌺"]
+  };
+
+  const addRaindrop = (e) => {
+    if (isDone) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    playSound("pop");
+    const newDrop = { id: Date.now() + Math.random(), x, y };
+    setDrops(prev => [...prev.slice(-8), newDrop]);
+
+    // Water closest plant
+    setSprouts(prev => prev.map(p => {
+      if (Math.abs(p.x - x) < 25) {
+        return { ...p, stage: Math.min(3, p.stage + 1) };
+      }
+      return p;
+    }));
+
+    setWateredCount(c => {
+      const next = c + 1;
+      if (next >= 8 && !isDone) {
+        setIsDone(true);
+        playSound("chime");
+        setTimeout(() => onComplete(3, "Peaceful & Refreshed"), 1700);
+      }
+      return next;
+    });
+  };
+
+  return (
+    <div style={{
+      textAlign: "center",
+      padding: "24px",
+      background: "linear-gradient(180deg, #1e293b 0%, #064e3b 100%)",
+      borderRadius: "28px",
+      color: "white",
+      maxWidth: "680px",
+      margin: "0 auto",
+      boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
+      border: "1px solid rgba(52, 211, 153, 0.2)"
+    }}>
+      <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(52, 211, 153, 0.15)", border: "1px solid #34d399", padding: "6px 18px", borderRadius: "999px", marginBottom: "12px", color: "#6ee7b7", fontWeight: "800", fontSize: "0.85rem" }}>
+        <span>🌧️🌱</span>
+        <span>{lang === "en" ? "Mindful Rain & Bloom" : "ಶಾಂತ ಮಳೆ ಮತ್ತು ಚಿಗುರು"}</span>
+      </div>
+
+      <h2 style={{ fontSize: "1.6rem", fontWeight: "900", margin: "6px 0 10px", background: "linear-gradient(to right, #6ee7b7, #38bdf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+        {lang === "en" ? "The Magic Rain Garden" : "ಮಾಯಾ ಮಳೆ ಉದ್ಯಾನ"}
+      </h2>
+      <p style={{ color: "#cbd5e1", fontSize: "0.95rem", maxWidth: "520px", margin: "0 auto 16px" }}>
+        {lang === "en"
+          ? "Tap anywhere in the sky to make soft raindrops fall. Water each sleepy seed and watch beautiful rainbow flowers bloom!"
+          : "ಮಳೆ ಹನಿಗಳನ್ನು ಬಿಡಲು ಆಕಾಶದಲ್ಲಿ ಮುಟ್ಟಿ. ಗಿಡಗಳು ಸುಂದರವಾಗಿ ಅರಳುವುದನ್ನು ನೋಡಿ."}
+      </p>
+
+      {/* Interactive Rain Meadow */}
+      <div
+        onClick={addRaindrop}
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "320px",
+          background: "linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(20, 83, 45, 0.7) 80%, #064e3b 100%)",
+          borderRadius: "24px",
+          border: "2px solid rgba(52, 211, 153, 0.3)",
+          overflow: "hidden",
+          cursor: "pointer",
+          margin: "0 auto 16px",
+          boxShadow: "inset 0 0 30px rgba(0,0,0,0.4)"
+        }}
+      >
+        {/* Soft rain clouds */}
+        <div style={{ position: "absolute", top: "10px", left: "15%", fontSize: "3rem", opacity: 0.85 }}>☁️</div>
+        <div style={{ position: "absolute", top: "5px", left: "55%", fontSize: "3.5rem", opacity: 0.85 }}>🌧️</div>
+
+        {/* Falling animated raindrops */}
+        {drops.map(d => (
+          <div
+            key={d.id}
+            style={{
+              position: "absolute",
+              left: `${d.x}%`,
+              top: `${d.y}%`,
+              transform: "translate(-50%, -50%)",
+              fontSize: "1.8rem",
+              animation: "fall 1.2s ease-out forwards",
+              pointerEvents: "none"
+            }}
+          >
+            💧
+          </div>
+        ))}
+
+        {/* Soil & Growing Plants */}
+        <div style={{
+          position: "absolute",
+          bottom: "0",
+          left: "0",
+          right: "0",
+          height: "90px",
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "flex-end",
+          paddingBottom: "16px",
+          borderTop: "3px dashed rgba(52, 211, 153, 0.3)"
+        }}>
+          {sprouts.map(p => {
+            const icons = plantEvolutions[p.type] || ["🌱", "🌿", "🌸", "🌻"];
+            const currentIcon = icons[Math.min(p.stage, icons.length - 1)];
+            return (
+              <div
+                key={p.id}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "4px",
+                  transform: `scale(${1 + p.stage * 0.25})`,
+                  transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)"
+                }}
+              >
+                <span style={{ fontSize: "2.4rem", filter: p.stage >= 3 ? "drop-shadow(0 0 12px #34d399)" : "none" }}>
+                  {currentIcon}
+                </span>
+                <span style={{ fontSize: "0.72rem", color: "#86efac", fontWeight: "800" }}>
+                  {p.stage >= 3 ? "Fully Bloomed! 🌸" : "Growing..."}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ color: "#86efac", fontWeight: "700", fontSize: "0.9rem" }}>
+        {isDone
+          ? (lang === "en" ? "🌸 The Whole Garden is Smiling & Peaceful! 🌸" : "🌸 ಇಡೀ ಉದ್ಯಾನವು ನಗುತ್ತಿದೆ ಮತ್ತು ಶಾಂತವಾಗಿದೆ! 🌸")
+          : (lang === "en" ? `💧 ${wateredCount}/8 Drops Given — Tap the clouds to rain!` : `💧 ${wateredCount}/8 ಹನಿಗಳು — ಮಳೆ ಸುರಿಸಲು ಮುಟ್ಟಿ!`)}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// RELAXATION GAME 7: Floating Glow Lanterns 🏮🌊 (Night River of Wishes)
+// ─────────────────────────────────────────────────────────────
+function GameFloatingLanterns({ age, lang, onComplete }) {
+  const [lanterns, setLanterns] = useState([
+    { id: 1, x: 25, y: 65, color: "#f97316", text: "Peace 🕊️", textKn: "ಶಾಂತಿ 🕊️" },
+    { id: 2, x: 70, y: 72, color: "#ec4899", text: "Joy 💖", textKn: "ಸಂತೋಷ 💖" },
+  ]);
+  const [wishInput, setWishInput] = useState("");
+  const [completed, setCompleted] = useState(false);
+
+  const presetWishes = [
+    { text: "Love & Hugs 🧸", textKn: "ಪ್ರೀತಿ ಮತ್ತು ಅಪ್ಪುಗೆ 🧸", color: "#f43f5e" },
+    { text: "Calm Mind 🌿", textKn: "ಶಾಂತ ಮನಸ್ಸು 🌿", color: "#10b981" },
+    { text: "Big Smiles 😊", textKn: "ದೊಡ್ಡ ನಗು 😊", color: "#f59e0b" },
+    { text: "Sweet Dreams 🌙", textKn: "ಸಿಹಿ ಕನಸುಗಳು 🌙", color: "#8b5cf6" },
+  ];
+
+  const releaseLantern = (wish) => {
+    if (completed) return;
+    playSound("calm");
+    const newLantern = {
+      id: Date.now() + Math.random(),
+      x: 20 + Math.random() * 60,
+      y: 75,
+      color: wish.color,
+      text: wish.text,
+      textKn: wish.textKn
+    };
+
+    setLanterns(prev => {
+      const next = [...prev, newLantern];
+      if (next.length >= 6 && !completed) {
+        setCompleted(true);
+        playSound("win");
+        setTimeout(() => onComplete(3, "Happy & Joyful"), 1800);
+      }
+      return next;
+    });
+  };
+
+  return (
+    <div style={{
+      textAlign: "center",
+      padding: "24px",
+      background: "radial-gradient(ellipse at 50% 80%, #0c1829 0%, #030712 100%)",
+      borderRadius: "28px",
+      color: "white",
+      maxWidth: "680px",
+      margin: "0 auto",
+      boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
+      border: "1px solid rgba(249, 115, 22, 0.2)"
+    }}>
+      <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(249, 115, 22, 0.15)", border: "1px solid #f97316", padding: "6px 18px", borderRadius: "999px", marginBottom: "12px", color: "#fdba74", fontWeight: "800", fontSize: "0.85rem" }}>
+        <span>🏮🌊</span>
+        <span>{lang === "en" ? "Gentle River of Light" : "ಶಾಂತ ಬೆಳಕಿನ ನದಿ"}</span>
+      </div>
+
+      <h2 style={{ fontSize: "1.6rem", fontWeight: "900", margin: "6px 0 10px", background: "linear-gradient(to right, #fdba74, #f472b6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+        {lang === "en" ? "Floating Glow Lanterns" : "ತೇಲುವ ದೀಪಗಳು"}
+      </h2>
+      <p style={{ color: "#94a3b8", fontSize: "0.95rem", maxWidth: "520px", margin: "0 auto 16px" }}>
+        {lang === "en"
+          ? "Choose a peaceful wish to light a warm paper lantern. Watch it float serenely down the river under the starlit sky."
+          : "ಬೆಳಕಿನ ದೀಪವನ್ನು ಹಚ್ಚಲು ಒಂದು ಒಳ್ಳೆಯ ಹಾರೈಕೆಯನ್ನು ಆರಿಸಿ. ಅದು ನದಿಯಲ್ಲಿ ತೇಲುವುದನ್ನು ನೋಡಿ."}
+      </p>
+
+      {/* River Canvas */}
+      <div style={{
+        position: "relative",
+        width: "100%",
+        height: "300px",
+        background: "linear-gradient(180deg, #091322 0%, #0d213a 45%, #073b61 75%, #031c30 100%)",
+        borderRadius: "24px",
+        border: "2px solid rgba(253, 186, 116, 0.3)",
+        overflow: "hidden",
+        margin: "0 auto 18px",
+        boxShadow: "inset 0 0 40px rgba(0,0,0,0.6)"
+      }}>
+        {/* Distant Moon */}
+        <div style={{
+          position: "absolute",
+          top: "20px",
+          right: "40px",
+          fontSize: "2.8rem",
+          filter: "drop-shadow(0 0 20px rgba(254, 240, 138, 0.8))"
+        }}>
+          🌕
+        </div>
+
+        {/* Floating Lanterns drifting upstream */}
+        {lanterns.map((l, idx) => (
+          <div
+            key={l.id}
+            style={{
+              position: "absolute",
+              left: `${l.x}%`,
+              bottom: `${15 + (idx % 4) * 14}%`,
+              transform: "translateX(-50%)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              animation: "bounceGently 3s ease-in-out infinite",
+              animationDelay: `${idx * 0.4}s`,
+              transition: "all 1s ease"
+            }}
+          >
+            <div style={{
+              fontSize: "2.4rem",
+              filter: `drop-shadow(0 0 16px ${l.color})`
+            }}>
+              🏮
+            </div>
+            <div style={{
+              background: "rgba(0,0,0,0.7)",
+              border: `1px solid ${l.color}`,
+              padding: "2px 8px",
+              borderRadius: "10px",
+              fontSize: "0.72rem",
+              color: "#fef08a",
+              fontWeight: "700",
+              whiteSpace: "nowrap"
+            }}>
+              {lang === "en" ? l.text : l.textKn}
+            </div>
+            {/* Water reflection */}
+            <div style={{
+              width: "28px",
+              height: "4px",
+              background: l.color,
+              opacity: 0.35,
+              borderRadius: "50%",
+              marginTop: "4px",
+              filter: "blur(2px)"
+            }} />
+          </div>
+        ))}
+      </div>
+
+      {/* Preset Wish Selection */}
+      <div style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap" }}>
+        {presetWishes.map((w, idx) => (
+          <button
+            key={idx}
+            onClick={() => releaseLantern(w)}
+            style={{
+              background: "rgba(255, 255, 255, 0.08)",
+              border: `1.5px solid ${w.color}`,
+              color: "white",
+              padding: "10px 16px",
+              borderRadius: "16px",
+              fontWeight: "700",
+              fontSize: "0.88rem",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              transition: "transform 0.15s, background 0.15s",
+              boxShadow: `0 4px 15px ${w.color}25`
+            }}
+          >
+            <span>🏮</span>
+            <span>{lang === "en" ? w.text : w.textKn}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────────────────────────
    Launcher Core Component
    ───────────────────────────────────────────────────────────── */
@@ -3612,6 +4135,54 @@ export default function Games({ user }) {
       isRelaxationGame: true,
       isMoralGame: true,
       ageLabel: "🌱 All Ages & Levels",
+    },
+    {
+      id: "r5",
+      level: 1,
+      targetAgeGroup: "All",
+      title: "Cosmic Star Jar",
+      titleKn: "ಕಾಸ್ಮಿಕ್ ನಕ್ಷತ್ರ ಜಾಡಿ",
+      category: "Relaxation & Moral",
+      icon: "🫙",
+      component: GameCosmicStarJar,
+      difficulty: 1,
+      moral: "Quiet moments fill our hearts with glowing light. Each calm breath is a shining star of peace! ✨",
+      moralKn: "ಶಾಂತ ಕ್ಷಣಗಳು ನಮ್ಮ ಹೃದಯವನ್ನು ಬೆಳಕಿನಿಂದ ತುಂಬುತ್ತವೆ. ಪ್ರತಿ ಉಸಿರಾಟವೂ ಶಾಂತಿಯ ನಕ್ಷತ್ರ! ✨",
+      isRelaxationGame: true,
+      isMoralGame: true,
+      ageLabel: "✨ Sensory & Chill (All Ages)",
+    },
+    {
+      id: "r6",
+      level: 1,
+      targetAgeGroup: "All",
+      title: "The Magic Rain Garden",
+      titleKn: "ಮಾಯಾ ಮಳೆ ಉದ್ಯಾನ",
+      category: "Relaxation & Moral",
+      icon: "🌧️",
+      component: GameMagicRainGarden,
+      difficulty: 1,
+      moral: "Just like rain helps little seeds blossom into flowers, gentle patience helps us grow strong and happy! 🌸",
+      moralKn: "ಮಳೆಯು ಹೂವುಗಳನ್ನು ಅರಳಿಸುವಂತೆ, ತಾಳ್ಮೆಯು ನಮ್ಮನ್ನು ಸಂತೋಷವಾಗಿ ಬೆಳೆಸುತ್ತದೆ! 🌸",
+      isRelaxationGame: true,
+      isMoralGame: true,
+      ageLabel: "🌱 Sensory & Chill (All Ages)",
+    },
+    {
+      id: "r7",
+      level: 2,
+      targetAgeGroup: "All",
+      title: "Floating Glow Lanterns",
+      titleKn: "ತೇಲುವ ದೀಪಗಳು",
+      category: "Relaxation & Moral",
+      icon: "🏮",
+      component: GameFloatingLanterns,
+      difficulty: 1,
+      moral: "Sending kind wishes out into the world fills the night with warm glow and brings peaceful joy to our hearts! 🌙",
+      moralKn: "ಜಗತ್ತಿಗೆ ಒಳ್ಳೆಯ ಹಾರೈಕೆಗಳನ್ನು ಕಳುಹಿಸುವುದು ನಮ್ಮ ಹೃದಯದಲ್ಲಿ ಶಾಂತಿ ಮತ್ತು ಸಂತೋಷವನ್ನು ತರುತ್ತದೆ! 🌙",
+      isRelaxationGame: true,
+      isMoralGame: true,
+      ageLabel: "🏮 Sensory & Chill (All Ages)",
     },
 
     // 🌟 Special Moral & Values Story Games (Age & Level Adapted)
@@ -3766,7 +4337,7 @@ export default function Games({ user }) {
             const isActive = activeLevel === level;
             let tabLabel = "⭐ Show All";
             if (level === "Relaxation") {
-              tabLabel = "🧘 Relaxation & Calm (4 Games)";
+              tabLabel = "🧘 Relaxation & Calm (7 Games)";
             } else if (level === "Moral") {
               tabLabel = "🌟 Moral & Values Stories";
             } else if (level.startsWith("Level ")) {
