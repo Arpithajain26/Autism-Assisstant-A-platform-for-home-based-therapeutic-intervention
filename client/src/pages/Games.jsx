@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { logSession } from "../services/api";
-import { getAgeLevelConfig } from "../utils/ageLevelMapping";
+import { getAgeLevelConfig, getAgeGroup } from "../utils/ageLevelMapping";
 import CertificateModal from "../components/CertificateModal";
 import ActivityRatingModal from "../components/ActivityRatingModal";
 import {
@@ -4015,6 +4015,7 @@ export default function Games({ user }) {
   const [showCert, setShowCert] = useState(false);
   const [showGameRating, setShowGameRating] = useState(false);
   const [voiceMutedState, setVoiceMutedState] = useState(getVoiceMuted());
+  const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
     if (activeGameId) {
