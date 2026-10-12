@@ -69,12 +69,55 @@ const req = async (method, path, body) => {
   throw lastError || new Error("Request failed");
 };
 
-// Local storage fallback helpers
+// Local storage fallback helpers with pre-seeded demo accounts
+const DEMO_FALLBACK_USERS = [
+  {
+    _id: "6aa93432096a7bbeda979ce5",
+    role: "therapist",
+    name: "Dr. Ananya Sharma",
+    email: "ananya.sharma@autismassistant.com",
+    phone: "+91 98765 43201",
+    specialization: "Toddler Early Intervention & Play (Level 1 Beginner)",
+    targetAgeMin: 2,
+    targetAgeMax: 5,
+    targetLevels: [1],
+    assignedChildren: ["child_rahul", "child_priya", "child_meera"]
+  },
+  {
+    _id: "6aa93432096a7bbeda979ce7",
+    role: "therapist",
+    name: "Dr. Rajesh Kulkarni",
+    email: "rajesh.kulkarni@autismassistant.com",
+    phone: "+91 98765 43202",
+    specialization: "Social Communication & Speech (Level 2)",
+    targetAgeMin: 5,
+    targetAgeMax: 8,
+    targetLevels: [2],
+    assignedChildren: ["child_dev", "child_arjun"]
+  },
+  {
+    _id: "6a756d3960ad5abb79b38f6d",
+    role: "parent",
+    name: "Arpitha Jain",
+    email: "arpithaammujain39@gmail.com",
+  }
+];
+
 const getLocalUsers = () => {
   try {
-    return JSON.parse(localStorage.getItem("app_local_users") || "[]");
+    const list = JSON.parse(localStorage.getItem("app_local_users") || "[]");
+    if (!list || list.length === 0) {
+      localStorage.setItem("app_local_users", JSON.stringify(DEMO_FALLBACK_USERS));
+      return DEMO_FALLBACK_USERS;
+    }
+    // Ensure therapists are present
+    const emails = new Set(list.map(u => u.email));
+    DEMO_FALLBACK_USERS.forEach(d => {
+      if (!emails.has(d.email)) list.push(d);
+    });
+    return list;
   } catch {
-    return [];
+    return DEMO_FALLBACK_USERS;
   }
 };
 
