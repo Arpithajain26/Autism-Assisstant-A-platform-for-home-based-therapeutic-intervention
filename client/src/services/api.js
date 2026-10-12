@@ -1,6 +1,7 @@
 import { CURATED_ACTIVITIES } from "../data/curatedActivities";
 
-const BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
+const PRODUCTION_BACKEND = "https://autism-assisstant-a-platform-for-home.onrender.com";
+const BASE = import.meta.env.VITE_API_URL || (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1" ? PRODUCTION_BACKEND : "http://127.0.0.1:5000");
 const FALLBACK_PORTS = [5000, 5001, 5002, 5003, 5004];
 
 const buildUrl = (base, path) => {
@@ -35,10 +36,15 @@ const req = async (method, path, body) => {
     }
   }
 
-  FALLBACK_PORTS.forEach((port) => {
-    bases.push(`http://127.0.0.1:${port}`);
-    bases.push(`http://localhost:${port}`);
-  });
+  // Always include the live Render production URL so deployed clients never get disconnected
+  bases.push(PRODUCTION_BACKEND);
+
+  if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+    FALLBACK_PORTS.forEach((port) => {
+      bases.push(`http://127.0.0.1:${port}`);
+      bases.push(`http://localhost:${port}`);
+    });
+  }
 
   const uniqueBases = Array.from(new Set(bases));
 
