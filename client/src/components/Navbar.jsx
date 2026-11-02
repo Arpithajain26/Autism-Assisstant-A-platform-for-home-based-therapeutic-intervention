@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLang } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
+import ThemeToggle from "./ThemeToggle";
 
 function navigate(path) {
   window.history.pushState({}, "", path);
@@ -8,6 +10,7 @@ function navigate(path) {
 
 export default function Navbar() {
   const { lang, setLang, t } = useLang();
+  const { isDark } = useTheme();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -49,14 +52,14 @@ export default function Navbar() {
         zIndex: 100,
         transition: "all .4s ease",
         background: scrolled
-          ? "rgba(255,255,255,0.95)"
-          : "rgba(10,10,30,0.4)",
+          ? (isDark ? "rgba(15, 23, 42, 0.92)" : "rgba(255,255,255,0.95)")
+          : (isDark ? "rgba(15, 23, 42, 0.7)" : "rgba(10,10,30,0.4)"),
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
         borderBottom: scrolled
-          ? "1px solid rgba(209,213,219,0.5)"
+          ? (isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(209,213,219,0.5)")
           : "1px solid rgba(255,255,255,0.12)",
-        boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.08)" : "none",
+        boxShadow: scrolled ? (isDark ? "0 4px 20px rgba(0,0,0,0.4)" : "0 4px 20px rgba(0,0,0,0.08)") : "none",
       }}
     >
       <div
@@ -152,6 +155,9 @@ export default function Navbar() {
             🌐 <span>{lang === "en" ? "English" : "ಕನ್ನಡ"}</span>
           </button>
 
+          {/* Theme Switcher */}
+          <ThemeToggle scrolled={scrolled} />
+
           <a
             href="/login"
             onClick={(e) => handleNav(e, "/login")}
@@ -196,7 +202,8 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Controls */}
-        <div style={{ display: "none", alignItems: "center", gap: 10 }} className="nav-mobile-controls">
+        <div style={{ display: "none", alignItems: "center", gap: 8 }} className="nav-mobile-controls">
+          <ThemeToggle scrolled={scrolled} />
           <button
             onClick={toggleLang}
             style={{
@@ -220,7 +227,7 @@ export default function Navbar() {
               border: "none",
               fontSize: "1.5rem",
               cursor: "pointer",
-              color: scrolled ? "var(--text)" : "#fff",
+              color: scrolled ? (isDark ? "#f8fafc" : "var(--text)") : "#fff",
             }}
           >
             {open ? "✕" : "☰"}
@@ -236,11 +243,17 @@ export default function Navbar() {
             display: "flex",
             flexDirection: "column",
             gap: 14,
-            background: "rgba(255,255,255,0.98)",
+            background: isDark ? "rgba(15, 23, 42, 0.98)" : "rgba(255,255,255,0.98)",
             backdropFilter: "blur(16px)",
-            borderTop: "1px solid var(--border)",
+            borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid var(--border)",
+            color: isDark ? "#f8fafc" : "var(--text)",
           }}
         >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 6 }}>
+            <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-muted)" }}>Appearance</span>
+            <ThemeToggle showLabel={true} />
+          </div>
+          <hr style={{ border: "none", borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid var(--border)" }} />
           {[
             { label: t("nav_features"), action: () => scrollTo("features") },
             { label: t("nav_about_autism"), action: () => scrollTo("autism-info") },

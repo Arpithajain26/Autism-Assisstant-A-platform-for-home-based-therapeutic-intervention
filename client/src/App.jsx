@@ -17,6 +17,7 @@ import ExamPage from "./pages/ExamPage";
 import MasteryExamPage from "./pages/MasteryExamPage";
 import TherapyTrophyRoom from "./pages/TherapyTrophyRoom";
 import Chatbot from "./components/Chatbot";
+import ThemeToggle from "./components/ThemeToggle";
 
 // ─────────────────────────────────────────────────────────────
 // Simple SPA Router
@@ -314,6 +315,8 @@ function App() {
 
           <span className={`badge badge-${user.role}`}>{user.role}</span>
 
+          <ThemeToggle />
+
           <button
             onClick={handleLogout}
             style={{
@@ -352,6 +355,13 @@ function App() {
         >
           © 2026 Autism Assistant · Empowering every journey 🌟
         </footer>
+      )}
+
+      {/* Floating Theme Switcher if top navbar isn't rendered */}
+      {!user && (path.includes("exam") || path === "/login") && (
+        <div style={{ position: "fixed", bottom: "24px", left: "24px", zIndex: 999 }}>
+          <ThemeToggle showLabel={true} />
+        </div>
       )}
 
       {/* Global AI Clinical Autism Chatbot */}

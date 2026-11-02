@@ -11,6 +11,8 @@ export const translations = {
   nav_get_started:    { en: "Get Started",      kn: "ಪ್ರಾರಂಭಿಸಿ" },
   nav_about:          { en: "About",            kn: "ನಮ್ಮ ಬಗ್ಗೆ" },
   nav_contact:        { en: "Contact",          kn: "ಸಂಪರ್ಕಿಸಿ" },
+  nav_theme_dark:     { en: "Dark Mode",        kn: "ಡಾರ್ಕ್ ಮೋಡ್" },
+  nav_theme_light:    { en: "Light Mode",       kn: "ಲೈಟ್ ಮೋಡ್" },
 
   // ── HERO ─────────────────────────────────────────────────────────────────
   hero_badge:         { en: "✨ AI-POWERED HOME THERAPY",           kn: "✨ AI-ಆಧಾರಿತ ಮನೆ ಚಿಕಿತ್ಸೆ" },

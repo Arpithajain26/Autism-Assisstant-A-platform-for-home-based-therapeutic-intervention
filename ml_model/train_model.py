@@ -74,3 +74,23 @@ print(f"Confidence: {round(max(prob)*100, 1)}%")
 joblib.dump(model, 'level_classifier.pkl')
 print("\n✅ Model saved as level_classifier.pkl !")
 print("🎉 Training complete — ready to use in Flask API!")
+import os
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.metrics import ConfusionMatrixDisplay, classification_report
+
+out_dir = os.path.dirname(os.path.abspath(__file__))   # saves next to train_model.py
+
+y_pred = model.predict(X_test)
+print(classification_report(y_test, y_pred))            # copy these numbers into Table 6.2
+
+ConfusionMatrixDisplay.from_predictions(y_test, y_pred)
+plt.savefig(os.path.join(out_dir, "confusion.png"), dpi=200, bbox_inches="tight")
+plt.close()
+
+imp = pd.Series(model.feature_importances_,
+                index=[f"Q{i+1}" for i in range(10)]).sort_values()
+imp.plot(kind="barh")
+plt.xlabel("Importance")
+plt.savefig(os.path.join(out_dir, "featureimp.png"), dpi=200, bbox_inches="tight")
+plt.close()

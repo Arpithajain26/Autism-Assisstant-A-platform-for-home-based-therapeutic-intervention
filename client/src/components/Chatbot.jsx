@@ -162,7 +162,7 @@ const Chatbot = () => {
   return (
     <div style={styles.container}>
       {isOpen && (
-        <div style={styles.chatWindow}>
+        <div style={styles.chatWindow} className="chatbot-window">
           {/* Header */}
           <div style={styles.header}>
             <div style={styles.headerLeft}>
@@ -317,12 +317,13 @@ const Chatbot = () => {
           )}
 
           {/* Quick Suggestion Chips */}
-          <div style={styles.chipsRow}>
+          <div style={styles.chipsRow} className="chatbot-chips">
             {QUICK_CHIPS.map((chip, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(chip)}
                 style={styles.chipBtn}
+                className="chatbot-chip"
               >
                 {chip}
               </button>
@@ -330,7 +331,7 @@ const Chatbot = () => {
           </div>
 
           {/* Messages Stream */}
-          <div style={styles.messagesContainer}>
+          <div style={styles.messagesContainer} className="chatbot-messages">
             {messages.map((m) => (
               <div
                 key={m.id}
@@ -340,6 +341,7 @@ const Chatbot = () => {
                 }}
               >
                 <div
+                  className={m.sender === 'user' ? 'chatbot-user-msg' : 'chatbot-bot-msg'}
                   style={m.sender === 'user' ? styles.userMessage : styles.botMessage}
                 >
                   <div style={{ whiteSpace: 'pre-line', lineHeight: '1.5', fontSize: '0.88rem' }}>
@@ -413,6 +415,7 @@ const Chatbot = () => {
               handleSend();
             }}
             style={styles.inputArea}
+            className="chatbot-input-area"
           >
             <input
               type="text"
@@ -420,6 +423,7 @@ const Chatbot = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               style={styles.input}
+              className="chatbot-input"
               disabled={loading}
             />
             <button
